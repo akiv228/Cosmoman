@@ -1,3 +1,11 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+misc.xml
+workspace.xml
+modules.xml
+patternState.iml
+vcs.xml
+patternState.iml
+inspectionProfiles
+/.idea/
