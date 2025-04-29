@@ -68,7 +68,8 @@ def generate_maze(grid_width, grid_height, difficulty):
 
         if dsu.find(cell_a) != dsu.find(cell_b):
             dsu.union(cell_a, cell_b)
-            removed_walls.add(wall)
+            removed_walls.add((wall[0], wall[1], wall[2]))
+
 
     # Настройка количества циклов на основе размера сетки
     grid_size = grid_width * grid_height
@@ -86,37 +87,15 @@ def generate_maze(grid_width, grid_height, difficulty):
     if not is_maze_connected2(grid_width, grid_height, removed_walls):
          print("Ошибка! Лабиринт не связный. Перегенерируйте.")
 
-    # Create wall sprites
-    wall_sprites = []
-    wall_thickness = 4
-
-    # Add outer walls
-    wall_sprites.append(Rect(maze_x, maze_y, grid_width * cell_size, wall_thickness))  # top
-    wall_sprites.append(
-        Rect(maze_x, maze_y + grid_height * cell_size, grid_width * cell_size, wall_thickness))  # bottom
-    wall_sprites.append(Rect(maze_x, maze_y, wall_thickness, grid_height * cell_size))  # left
-    wall_sprites.append(Rect(maze_x + grid_width * cell_size, maze_y, wall_thickness, grid_height * cell_size + wall_thickness ))  # right
-
-    # Add internal walls
-    for wall in walls:
-        if wall not in removed_walls:
-            if wall[0] == 'h':
-                x = maze_x + wall[2] * cell_size
-                y = maze_y + (wall[1] + 1) * cell_size
-                wall_sprites.append(Rect(x, y - wall_thickness // 2, cell_size, wall_thickness))
-            else:
-                x = maze_x + (wall[2] + 1) * cell_size
-                y = maze_y + wall[1] * cell_size
-                wall_sprites.append(Rect(x - wall_thickness // 2, y, wall_thickness, cell_size))
-
-    return wall_sprites, {
+# Возвращаем только информацию о лабиринте
+    return {
         'removed_walls': removed_walls,
         'grid_width': grid_width,
         'grid_height': grid_height,
         'cell_size': cell_size,
         'maze_x': maze_x,
         'maze_y': maze_y,
-        'wall_thickness': wall_thickness  # добавляем толщину стен
+        'wall_thickness': 4  # фиксированная толщина стен
     }
 
 def get_wall_weight(wall_type, difficulty):

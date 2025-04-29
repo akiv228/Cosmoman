@@ -2,6 +2,9 @@ import pickle
 
 import pygame as pg
 from collections import defaultdict, deque
+
+from pygame import Rect
+
 from maze_generation import generate_maze
 from player import Player
 from game_classes import Wall, GameSprite
@@ -24,10 +27,6 @@ class Level:
             'EXPLORE': (random.randint(18, 22), random.randint(13, 17))
         }
 
-        # # Генерация лабиринта
-        # gw, gh = self.grid_sizes[difficulty]
-        # wall_rects, maze_info = generate_maze(gw, gh, difficulty)
-
         if load_from_file:
             # Загружаем данные из файла
             self.maze_info = load_maze(filename)
@@ -35,12 +34,13 @@ class Level:
         else:
             # Генерируем новый лабиринт
             gw, gh = self.grid_sizes[difficulty]
-            wall_rects, self.maze_info = generate_maze(gw, gh, difficulty)
-            # Сохраняем данные в файл (опционально)
+            self.maze_info = generate_maze(gw, gh, difficulty)
+            # Сохраняем данные в файл
             save_maze(filename, self.maze_info)
 
-        # Инициализация стен
+            # Инициализация стен
         self.walls = pg.sprite.Group()
+        wall_rects = self.reconstruct_wall_rects()
         for rect in wall_rects:
             self.walls.add(Wall(rect.x, rect.y, rect.width, rect.height))
 
@@ -236,3 +236,44 @@ class Level:
         self.all_sprites.draw(window)
         self.player.bullets.draw(window)
 
+    def reconstruct_wall_rects(self):
+        gw = self.maze_info['grid_width']
+        gh = self.maze_info['grid_height']
+        cs = self.maze_info['cell_size']
+        maze_x = self.maze_info['maze_x']
+        maze_y = self.maze_info['maze_y']
+        wall_thickness = self.maze_info['wall_thickness']
+
+        # Все возможные стены
+        all_walls = []
+        for row in range(gh):
+            for col in range(gw):
+                if col < gw - 1:
+                    all_walls.append(('v', row, col))  # Вертикальные стены
+                if row < gh - 1:
+                    all_walls.append(('h', row, col))  # Горизонтальные стены
+
+        # Удаленные стены из maze_info
+        removed_walls = self.maze_info['removed_walls']
+        present_walls = [wall for wall in all_walls if wall not in removed_walls]
+
+        wall_sprites = []
+
+        # Внешние стены
+        wall_sprites.append(Rect(maze_x, maze_y, gw * cs, wall_thickness))  # верх
+        wall_sprites.append(Rect(maze_x, maze_y + gh * cs, gw * cs, wall_thickness))  # низ
+        wall_sprites.append(Rect(maze_x, maze_y, wall_thickness, gh * cs))  # лево
+        wall_sprites.append(Rect(maze_x + gw * cs, maze_y, wall_thickness, gh * cs + wall_thickness))  # право
+
+        # Внутренние стены
+        for wall in present_walls:
+            if wall[0] == 'h':  # Горизонтальная стена
+                x = maze_x + wall[2] * cs
+                y = maze_y + (wall[1] + 1) * cs
+                wall_sprites.append(Rect(x, y - wall_thickness // 2, cs, wall_thickness))
+            else:  # Вертикальная стена
+                x = maze_x + (wall[2] + 1) * cs
+                y = maze_y + wall[1] * cs
+                wall_sprites.append(Rect(x - wall_thickness // 2, y, wall_thickness, cs))
+
+        return wall_sprites
