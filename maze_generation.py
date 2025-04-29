@@ -69,19 +69,22 @@ def generate_maze(grid_width, grid_height, difficulty):
             dsu.union(cell_a, cell_b)
             removed_walls.add(wall)
 
-
-    # Настраиваем количество циклов по сложности
+    # Настройка количества циклов на основе размера сетки
+    grid_size = grid_width * grid_height
     cycles_config = {
-        'EASY': 2,  # Без циклов
-        'MEDIUM': 5,
-        'HARD': 10,
-        'EXPLORE': 15
+        'EASY': int(grid_size * 0.02),    # 2% от размера сетки
+        'MEDIUM': int(grid_size * 0.05),
+        'HARD': int(grid_size * 0.1),
+        'EXPLORE': int(grid_size * 0.2)
     }
-    add_cycles(grid_width, grid_height, removed_walls, cycles_config[difficulty])
+    add_cycles(grid_width, grid_height, dsu, removed_walls, walls, cycles_config[difficulty])
 
-    if not is_maze_connected(grid_width, grid_height, removed_walls):
-        print("Ошибка! Лабиринт не связный. Перегенерируйте.")
+    # if not is_maze_connected(grid_width, grid_height, removed_walls):
+    if not is_maze_connected(dsu):
+         print("Ошибка! Лабиринт не связный. Перегенерируйте.")
         # return generate_maze(grid_width, grid_height, difficulty)  # Рекурсивный перезапуск
+    if not is_maze_connected2(grid_width, grid_height, removed_walls):
+         print("Ошибка! Лабиринт не связный. Перегенерируйте.")
 
     # Create wall sprites
     wall_sprites = []
@@ -121,38 +124,39 @@ def get_wall_weight(wall_type, difficulty):
     return random.randint(min_w, max_w)
 
 
-def add_cycles(grid_width, grid_height, removed_walls, num_cycles):
-    candidates = list(removed_walls)
-    random.shuffle(candidates)
+def add_cycles(grid_width, grid_height, dsu, removed_walls, all_walls, num_cycles):
+    # Получаем список стен, которые НЕ были удалены (физически присутствуют в лабиринте)
+    present_walls = [wall for wall in all_walls if wall not in removed_walls]
+    random.shuffle(present_walls)
+
     cycles_added = 0
 
-    for wall in candidates:
+    for wall in present_walls:
         if cycles_added >= num_cycles:
             break
 
-        # Удаляем стену из removed_walls (возвращаем стену в лабиринт)
-        removed_walls.remove(wall)
-
-        # Временная проверка связности
-        temp_dsu = DSU(grid_width * grid_height)
-        for w in removed_walls:
-            row, col = w[1], w[2]
-            if w[0] == 'h':
-                cell_a = row * grid_width + col
-                cell_b = (row + 1) * grid_width + col
-            else:
-                cell_a = row * grid_width + col
-                cell_b = row * grid_width + (col + 1)
-            temp_dsu.union(cell_a, cell_b)
-
-        if is_maze_connected(grid_width, grid_height, removed_walls):
-            cycles_added += 1
+        # Определяем клетки по обе стороны от стены
+        if wall[0] == 'h':
+            cell_a = wall[1] * grid_width + wall[2]
+            cell_b = (wall[1] + 1) * grid_width + wall[2]
         else:
-            # Откатываем изменение, если нарушилась связность
+            cell_a = wall[1] * grid_width + wall[2]
+            cell_b = wall[1] * grid_width + (wall[2] + 1)
+
+        # Если клетки уже соединены - удаляем стену для создания цикла
+        if dsu.find(cell_a) == dsu.find(cell_b):
             removed_walls.add(wall)
+            cycles_added += 1
 
 
-def is_maze_connected(grid_width, grid_height, removed_walls):
+def is_maze_connected(dsu):
+    root = dsu.find(0)
+    for i in range(1, len(dsu.parent)):
+        if dsu.find(i) != root:
+            return False
+    return True
+
+def is_maze_connected2(grid_width, grid_height, removed_walls):
     dsu = DSU(grid_width * grid_height)
     for wall in removed_walls:
         row, col = wall[1], wall[2]
@@ -166,5 +170,37 @@ def is_maze_connected(grid_width, grid_height, removed_walls):
 
     root = dsu.find(0)
     return all(dsu.find(i) == root for i in range(1, grid_width * grid_height))
+
+# def add_cycles(grid_width, grid_height, removed_walls, num_cycles):
+#     candidates = list(removed_walls)
+#     random.shuffle(candidates)
+#     cycles_added = 0
+#
+#     for wall in candidates:
+#         if cycles_added >= num_cycles:
+#             break
+#
+#         # Удаляем стену из removed_walls (возвращаем стену в лабиринт)
+#         removed_walls.remove(wall)
+#
+#         # Временная проверка связности
+#         temp_dsu = DSU(grid_width * grid_height)
+#         for w in removed_walls:
+#             row, col = w[1], w[2]
+#             if w[0] == 'h':
+#                 cell_a = row * grid_width + col
+#                 cell_b = (row + 1) * grid_width + col
+#             else:
+#                 cell_a = row * grid_width + col
+#                 cell_b = row * grid_width + (col + 1)
+#             temp_dsu.union(cell_a, cell_b)
+#
+#         if is_maze_connected(grid_width, grid_height, removed_walls):
+#             cycles_added += 1
+#         else:
+#             # Откатываем изменение, если нарушилась связность
+#             removed_walls.add(wall)
+
+
 
 
