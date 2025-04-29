@@ -1,3 +1,4 @@
+import pickle
 import random
 from pygame import Rect
 from constants import WIDTH, HEIGHT
@@ -114,7 +115,8 @@ def generate_maze(grid_width, grid_height, difficulty):
         'grid_height': grid_height,
         'cell_size': cell_size,
         'maze_x': maze_x,
-        'maze_y': maze_y
+        'maze_y': maze_y,
+        'wall_thickness': wall_thickness  # добавляем толщину стен
     }
 
 def get_wall_weight(wall_type, difficulty):

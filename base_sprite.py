@@ -17,10 +17,16 @@ class GameSprite(sprite.Sprite):
         if self.anime:
              self.images = []
         # каждый спрайт должен хранить свойство rect - прямоугольник, в который он вписан
+        # self.rect = self.image.get_rect()
+        # self.rect.x = player_x
+        # self.rect.y = player_y
+        # self.rect.center = (player_x, player_y)
+        # устанавливаем центр спрайта
         self.rect = self.image.get_rect()
-        self.rect.x = player_x
-        self.rect.y = player_y
+        self.rect.center = (player_x, player_y)
+
     def reset(self, window):
+        # window.blit(self.image, (self.rect.x, self.rect.y))
         window.blit(self.image, (self.rect.x, self.rect.y))
 
 
