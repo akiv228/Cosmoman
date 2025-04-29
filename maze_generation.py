@@ -77,9 +77,8 @@ def generate_maze(grid_width, grid_height, difficulty):
         'HARD': int(grid_size * 0.1),
         'EXPLORE': int(grid_size * 0.2)
     }
-    add_cycles(grid_width, grid_height, dsu, removed_walls, walls, cycles_config[difficulty])
+    # add_cycles(grid_width, grid_height, dsu, removed_walls, walls, cycles_config[difficulty])
 
-    # if not is_maze_connected(grid_width, grid_height, removed_walls):
     if not is_maze_connected(dsu):
          print("Ошибка! Лабиринт не связный. Перегенерируйте.")
         # return generate_maze(grid_width, grid_height, difficulty)  # Рекурсивный перезапуск
@@ -109,12 +108,20 @@ def generate_maze(grid_width, grid_height, difficulty):
                 y = maze_y + wall[1] * cell_size
                 wall_sprites.append(Rect(x - wall_thickness // 2, y, wall_thickness, cell_size))
 
-    return wall_sprites
+    return wall_sprites, {
+        'removed_walls': removed_walls,
+        'grid_width': grid_width,
+        'grid_height': grid_height,
+        'cell_size': cell_size,
+        'maze_x': maze_x,
+        'maze_y': maze_y
+    }
 
 def get_wall_weight(wall_type, difficulty):
     """Возвращает вес стены в зависимости от типа и сложности"""
     weights = {
-        'EASY': {'v': (1, 10), 'h': (1, 10)},   # Случайные веса
+        # 'EASY': {'v': (1, 10), 'h': (1, 10)},   # Случайные веса
+        'EASY': {'v': (5, 50), 'h': (5, 50)},
         'MEDIUM': {'v': (5, 20), 'h': (5, 20)},  # Более высокие веса
         # 'MEDIUM': {'v': (10, 50), 'h': (10, 50)},
         'HARD': {'v': (10, 50), 'h': (10, 50)},  # Максимальные веса
