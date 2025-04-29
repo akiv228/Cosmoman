@@ -32,52 +32,107 @@ class Level:
         self.all_sprites, self.player, self.final = self.place_objects(start_pos, final_pos)
         self.background = self.get_background()
 
+    def draw_path(self, window, path):
+        if not path:
+            return
+        for i in range(len(path) - 1):
+            start = path[i]
+            end = path[i + 1]
+            pg.draw.line(window, (255, 0, 0), start, end, 3)
+
+    # Модифицируем метод find_farthest_cells
     def find_farthest_cells(self):
         from collections import defaultdict, deque
 
-        # Строим граф смежности
+        # Строим граф смежности клеток
         graph = defaultdict(list)
         for wall in self.removed_walls:
             row, col = wall[1], wall[2]
             if wall[0] == 'h':
                 cell_a = (row, col)
                 cell_b = (row + 1, col)
-            elif wall[0] == 'v':
+            else:
                 cell_a = (row, col)
                 cell_b = (row, col + 1)
             graph[cell_a].append(cell_b)
             graph[cell_b].append(cell_a)
 
-        # BFS для поиска самых удалённых точек
-        def bfs(start):
-            visited = {start: 0}
+        # Выбираем стартовые точки из угловых клеток
+        corners = [
+            (0, 0),
+            (0, self.grid_width - 1),
+            (self.grid_height - 1, 0)
+            (self.grid_height - 1, self.grid_width - 1)
+        ]
+
+        # Находим самую удаленную пару углов
+        max_distance = 0
+        best_pair = None
+        for start in corners:
             q = deque([(start, 0)])
-            max_dist = 0
-            far_node = start
+            visited = {}
             while q:
                 node, dist = q.popleft()
+                if node in visited:
+                    continue
+                visited[node] = dist
                 for neighbor in graph[node]:
                     if neighbor not in visited:
-                        visited[neighbor] = dist + 1
                         q.append((neighbor, dist + 1))
-                        if dist + 1 > max_dist:
-                            max_dist = dist + 1
-                            far_node = neighbor
-            return far_node, visited
 
-        # Первый BFS для поиска крайней точки
-        start_node = (0, 0)
-        far_node, _ = bfs(start_node)
-        # Второй BFS для поиска диаметра
-        final_node, dist_map = bfs(far_node)
+            for end in corners:
+                if end in visited and visited[end] > max_distance:
+                    max_distance = visited[end]
+                    best_pair = (start, end)
+                    self.path = self.reconstruct_path(graph, start, end)
 
-        # Конвертируем клетки в экранные координаты
-        def to_pixels(row, col):
+        # Конвертация координат с учетом размеров спрайтов
+        def adjust_position(row, col):
             x = self.maze_x + col * self.cell_size + self.cell_size // 2
             y = self.maze_y + row * self.cell_size + self.cell_size // 2
-            return (x, y)
 
-        return to_pixels(*far_node), to_pixels(*final_node)
+            # Сдвигаем от стен (примерно 10% от размера клетки)
+            offset = self.cell_size * 0.01
+            if col == 0:
+                x += offset
+            elif col == self.grid_width - 1:
+                x -= offset
+            if row == 0:
+                y += offset
+            elif row == self.grid_height - 1:
+                y -= offset
+
+            return (int(x), int(y))
+
+        start_pixels = adjust_position(*best_pair[0])
+        final_pixels = adjust_position(*best_pair[1])
+
+        return start_pixels, final_pixels
+
+    def reconstruct_path(self, graph, start, end):
+        # BFS для восстановления пути
+        from collections import deque
+        parent = {}
+        q = deque([start])
+        parent[start] = None
+
+        while q:
+            node = q.popleft()
+            if node == end:
+                break
+            for neighbor in graph[node]:
+                if neighbor not in parent:
+                    parent[neighbor] = node
+                    q.append(neighbor)
+
+        # Восстановление пути
+        path = []
+        current = end
+        while current is not None:
+            path.append(current)
+            current = parent[current]
+        return path[::-1]
+
 
     def place_objects(self, start_pos, final_pos):
         all_sprites = pg.sprite.Group()
@@ -113,5 +168,15 @@ class Level:
         else:
             window.blit(self.background.alpha_surface, (0, 0))
             self.background.run()
+
+        # Отрисовка пути (временно)
+        path_pixels = []
+        for (row, col) in self.path:
+            x = self.maze_x + col * self.cell_size + self.cell_size // 2
+            y = self.maze_y + row * self.cell_size + self.cell_size // 2
+            path_pixels.append((x, y))
+        self.draw_path(window, path_pixels)
+
+
         self.all_sprites.draw(window)
         self.player.bullets.draw(window)
