@@ -74,12 +74,13 @@ def generate_maze(grid_width, grid_height, difficulty):
     # Настройка количества циклов на основе размера сетки
     grid_size = grid_width * grid_height
     cycles_config = {
-        'EASY': int(grid_size * 0.02),    # 2% от размера сетки
+        'EASY': int(grid_size * 0.1),    # 2% от размера сетки
         'MEDIUM': int(grid_size * 0.05),
         'HARD': int(grid_size * 0.1),
         'EXPLORE': int(grid_size * 0.2)
     }
-    # add_cycles(grid_width, grid_height, dsu, removed_walls, walls, cycles_config[difficulty])
+    add_cycles(grid_width, grid_height, dsu, removed_walls, walls, cycles_config[difficulty])
+    # add_cycles(grid_width, grid_height, removed_walls, cycles_config[difficulty])
 
     if not is_maze_connected(dsu):
          print("Ошибка! Лабиринт не связный. Перегенерируйте.")
@@ -95,14 +96,14 @@ def generate_maze(grid_width, grid_height, difficulty):
         'cell_size': cell_size,
         'maze_x': maze_x,
         'maze_y': maze_y,
-        'wall_thickness': 4  # фиксированная толщина стен
+        'wall_thickness': 3  # фиксированная толщина стен
     }
 
 def get_wall_weight(wall_type, difficulty):
     """Возвращает вес стены в зависимости от типа и сложности"""
     weights = {
-        'EASY': {'v': (1, 10), 'h': (1, 10)},   # Случайные веса
-        # 'EASY': {'v': (5, 50), 'h': (5, 50)},
+        # 'EASY': {'v': (1, 10), 'h': (1, 10)},   # Случайные веса
+        'EASY': {'v': (1, 10), 'h': (1, 10)},
         'MEDIUM': {'v': (5, 20), 'h': (5, 20)},  # Более высокие веса
         # 'MEDIUM': {'v': (10, 50), 'h': (10, 50)},
         'HARD': {'v': (10, 50), 'h': (10, 50)},  # Максимальные веса
@@ -183,7 +184,7 @@ def is_maze_connected2(grid_width, grid_height, removed_walls):
 #                 cell_b = row * grid_width + (col + 1)
 #             temp_dsu.union(cell_a, cell_b)
 #
-#         if is_maze_connected(grid_width, grid_height, removed_walls):
+#         if is_maze_connected2(grid_width, grid_height, removed_walls):
 #             cycles_added += 1
 #         else:
 #             # Откатываем изменение, если нарушилась связность

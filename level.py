@@ -7,7 +7,7 @@ from pygame import Rect
 
 from maze_generation import generate_maze
 from player import Player
-from game_classes import Wall, GameSprite
+from game_classes import Wall, GameSprite, Enemy
 from constants import WIDTH, HEIGHT
 from grafics_classes import Backgrounds, Fon
 from grafics import starfield
@@ -55,6 +55,8 @@ class Level:
 
         # Фон
         self.background = self.get_background()
+
+        # self.enemies = pg.sprite.Group()
 
     def calculate_positions(self):
         """Вычисляет позиции с учетом смещения и находит путь"""
@@ -163,14 +165,16 @@ class Level:
     def init_sprites(self, start_pos, end_pos):
         """Инициализирует игровые объекты"""
         self.all_sprites = pg.sprite.Group()
+        self.enemies = pg.sprite.Group()
+        self.spawn_enemies()
 
-        save_maze("maze_data.pkl", self.maze_info)
+        # save_maze("maze_data.pkl", self.maze_info)
 
         # Игрок
         self.player = Player(
             'images/astronaut.png',
             start_pos[0], start_pos[1],
-            30, 35, 0, 0, False, False
+            30, 35, 0, 0, False, False, 5
         )
         self.player.walls = self.walls
         self.player.bullets = pg.sprite.Group()
@@ -192,6 +196,93 @@ class Level:
             print(f"стена: {wall.rect}")
 
         self.all_sprites.add(self.walls, self.player, self.final)
+
+    def spawn_enemies(self):
+        if not self.path:
+            return
+
+        # Параметры врагов в зависимости от сложности
+        enemy_config = {
+            'EASY': {'count': 7, 'speed': 1},
+            'MEDIUM': {'count': 20, 'speed': 2},
+            'HARD': {'count': 5, 'speed': 3},
+            'EXPLORE': {'count': 4, 'speed': 2}
+        }
+        cfg = enemy_config[self.difficulty]
+
+        # Разбиваем путь на сегменты
+        segments = self.split_path_into_segments()
+        valid_segments = [seg for seg in segments if len(seg) >= 2]
+
+        wall_thickness = self.maze_info['wall_thickness']
+        for segment in random.sample(valid_segments, min(cfg['count'], len(valid_segments))):
+            direction = self.get_segment_direction(segment)
+            if not direction:
+                continue
+
+            # Рассчитываем границы патрулирования
+            maze_x = self.maze_info['maze_x']
+            maze_y = self.maze_info['maze_y']
+            cell_size = self.maze_info['cell_size']
+            start = segment[0]
+            end = segment[-1]
+
+            if direction in ('left', 'right'):
+                x1 = maze_x + start[1] * cell_size + cell_size // 2 - wall_thickness
+                x2 = maze_x + end[1] * cell_size + cell_size // 2 - wall_thickness
+                y = maze_y + start[0] * cell_size + cell_size // 2 - wall_thickness
+                enemy = Enemy(
+                    'images/alien1.png',
+                    (x1 + x2) // 2, y,
+                    30, 35, cfg['speed'], 'h',
+                    min(x1, x2), max(x1, x2)
+                )
+            else:
+                y1 = maze_y + start[0] * cell_size + cell_size // 2 - wall_thickness
+                y2 = maze_y + end[0] * cell_size + cell_size // 2 - wall_thickness
+                x = maze_x + start[1] * cell_size + cell_size // 2 - wall_thickness
+                enemy = Enemy(
+                    'images/alien1.png',
+                    x, (y1 + y2) // 2,
+                    30, 35, cfg['speed'], 'v',
+                    min(y1, y2), max(y1, y2)
+                )
+            self.enemies.add(enemy)
+            self.all_sprites.add(enemy)
+
+    def split_path_into_segments(self):
+        segments = []
+        if len(self.path) < 2:
+            return segments
+
+        current_dir = self.get_direction(self.path[0], self.path[1])
+        current_segment = [self.path[0]]
+
+        for i in range(1, len(self.path)):
+            new_dir = self.get_direction(self.path[i - 1], self.path[i])
+            if new_dir == current_dir:
+                current_segment.append(self.path[i])
+            else:
+                segments.append(current_segment)
+                current_segment = [self.path[i - 1], self.path[i]]
+                current_dir = new_dir
+
+        segments.append(current_segment)
+        return segments
+
+    def get_direction(self, p1, p2):
+        dx = p2[1] - p1[1]
+        dy = p2[0] - p1[0]
+        if dx == 1: return 'right'
+        if dx == -1: return 'left'
+        if dy == 1: return 'down'
+        if dy == -1: return 'up'
+        return None
+
+    def get_segment_direction(self, segment):
+        if len(segment) < 2:
+            return None
+        return self.get_direction(segment[0], segment[1])
 
     def get_background(self):
         if self.difficulty == 'EASY':
@@ -217,7 +308,17 @@ class Level:
     def update(self):
         self.player.update()
         self.player.bullets.update()
+        # pg.sprite.groupcollide(self.player.bullets, self.walls, True, False)
+        self.enemies.update()  # Обновляем врагов
+
+        # Обработка столкновений
         pg.sprite.groupcollide(self.player.bullets, self.walls, True, False)
+        pg.sprite.groupcollide(self.player.bullets, self.enemies, True, True)
+
+        # Проверка столкновения игрока с врагами
+        if pg.sprite.spritecollideany(self.player, self.enemies):
+        # if pg.sprite.groupcollide(self.player, self.enemies, True, True):
+            self.player.lives -= 1
 
     def render(self, window):
         # Отрисовка фона
@@ -232,6 +333,7 @@ class Level:
         # Отрисовка пути
         self.draw_debug_path(window)
 
+        self.enemies.draw(window)
         # Отрисовка спрайтов
         self.all_sprites.draw(window)
         self.player.bullets.draw(window)
