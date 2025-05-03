@@ -10,19 +10,19 @@ class DSU: #Disjoint Set Union
 
         self.rank = [0] * size  # Добавляем ранги  - высота (глубина) поддерева
 
-    #  Рекурсивно находит корень множества с оптимизацией (эвристикой) сжатия путей
+    #  рекурсивно находит корень множества с оптимизацией (эвристикой) сжатия путей
     def find(self, x):
         if self.parent[x] != x:
             self.parent[x] = self.find(self.parent[x]) # path compression
         return self.parent[x]
 
 
-    #  Объединяет два множества с учетом ранга для минимизации глубины дерева
+    #  объединяет два множества с учетом ранга для минимизации глубины дерева
     def union(self, x, y):
         root_x = self.find(x)
         root_y = self.find(y)
         if root_x != root_y:
-            # Объединение по рангу
+            # объединение по рангу
             if self.rank[root_x] < self.rank[root_y]: # если глубина дерева х меньше, то подвешиваем его к более глубокому
                 self.parent[root_x] = root_y
             elif self.rank[root_x] > self.rank[root_y]:
