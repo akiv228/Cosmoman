@@ -38,6 +38,7 @@ def generate_maze(grid_width, grid_height, difficulty):
 
     # Этап 2: Генерация всех возможных стен
     walls = generate_all_walls(grid_width, grid_height)
+
     # Этап 3: Построение MST алгоритмом Крускала
     # Генерация стен с весами только для сортировки
     walls_with_weights = [(wall[0], wall[1], wall[2], get_wall_weight(wall[0], difficulty)) for wall in walls]
@@ -52,15 +53,16 @@ def generate_maze(grid_width, grid_height, difficulty):
             dsu.union(cell_a, cell_b)
             removed_walls.add((wall[0], wall[1], wall[2]))
 
+    # цикл через возвражение стен + проверка связности
     # add_cycles(grid_width, grid_height, removed_walls, get_cycles_config(grid_width, grid_height, difficulty))
     # Этап 4: Добавление циклов через удаление "лишних" стен
-    # add_cycles_after_mst(grid_width, grid_height, removed_walls, walls, 3)
+    add_cycles_after_mst(grid_width, grid_height, removed_walls, walls, 5)
 
-    # Этап 5: Добавление тупиков
-    add_dead_ends_safe(grid_width, grid_height, removed_walls, 7)
+    # Этап 5: Добавление тупиков - возвращение стен
+    add_dead_ends_safe2(grid_width, grid_height, removed_walls, 5)
 
 
-# Этап 5: Финальная проверка связности
+# Этап 5:
     if not validate_maze(grid_width, grid_height, removed_walls):
         print("Ошибка! Лабиринт не связный. Перегенерируйте.")
         # return generate_maze(grid_width, grid_height, difficulty)
@@ -86,23 +88,20 @@ def get_cells_from_wall(wall, grid_width):
     """
     Возвращает две соседние клетки, между которыми находится стена.
 
-    Параметры:
     wall (tuple): (тип_стены, ряд, столбец, [вес])
     grid_width (int): ширина сетки
-
-    Возвращает:
     tuple: (индекс_клетки_A, индекс_клетки_B)
     """
     wall_type, row, col = wall[0], wall[1], wall[2]
 
     if wall_type == 'h':
-        # Горизонтальная стена соединяет клетки сверху и снизу
+        # горизонтальная соединяет клетки сверху и снизу
         upper_cell = row * grid_width + col
         lower_cell = (row + 1) * grid_width + col
         return (upper_cell, lower_cell)
 
-    else:  # Вертикальная стена
-        # Вертикальная стена соединяет клетки слева и справа
+    else:
+        # вертикальная соединяет клетки слева и справа
         left_cell = row * grid_width + col
         right_cell = row * grid_width + (col + 1)
         return (left_cell, right_cell)
@@ -166,30 +165,7 @@ def get_cycles_config(grid_width, grid_height, difficulty):
         'EXPLORE': int(grid_size * 0.2)
     }[difficulty]
 
-# def add_cycles(grid_width, grid_height, dsu, removed_walls, all_walls, num_cycles):
-#     # Получаем список стен, которые НЕ были удалены (физически присутствуют в лабиринте)
-#     present_walls = [wall for wall in all_walls if wall not in removed_walls]
-#     random.shuffle(present_walls)
-#
-#     cycles_added = 0
-#
-#     for wall in present_walls:
-#         if cycles_added >= num_cycles:
-#             break
-#
-#         # Определяем клетки по обе стороны от стены
-#         if wall[0] == 'h':
-#             cell_a = wall[1] * grid_width + wall[2]
-#             cell_b = (wall[1] + 1) * grid_width + wall[2]
-#         else:
-#             cell_a = wall[1] * grid_width + wall[2]
-#             cell_b = wall[1] * grid_width + (wall[2] + 1)
-#
-#         # Если клетки уже соединены - удаляем стену для создания цикла
-#         if dsu.find(cell_a) == dsu.find(cell_b):
-#             removed_walls.add(wall)
-#             cycles_added += 1
-#
+
 def build_dsu_from_walls(grid_width, grid_height, walls):
     """Строит DSU на основе набора стен"""
     dsu = DSU(grid_width * grid_height)
@@ -217,31 +193,31 @@ def validate_maze2(grid_width, grid_height, removed_walls):
     return True
 
 def add_cycles(grid_width, grid_height, removed_walls, num_cycles):
-    candidates = list(removed_walls)  # Копируем стены для перебора
-    random.shuffle(candidates)  # Случайный порядок
+    candidates = list(removed_walls)  # копируем стены для перебора
+    random.shuffle(candidates)  # случайный порядок
     cycles_added = 0
 
     for wall in candidates:
         if cycles_added >= num_cycles:
             break
 
-        # Удаляем стену из removed_walls (возвращаем её в лабиринт)
+        # удаляем стену из removed_walls (возвращаем её в лабиринт)
         removed_walls.discard(wall)  # Используем discard, чтобы не вызывать ошибку
 
-        # Проверяем, остался ли лабиринт связным
+        # проверяем, остался ли лабиринт связным
         if not validate_maze2(grid_width, grid_height, removed_walls):
-            # Если нет — возвращаем стену обратно
+            # если нет — возвращаем стену обратно
             removed_walls.add(wall)
         else:
             cycles_added += 1
 
 
 def count_connections(cell, removed_walls, grid_width):
-    # Считает количество проходов у клетки
+    # считает количество проходов у клетки
     connections = 0
     row = cell // grid_width
     col = cell % grid_width
-    # Проверяем все 4 возможных направления
+    # проверяем все 4 возможных направления
     directions = [
         ('h', row-1, col),  # верхняя стена
         ('h', row, col),    # нижняя стена
@@ -261,24 +237,32 @@ def add_cycles_after_mst(grid_width, grid_height, removed_walls, all_walls, num_
     for wall in non_mst_walls:
         if cycles_added >= num_cycles:
             break
-        # Удаляем стену (добавляем в removed_walls)
+        # Удаляем стену
         removed_walls.add(wall)
         cycles_added += 1
 
 
-def add_dead_ends(grid_width, grid_height, removed_walls, num_dead_ends):
-    present_walls = [wall for wall in generate_all_walls(grid_width, grid_height) if wall not in removed_walls]
+def add_dead_ends_safe2(grid_width, grid_height, removed_walls, num_dead_ends):
+    all_walls = generate_all_walls(grid_width, grid_height)
+    present_walls = [wall for wall in all_walls if wall not in removed_walls]
     dead_ends_added = 0
 
     for wall in present_walls:
         if dead_ends_added >= num_dead_ends:
             break
-        # Проверяем, создаёт ли удаление стены тупик
-        cell_a, cell_b = get_cells_from_wall(wall, grid_width)
-        if count_connections(cell_a, removed_walls, grid_width) == 1 or count_connections(cell_b, removed_walls, grid_width) == 1:
-            removed_walls.add(wall)
-            dead_ends_added += 1
 
+        cell_a, cell_b = get_cells_from_wall(wall, grid_width)
+        # закрываем проход
+        removed_walls.discard(wall)  # убираем стену из removed_walls  она становится физической
+
+        #  стала ли одна из клеток тупиком
+        if count_connections(cell_a, removed_walls, grid_width) == 1 or \
+           count_connections(cell_b, removed_walls, grid_width) == 1:
+            dead_ends_added += 1
+        else:
+            #  не создали тупик — откатываем
+            removed_walls.add(wall)
+    print(dead_ends_added)
 
 def add_dead_ends_safe(grid_width, grid_height, removed_walls, num_dead_ends):
     present_walls = [wall for wall in generate_all_walls(grid_width, grid_height) if wall not in removed_walls]
@@ -292,8 +276,8 @@ def add_dead_ends_safe(grid_width, grid_height, removed_walls, num_dead_ends):
         connections_a = count_connections(cell_a, removed_walls, grid_width)
         connections_b = count_connections(cell_b, removed_walls, grid_width)
 
-        # Удаляем стену только если одна из клеток станет тупиком (1 проход)
-        # И при этом не изолируется
+        # удаляем стену только если одна из клеток станет тупиком (1 проход)
+        # и при этом не изолируется
         if (connections_a == 1 or connections_b == 1) and validate_maze2(grid_width, grid_height,
                                                                          removed_walls - {wall}):
             removed_walls.add(wall)
