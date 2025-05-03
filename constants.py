@@ -10,6 +10,7 @@ COLORS1 = 'red|green|blue|orange|purple'
 COLORS = COLORS1.split("|")
 Z_DISTANCE = 80
 ALPHA = 300
+WALL_OFFSET = 1
 
 txt_caption = "Galactic maze"
 txt_welcome = "Galactic maze"
