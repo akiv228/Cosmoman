@@ -10,10 +10,11 @@ from grafics import starfield
 import random
 import createwalls
 import path_utils
+import upload_maze
 from enemy_manager import EnemyManager
 
 class Level:
-    def __init__(self, difficulty, debug_mode=False, load_from_file=False, filename="maze_data.pkl"):
+    def __init__(self, difficulty, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
         self.difficulty = difficulty
         self.debug_mode = debug_mode
         self.grid_sizes = {
@@ -24,12 +25,12 @@ class Level:
         }
 
         if load_from_file:
-            self.maze_info = createwalls.load_maze(filename)
+            self.maze_info = upload_maze.load_maze(filename)
             gw, gh = self.maze_info['grid_width'], self.maze_info['grid_height']
         else:
             gw, gh = self.grid_sizes[difficulty]
             self.maze_info = generate_maze(gw, gh, difficulty)
-            createwalls.save_maze(filename, self.maze_info)
+            upload_maze.save_maze(filename, self.maze_info)
 
         self.walls = pg.sprite.Group()
         wall_rects = createwalls.reconstruct_wall_rects(self.maze_info)
