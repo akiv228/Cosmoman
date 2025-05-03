@@ -3,6 +3,7 @@ import random
 from game_classes import Enemy
 import path_utils
 
+
 class EnemyManager:
     def __init__(self, level):
         self.level = level
@@ -13,20 +14,20 @@ class EnemyManager:
         for seg in segments:
             is_adjacent = False
             seg_center = self.segment_center(seg)
-            
+
             for used_seg in used_segments:
                 used_center = self.segment_center(used_seg)
                 dx = seg_center[0] - used_center[0]
                 dy = seg_center[1] - used_center[1]
                 distance_sq = dx * dx + dy * dy
-                
+
                 if distance_sq < (min_distance ** 2):
                     is_adjacent = True
                     break
-            
+
             if not is_adjacent:
                 non_adjacent.append(seg)
-        
+
         return non_adjacent
 
     def spawn_enemies(self):

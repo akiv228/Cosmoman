@@ -1,3 +1,121 @@
+from collections import deque, defaultdict
+
+def build_graph(maze_info):
+    """
+    создает граф соединений лабиринта на основе удаленных стен.
+    принимает maze_info - словарь с данными лабиринта, включая 'removed_walls'.
+    возвращает словарь, где ключи - ячейки, а значения - списки соседей.
+    алгоритм: проходит по списку удаленных стен, соединяя соседние ячейки двусторонними ребрами.
+    """
+    graph = defaultdict(list)
+    for wall in maze_info['removed_walls']:
+        r, c = wall[1], wall[2]
+        if wall[0] == 'h':
+            a, b = (r, c), (r + 1, c)
+        else:
+            a, b = (r, c), (r, c + 1)
+        graph[a].append(b)
+        graph[b].append(a)
+    return graph
+
+def bfs(graph, start):
+    """
+    ищет кратчайшие расстояния от начальной ячейки до всех достижимых.
+    принимает graph - граф лабиринта, start - начальную ячейку.
+    возвращает словарь с расстояниями до всех посещенных ячеек.
+    алгоритм: использует очередь для обхода ячеек по уровням, обновляя расстояния.
+    """
+    visited = {start: 0}
+    q = deque([start])
+    while q:
+        node = q.popleft()
+        for neighbor in graph.get(node, []):
+            if neighbor not in visited:
+                visited[neighbor] = visited[node] + 1
+                q.append(neighbor)
+    return visited
+
+def reconstruct_path(graph, start, end):
+    """
+    воссоздает кратчайший путь от начальной до конечной ячейки.
+    принимает graph - граф лабиринта, start - начало, end - конец.
+    возвращает список ячеек пути.
+    алгоритм: строит карту родителей через bfs и проходит назад от конца к началу.
+    """
+    parent = {start: None}
+    q = deque([start])
+    while q:
+        node = q.popleft()
+        if node == end:
+            break
+        for neighbor in graph.get(node, []):
+            if neighbor not in parent:
+                parent[neighbor] = node
+                q.append(neighbor)
+
+    path = []
+    current = end
+    while current:
+        path.append(current)
+        current = parent.get(current)
+    path.reverse()
+    return path
+
+def calculate_positions(maze_info, grid, debug_mode):
+    """
+    определяет начальную и конечную позиции, а также путь для отладки.
+    принимает maze_info - данные лабиринта, grid - размеры сетки, debug_mode - флаг отладки.
+    возвращает кортеж (начальная позиция, конечная позиция, путь).
+    алгоритм:
+    - находит углы лабиринта.
+    - ищет пару углов с максимальным расстоянием через bfs.
+    - при debug_mode строит путь между этими углами.
+    - корректирует позиции для размещения спрайтов.
+    """
+    gw, gh = grid
+    graph = build_graph(maze_info)
+
+    corners = [(0, 0), (0, gw - 1), (gh - 1, 0), (gh - 1, gw - 1)]
+    max_dist = 0
+    best_pair = (corners[0], corners[1])
+
+    for start in corners:
+        distances = bfs(graph, start)
+        for end in corners:
+            if distances.get(end, 0) > max_dist:
+                max_dist = distances[end]
+                best_pair = (start, end)
+
+    path = []
+    # if debug_mode:
+    path = reconstruct_path(graph, *best_pair)
+
+    start_pos = adjust_position(maze_info, *best_pair[0])
+    end_pos = adjust_position(maze_info, *best_pair[1])
+    return start_pos, end_pos, path
+
+def adjust_position(maze_info, row, col):
+    """
+    вычисляет точные координаты спрайта в ячейке лабиринта.
+    принимает maze_info - данные лабиринта, row и col - координаты ячейки.
+    возвращает скорректированные (x, y) для спрайта.
+    алгоритм: определяет центр ячейки и добавляет смещение с учетом размеров и стен.
+    """
+    cs = maze_info['cell_size']
+    wall_thickness = maze_info['wall_thickness']
+
+    if (row, col) == (0, 0):
+        obj_size = max(30, 35)
+    else:
+        obj_size = max(40, 40)
+
+    offset = (obj_size / 2) + (wall_thickness / 2) + 5
+    x = maze_info['maze_x'] + col * cs + cs // 2
+    y = maze_info['maze_y'] + row * cs + cs // 2
+    return (int(x), int(y))
+
+
+
 def split_path_into_segments(path):
     segments = []
     if len(path) < 2:

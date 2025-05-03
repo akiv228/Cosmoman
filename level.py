@@ -13,7 +13,7 @@ import path_utils
 from enemy_manager import EnemyManager
 
 class Level:
-    def __init__(self, difficulty, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
+    def __init__(self, difficulty, debug_mode=False, load_from_file=False, filename="maze_data.pkl"):
         self.difficulty = difficulty
         self.debug_mode = debug_mode
         self.grid_sizes = {
@@ -39,91 +39,12 @@ class Level:
         self.grid = (gw, gh)
         self.path = []
 
-        start_pos, final_pos = self.calculate_positions()
+        start_pos, final_pos, self.path = path_utils.calculate_positions(self.maze_info, self.grid, self.debug_mode)
         self.init_sprites(start_pos, final_pos)
 
         self.background = self.get_background()
         self.enemy_manager = EnemyManager(self)
         self.enemy_manager.spawn_enemies()
-
-    def calculate_positions(self):
-        gw, gh = self.grid
-        cs = self.maze_info['cell_size']
-        graph = self.build_graph()
-
-        corners = [(0,0), (0,gw-1), (gh-1,0), (gh-1,gw-1)]
-        max_dist = 0
-        best_pair = (corners[0], corners[1])
-
-        for start in corners:
-            distances = self.bfs(graph, start)
-            for end in corners:
-                if distances.get(end, 0) > max_dist:
-                    max_dist = distances[end]
-                    best_pair = (start, end)
-
-        if self.debug_mode:
-            self.path = self.reconstruct_path(graph, *best_pair)
-
-        start_pos = self.adjust_position(*best_pair[0])
-        end_pos = self.adjust_position(*best_pair[1])
-        return start_pos, end_pos
-
-    def build_graph(self):
-        graph = defaultdict(list)
-        for wall in self.maze_info['removed_walls']:
-            r, c = wall[1], wall[2]
-            if wall[0] == 'h':
-                a, b = (r, c), (r+1, c)
-            else:
-                a, b = (r, c), (r, c+1)
-            graph[a].append(b)
-            graph[b].append(a)
-        return graph
-
-    def bfs(self, graph, start):
-        visited = {start: 0}
-        q = deque([start])
-        while q:
-            node = q.popleft()
-            for neighbor in graph.get(node, []):
-                if neighbor not in visited:
-                    visited[neighbor] = visited[node] + 1
-                    q.append(neighbor)
-        return visited
-
-    def reconstruct_path(self, graph, start, end):
-        parent = {start: None}
-        q = deque([start])
-        while q:
-            node = q.popleft()
-            if node == end:
-                break
-            for neighbor in graph.get(node, []):
-                if neighbor not in parent:
-                    parent[neighbor] = node
-                    q.append(neighbor)
-
-        path = []
-        current = end
-        while current:
-            path.append(current)
-            current = parent.get(current)
-        return path[::-1]
-
-    def adjust_position(self, row, col):
-        cs = self.maze_info['cell_size']
-        wall_thickness = self.maze_info['wall_thickness']
-
-        if (row, col) == (0, 0):
-            obj_size = max(30, 35)
-        else:
-            obj_size = max(40, 40)
-
-        offset = (obj_size / 2) + (wall_thickness / 2) + 5
-        x = self.maze_info['maze_x'] + col * cs + cs // 2
-        y = self.maze_info['maze_y'] + row * cs + cs // 2
-        return (int(x), int(y))
 
     def init_sprites(self, start_pos, end_pos):
         self.all_sprites = pg.sprite.Group()
@@ -157,7 +78,7 @@ class Level:
         return starfield
 
     def draw_debug_path(self, surface):
-        if not self.debug_mode or not self.path:
+        if not self.debug_mode:
             return
 
         path_pixels = []

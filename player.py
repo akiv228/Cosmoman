@@ -3,6 +3,7 @@ from base_sprite import GameSprite
 from bullet import Bullet
 from constants import win_width, win_height, WALL_OFFSET
 
+
 class Player(GameSprite):
     def __init__(self, image, x, y, size_x, size_y, x_speed, y_speed, anime, xbool, lives=3):
         super().__init__(image, x, y, size_x, size_y, anime)
@@ -38,7 +39,7 @@ class Player(GameSprite):
 
     def _handle_axis_collision(self, axis, old_pos):
         collided = False
-        
+
         for wall in self.walls:
             if self.rect.colliderect(wall.rect):
                 collided = True
@@ -60,7 +61,7 @@ class Player(GameSprite):
                         self.rect.bottom = wall.rect.top - WALL_OFFSET
                     elif self.rect.top - wall.rect.bottom < WALL_OFFSET:
                         self.rect.top = wall.rect.bottom + WALL_OFFSET
-        
+
         if collided and abs(self.x_speed if axis == 'x' else self.y_speed) > 5:
             self._pixel_perfect_collision(axis, old_pos)
 
@@ -69,12 +70,12 @@ class Player(GameSprite):
         test_pos = old_pos.copy()
         for i in range(0, abs(self.x_speed if axis == 'x' else self.y_speed), 1):
             test_pos.x += step if axis == 'x' else 0
-            test_pos.y += 0 if axis == 'x' else step 
+            test_pos.y += 0 if axis == 'x' else step
             collision = False
             for wall in self.walls:
                 if test_pos.colliderect(wall.rect):
                     collision = True
-                    break   
+                    break
             if collision:
                 if axis == 'x':
                     self.rect.x = test_pos.x - step
@@ -108,6 +109,7 @@ class Player(GameSprite):
             # if check_sound % 2 == 0:
             #     sound.play()
             prize.kill()
+
 
 import pygame as pg
 from base_sprite import GameSprite
