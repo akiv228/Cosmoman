@@ -3,13 +3,16 @@ import pygame as pg
 from states.game_state import State
 from states.level_select_state import LevelSelectState
 from constants import win_width, win_height, BLACK_BLUE, WHITE, txt_welcome
-from grafics_classes import Backgrounds, Menu, Label
+from grafics_classes import Backgrounds, Menu, Label, Fon2, Fon, Starfield_rects2
 from game_music import mixer
 
 class MenuState(State):
     def __init__(self, game):
         super().__init__(game)
-        self.background = Backgrounds('images\\m_start_back2.jpg', win_width + 20, win_height + 20, -10, 0)
+        # self.background = Backgrounds('images\\m_start_back2.jpg', win_width + 20, win_height + 20, -10, 0)
+        # self.background = Fon2(w=5000, h=900, stars_count=3000)
+        # self.background = Fon(w=5000, h=900, stars_count=2000)
+        self.background = Starfield_rects2()
         self.menu_but = sprite.Group()
         self.button_start = Menu('images\\start.png', 550, 370, 130, 130)
         self.button_manual = Menu('images\\instruction.png', 380, 395, 110, 110)
@@ -42,9 +45,17 @@ class MenuState(State):
         pass # Логика обновления меню, если нужна (например, анимации)
 
     def render(self, window):
-        self.background.reset(window)
+        # self.background.reset(window)
+        # self.background.update(window)
+        # window.blit(self.background.alpha_surface, (0, 0))
+        # self.background.run(window)
+        self.background.run()
+        window.blit(self.background.alpha_surface, (0, 0))
         self.button_sound.reset(window)
         self.menu_but.draw(window)
         self.text_back.draw(window, 0, -7)
+
+
+
 
 

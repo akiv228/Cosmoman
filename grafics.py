@@ -1,5 +1,46 @@
+
 import pygame as pg
+from constants import *
+from base_sprite import *
+from random import randint
 import random
+import math
+
+
+class Star2(sprite.Sprite):
+    def __init__(self, w, h) -> None:
+        super().__init__()
+        self.r = randint(1, 2)
+        self.image = Surface((self.r * 2, self.r * 2), SRCALPHA)
+        self.rect = self.image.get_rect()
+        self.rect.x = randint(0, w)
+        self.rect.y = randint(1, h)
+        self.color = (255, 255, 255, 255)
+        self.shine_speed = randint(1, 100)
+        self.shine_deep = randint(150, 250)
+        self.shine_revers = False
+        self.shine_ok = randint(0, 1)
+
+    def update(self):
+        if self.shine_ok == 1: self.color = self.__shine()
+        draw.circle(self.image, self.color, (self.r, self.r), self.r)
+
+    def __shine(self):
+        # моргание звезд - зависит от shine_speed и shine_deep
+        # которые создаются случайно для каждой звезды
+        color = self.color[3]
+        if self.shine_revers:
+            color += self.shine_speed
+            if color >= 255:
+                color = 255
+                self.shine_revers = False
+        else:
+            color -= self.shine_speed
+            if color <= 255 - self.shine_deep:
+                color = 255 - self.shine_deep
+                self.shine_revers = True
+        return tuple(list(self.color)[0:3] + [color])
+
 
 class Star:
     def __init__(self, w, h):
@@ -24,7 +65,63 @@ class Starfield:
                 star.x = random.randint(0, self.w)
             pg.draw.circle(self.alpha_surface, (255, 255, 255), (int(star.x), int(star.y)), star.size)
 
-starfield = Starfield(710, 540, 300)
+# starfield = Starfield(710, 540, 300)
+
+vec2, vec3 = pg.math.Vector2, pg.math.Vector3
+CENTER = vec2(WIDTH // 2, HEIGHT // 2)
+
+class Star_rect():
+    def __init__(self):
+
+        self.pos3d = self.get_pos3d()
+        self.vel = random.uniform(0.05, 0.25)
+        self.color = random.choice(COLORS)
+        self.screen_pos = vec2(0, 0)
+        self.size = 10
+
+
+    def get_pos3d(self, scale_pos=35):
+        angle = random.uniform(0, 2 * math.pi)
+        radius = random.randrange(HEIGHT // scale_pos, HEIGHT) * scale_pos
+        x = radius * math.cos(angle)
+        y = radius * math.sin(angle)
+        return vec3(x, y, Z_DISTANCE)
+
+
+    def update(self):
+        self.pos3d.z -= self.vel
+        self.pos3d = self.get_pos3d() if self.pos3d.z < 1 else self.pos3d
+
+        self.screen_pos = vec2(self.pos3d.x, self.pos3d.y) / self.pos3d.z + CENTER
+        self.size = (Z_DISTANCE - self.pos3d.z) / (0.2 * self.pos3d.z)
+        # rotate xy
+        self.pos3d.xy = self.pos3d.xy.rotate(0.2)
+        # mouse
+        # mouse_pos = CENTER - vec2(pg.mouse.get_pos())
+        # self.screen_pos += mouse_pos
+
+
+    def draw(self, window):
+        s = self.size
+        if (-s < self.screen_pos.x < WIDTH + s) and (-s < self.screen_pos.y < HEIGHT + s):
+            pg.draw.rect(window, self.color, (*self.screen_pos, self.size, self.size))
+
+
+
+# класс главного фона у 3 уровня
+class Starfield_rects():
+    def __init__(self):
+        self.alpha_surface = pg.Surface(RES)
+        self.alpha_surface.set_alpha(ALPHA)
+        self.stars = [Star_rect() for i in range(NUM_STARS)]
+
+
+    def run(self, window):
+        [star.update() for star in self.stars]
+        self.stars.sort(key=lambda star: star.pos3d.z, reverse=True)
+        [star.draw(window) for star in self.stars]
+
+
 
 
 # from pygame import *

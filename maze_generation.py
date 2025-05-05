@@ -56,10 +56,10 @@ def generate_maze(grid_width, grid_height, difficulty):
     # цикл через возвражение стен + проверка связности
     # add_cycles(grid_width, grid_height, removed_walls, get_cycles_config(grid_width, grid_height, difficulty))
     # Этап 4: Добавление циклов через удаление "лишних" стен
-    add_cycles_after_mst(grid_width, grid_height, removed_walls, walls, 5)
+    # add_cycles_after_mst(grid_width, grid_height, removed_walls, walls, 5)
 
     # Этап 5: Добавление тупиков - возвращение стен
-    add_dead_ends_safe2(grid_width, grid_height, removed_walls, 5)
+    # add_dead_ends_safe2(grid_width, grid_height, removed_walls, 5)
 
 
 # Этап 5:
@@ -111,7 +111,7 @@ def get_cells_from_wall(wall, grid_width):
 def calculate_layout(grid_width, grid_height):
     """Рассчитывает размеры и позиционирование лабиринта"""
     cell_size_x = (WIDTH - 40) // grid_width # 20px padding с каждой стороны
-    cell_size_y = (HEIGHT - 100) // grid_height # 50px сверху и снизу
+    cell_size_y = (HEIGHT - 80) // grid_height # 50px сверху и снизу
     cell_size = min(cell_size_x, cell_size_y)
 
     return {
@@ -144,12 +144,10 @@ def generate_all_walls(grid_width, grid_height):
 def get_wall_weight(wall_type, difficulty):
     """Возвращает вес стены в зависимости от типа и сложности"""
     weights = {
-        # 'EASY': {'v': (1, 10), 'h': (1, 10)},   # Случайные веса
-        'EASY': {'v': (1, 10), 'h': (1, 10)},
-        'MEDIUM': {'v': (5, 20), 'h': (5, 20)},  # Более высокие веса
-        # 'MEDIUM': {'v': (10, 50), 'h': (10, 50)},
-        'HARD': {'v': (10, 50), 'h': (10, 50)},  # Максимальные веса
-        'EXPLORE': {'v': (1, 100), 'h': (1, 100)} # Полный рандом
+        'EASY': {'v': (1, 10), 'h': (1, 10)},  # Низкая вариативность
+        'MEDIUM': {'v': (5, 20), 'h': (5, 20)},  # Умеренная вариативность
+        'HARD': {'v': (10, 50), 'h': (10, 50)},  # Высокая структурированность
+        'EXPLORE': {'v': (1, 100), 'h': (1, 100)}  # Полная случайность
     }
     min_w, max_w = weights[difficulty][wall_type]
     return random.randint(min_w, max_w)
@@ -159,10 +157,10 @@ def get_cycles_config(grid_width, grid_height, difficulty):
     """Возвращает количество циклов для заданной сложности"""
     grid_size = grid_width * grid_height
     return {
-        'EASY': int(grid_size * 0.2),
-        'MEDIUM': int(grid_size * 0.05),
-        'HARD': int(grid_size * 0.1),
-        'EXPLORE': int(grid_size * 0.2)
+        'EASY': int(grid_size * 0.24),
+        'MEDIUM': int(grid_size * 0.15),
+        'HARD': int(grid_size * 0.08),
+        'EXPLORE': int(grid_size * 0.1)
     }[difficulty]
 
 

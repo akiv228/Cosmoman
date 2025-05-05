@@ -1,6 +1,9 @@
 import pygame as pg
 from base_sprite import GameSprite
-from grafics import Starfield
+from grafics import  *
+import pygame as pg
+from constants import *
+from base_sprite import *
 
 class Backgrounds:
     def __init__(self, image_path, w, h, x, y):
@@ -43,6 +46,100 @@ class Fon:
         window.blit(self.starfield.alpha_surface, (0, 0))
         self.starfield.run()
 
+
+class Fon2():
+    def __init__(self, w, h, stars_count=3000) -> None:
+        self.w = w
+        self.h = h
+        self.x = -1000
+        self.y = -200
+        self.image = Surface((w, h))
+        self.rect = self.image.get_rect()
+        self.stars_count = stars_count
+        self.stars = []
+        self.fill_stars()
+
+    # заполнение звёздам
+    def fill_stars(self):
+        for i in range(self.stars_count):
+            self.stars.append(Star2(self.w, self.h))
+
+    def update(self, scr):
+        self.image.fill(BLACK)
+        for star in self.stars:
+            star.update()
+            self.image.blit(star.image, (star.rect.x, star.rect.y))
+        scr.blit(self.image, (self.x, self.y))
+
+
+class Star_rect2():
+    def __init__(self):
+        # Определяем, статичная звезда или движущаяся (30% шанс на статичную)
+        self.is_static = random.random() < 0.1
+        self.pos3d = self.get_pos3d()
+
+        if self.is_static:
+            self.vel = 0
+            self.pos3d.z = random.uniform(1, Z_DISTANCE)  # Случайная глубина
+            self.shine_speed = randint(1, 100)  # Скорость мерцания
+            self.shine_deep = randint(150, 250)  # Глубина мерцания
+            self.shine_revers = False
+            self.color = pg.Color(random.choice(COLORS))
+            self.color.a = 255
+        else:
+            self.vel = random.uniform(0.05, 0.25)
+            self.color = pg.Color(random.choice(COLORS))
+            self.color.a = 255
+
+        self.screen_pos = vec2(0, 0)
+        self.size = 10
+
+    def get_pos3d(self, scale_pos=35):
+        angle = random.uniform(0, 2 * math.pi)
+        radius = random.randrange(HEIGHT // scale_pos, HEIGHT) * scale_pos
+        x = radius * math.cos(angle)
+        y = radius * math.sin(angle)
+        return vec3(x, y, Z_DISTANCE)
+
+    def update(self):
+        if not self.is_static:
+            self.pos3d.z -= self.vel
+            if self.pos3d.z < 1:
+                self.pos3d = self.get_pos3d()
+        else:
+            # Эффект мерцания для статичных звёзд
+            if self.shine_revers:
+                self.color.a += self.shine_speed
+                if self.color.a >= 255:
+                    self.color.a = 255
+                    self.shine_revers = False
+            else:
+                self.color.a -= self.shine_speed
+                if self.color.a <= 255 - self.shine_deep:
+                    self.color.a = 255 - self.shine_deep
+                    self.shine_revers = True
+
+        self.screen_pos = vec2(self.pos3d.x, self.pos3d.y) / self.pos3d.z + CENTER
+        self.size = (Z_DISTANCE - self.pos3d.z) / (0.2 * self.pos3d.z)
+        # Мягкое вращение для всех звёзд
+        self.pos3d.xy = self.pos3d.xy.rotate(0.05)
+
+    def draw(self, surface):
+        s = self.size
+        if (-s < self.screen_pos.x < WIDTH + s) and (-s < self.screen_pos.y < HEIGHT + s):
+            pg.draw.rect(surface, self.color, (*self.screen_pos, self.size, self.size))
+
+
+class Starfield_rects2():
+    def __init__(self):
+        self.alpha_surface = pg.Surface(RES, pg.SRCALPHA)  # Прозрачная поверхность
+        self.stars = [Star_rect() for _ in range(NUM_STARS)]
+
+    def run(self):
+        self.alpha_surface.fill((0, 0, 0, 0))  # Очистка с прозрачностью
+        [star.update() for star in self.stars]
+        self.stars.sort(key=lambda star: star.pos3d.z, reverse=True)
+        [star.draw(self.alpha_surface) for star in self.stars]
 #
 # import pygame; import random; import math
 # from pygame import SRCALPHA; from constants import *

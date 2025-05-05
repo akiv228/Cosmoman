@@ -6,7 +6,7 @@ from player import Player
 from game_classes import Wall, GameSprite, Enemy
 from constants import WIDTH, HEIGHT
 from grafics_classes import Backgrounds, Fon
-from grafics import starfield
+from grafics import Starfield_rects
 import random
 import createwalls
 import path_utils
@@ -18,10 +18,14 @@ class Level:
         self.difficulty = difficulty
         self.debug_mode = debug_mode
         self.grid_sizes = {
-            'EASY': (16, 12),
-            'MEDIUM': (16, 12),
-            'HARD': (20, 15),
-            'EXPLORE': (random.randint(18, 22), random.randint(13, 17))
+            # 'EASY': (16, 12),
+            # 'MEDIUM': (16, 12),
+            # 'HARD': (20, 15),
+            # 'EXPLORE': (random.randint(18, 22), random.randint(13, 17))
+            'EASY': (16, 12),  # Компактный размер
+            'MEDIUM': (16, 12),  # Средняя сложность
+            'HARD': (20, 15),  # Крупный и сложный
+            'EXPLORE': (random.randint(18, 22), random.randint(13, 17))  # Динамический размер
         }
 
         if load_from_file:
@@ -36,6 +40,10 @@ class Level:
         wall_rects = createwalls.reconstruct_wall_rects(self.maze_info)
         for rect in wall_rects:
             self.walls.add(Wall(rect.x, rect.y, rect.width, rect.height))
+
+        # wall_data = createwalls.reconstruct_wall_rects(self.maze_info)
+        # for rect, wall_type, row, col in wall_data:
+        #     self.walls.add(createwalls.Wall(rect.x, rect.y, rect.width, rect.height, wall_type, row, col))
 
         self.grid = (gw, gh)
         self.path = []
@@ -76,7 +84,7 @@ class Level:
             return Backgrounds('images/back.jpg', WIDTH, HEIGHT, 0, 0)
         elif self.difficulty == 'MEDIUM':
             return Fon(w=5000, h=900, stars_count=2000)
-        return starfield
+        return Starfield_rects()
 
     def draw_debug_path(self, surface):
         if not self.debug_mode:

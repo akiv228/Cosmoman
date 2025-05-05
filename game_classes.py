@@ -80,6 +80,8 @@ class Prize(GameSprite):
 #             self.rect.y -= self.speed
 #         self.index += 1
 
+
+
 class Enemy(GameSprite):
     def __init__(self, image_path, x, y, width, height, speed, direction, board1, board2, walls):
         super().__init__(image_path, x, y, width, height, anime=False)
@@ -119,30 +121,72 @@ class Enemy(GameSprite):
 
 
 # class Enemy(GameSprite):
-#     def __init__(self, image_path, x, y, width, height, speed, direction, board1, board2):
+#     def __init__(self, maze_info, image_path, x, y, width, height, speed, direction, board1, board2, walls):
 #         super().__init__(image_path, x, y, width, height, anime=False)
 #         self.speed = speed
-#         self.direction = direction  # 'h' - горизонтально, 'v' - вертикально
-#         self.board1 = board1
-#         self.board2 = board2
-#         self.moving_forward = True
+#         self.direction = direction  # 'north', 'east', 'south', 'west'
+#         self.walls = walls
+#         self.cell_size = maze_info['cell_size']
+#
+#     def get_current_cell(self):
+#         """Возвращает текущую ячейку лабиринта, в которой находится враг."""
+#         grid_x = int((self.rect.x - self.walls.sprites()[0].rect.x) / self.cell_size)
+#         grid_y = int((self.rect.y - self.walls.sprites()[0].rect.y) / self.cell_size)
+#         return (grid_y, grid_x)
+#
+#     def check_wall(self, direction):
+#         """Проверяет наличие стены в указанном направлении."""
+#         y, x = self.get_current_cell()
+#         walls_near = [
+#             wall for wall in self.walls
+#             if (wall.row == y and wall.col == x)  # Логика проверки стен
+#         ]
+#         # Зависит от структуры Wall. Пример для вертикальных/горизонтальных стен:
+#         for wall in walls_near:
+#             if direction == 'north' and wall.type == 'h' and wall.row == y-1:
+#                 return True
+#             elif direction == 'south' and wall.type == 'h' and wall.row == y:
+#                 return True
+#             elif direction == 'east' and wall.type == 'v' and wall.col == x:
+#                 return True
+#             elif direction == 'west' and wall.type == 'v' and wall.col == x-1:
+#                 return True
+#         return False
+#
+#     def move(self):
+#         """Двигает врага в текущем направлении."""
+#         if self.direction == 'north':
+#             self.rect.y -= self.speed
+#         elif self.direction == 'south':
+#             self.rect.y += self.speed
+#         elif self.direction == 'east':
+#             self.rect.x += self.speed
+#         elif self.direction == 'west':
+#             self.rect.x -= self.speed
 #
 #     def update(self):
-#         if self.direction == 'h':
-#             if self.moving_forward:
-#                 self.rect.x += self.speed
-#                 if self.rect.x >= self.board2:
-#                     self.moving_forward = False
-#             else:
-#                 self.rect.x -= self.speed
-#                 if self.rect.x <= self.board1:
-#                     self.moving_forward = True
-#         elif self.direction == 'v':
-#             if self.moving_forward:
-#                 self.rect.y += self.speed
-#                 if self.rect.y >= self.board2:
-#                     self.moving_forward = False
-#             else:
-#                 self.rect.y -= self.speed
-#                 if self.rect.y <= self.board1:
-#                     self.moving_forward = True
+#         old_rect = self.rect.copy()
+#         directions_order = ['north', 'east', 'south', 'west']
+#         current_idx = directions_order.index(self.direction)
+#
+#         # Правило левой руки: проверяем стену слева, затем вперед, затем направо
+#         left_dir = directions_order[(current_idx - 1) % 4]
+#         forward_dir = self.direction
+#         right_dir = directions_order[(current_idx + 1) % 4]
+#
+#         # Попытка повернуть налево
+#         if not self.check_wall(left_dir):
+#             self.direction = left_dir
+#         # Иначе двигаться вперед
+#         elif not self.check_wall(forward_dir):
+#             pass
+#         # Иначе повернуть направо
+#         else:
+#             self.direction = right_dir
+#
+#         self.move()
+#
+#         # Откат при коллизии
+#         if pg.sprite.spritecollideany(self, self.walls):
+#             self.rect = old_rect
+#             self.direction = directions_order[(current_idx + 1) % 4]  # Поворот направо при столкновении
