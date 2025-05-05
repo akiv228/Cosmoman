@@ -4,7 +4,7 @@ from pygame import Rect
 from maze_generation import generate_maze
 from player import Player
 from game_classes import Wall, GameSprite, Enemy
-from constants import WIDTH, HEIGHT
+from config import WIDTH, HEIGHT
 from grafics_classes import Backgrounds, Fon
 from grafics import starfield
 import random
@@ -43,9 +43,55 @@ class Level:
         start_pos, final_pos, self.path = path_utils.calculate_positions(self.maze_info, self.grid, self.debug_mode)
         self.init_sprites(start_pos, final_pos)
 
+        # Инициализация системы "тумана войны"
+        self.init_fog_of_war()
+        
         self.background = self.get_background()
         self.enemy_manager = EnemyManager(self)
         self.enemy_manager.spawn_enemies()
+
+    def init_fog_of_war(self):
+        """Инициализирует систему тумана войны с облаками"""
+        # Загружаем изображение облака
+        try:
+            self.cloud_image = pg.image.load('images/cloud.png').convert_alpha()
+            self.cloud_image = pg.transform.scale(self.cloud_image, 
+                                            (self.maze_info['cell_size'], self.maze_info['cell_size']))
+        except:
+            # Создаем временное изображение, если файл не найден
+            self.cloud_image = pg.Surface((self.maze_info['cell_size'], self.maze_info['cell_size']), pg.SRCALPHA)
+            self.cloud_image.fill((100, 100, 100, 200))
+        
+        self.cloud_group = pg.sprite.Group()
+        
+        # Создаем облака для каждой клетки
+        for row in range(self.grid[1]):
+            for col in range(self.grid[0]):
+                x = self.maze_info['maze_x'] + col * self.maze_info['cell_size'] + self.maze_info['cell_size']//2
+                y = self.maze_info['maze_y'] + row * self.maze_info['cell_size'] + self.maze_info['cell_size']//2
+                
+                # Создаем спрайт облака с правильными параметрами
+                cloud = GameSprite(
+                    player_image='images/cloud.png',
+                    player_x=x,
+                    player_y=y,
+                    size_x=self.maze_info['cell_size'],
+                    size_y=self.maze_info['cell_size']
+                )
+                # Добавляем свойство видимости
+                cloud.visible = True
+                self.cloud_group.add(cloud)
+
+    def update_fog_of_war(self):
+        """Обновляет видимость облаков в зависимости от позиции игрока"""
+        reveal_distance = 150  # Дистанция раскрытия
+        
+        for cloud in self.cloud_group:
+            if hasattr(cloud, 'visible'):
+                # Вычисляем расстояние между центрами
+                distance = ((cloud.rect.centerx - self.player.rect.centerx)**2 + 
+                        (cloud.rect.centery - self.player.rect.centery)**2)**0.5
+                cloud.visible = distance > reveal_distance
 
     def init_sprites(self, start_pos, end_pos):
         self.all_sprites = pg.sprite.Group()
@@ -74,7 +120,7 @@ class Level:
     def get_background(self):
         if self.difficulty == 'EASY':
             return Backgrounds('images/back.jpg', WIDTH, HEIGHT, 0, 0)
-        elif self.difficulty == 'MEDIUM':
+        elif self.difficulty in ('MEDIUM', 'HARD'):
             return Fon(w=5000, h=900, stars_count=2000)
         return starfield
 
@@ -95,6 +141,7 @@ class Level:
         self.player.update()
         self.player.bullets.update()
         self.enemy_manager.enemies.update()
+        self.update_fog_of_war()  # Обновляем видимость облаков
 
         pg.sprite.groupcollide(self.player.bullets, self.walls, True, False)
         pg.sprite.groupcollide(self.player.bullets, self.enemy_manager.enemies, True, True)
@@ -105,7 +152,7 @@ class Level:
     def render(self, window):
         if self.difficulty == 'EASY':
             self.background.reset(window)
-        elif self.difficulty == 'MEDIUM':
+        elif self.difficulty in ('MEDIUM', 'HARD'):
             self.background.update(window)
         else:
             window.blit(self.background.alpha_surface, (0, 0))
@@ -115,3 +162,8 @@ class Level:
         self.enemy_manager.enemies.draw(window)
         self.all_sprites.draw(window)
         self.player.bullets.draw(window)
+        
+        # Рисуем только видимые облака
+        for cloud in self.cloud_group:
+            if hasattr(cloud, 'visible') and cloud.visible:
+                window.blit(cloud.image, cloud.rect)

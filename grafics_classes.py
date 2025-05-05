@@ -43,6 +43,51 @@ class Fon:
         window.blit(self.starfield.alpha_surface, (0, 0))
         self.starfield.run()
 
+
+class InputBox(pg.sprite.Sprite):
+    def __init__(self, x, y, w, h, placeholder='', inactive_color=(200, 200, 200), active_color=(255, 255, 255), is_password=False):
+        super().__init__()
+        self.rect = pg.Rect(x, y, w, h)
+        self.color = inactive_color
+        self.inactive_color = inactive_color
+        self.active_color = active_color
+        self.placeholder = placeholder
+        self.text = ''
+        self.text_color = (255, 255, 255)
+        self.font = pg.font.Font(None, 32)
+        self.active = False
+        self.is_password = is_password
+        self.image = pg.Surface((w, h), pg.SRCALPHA)
+        
+    def handle_event(self, event):
+        if event.type == pg.MOUSEBUTTONDOWN:
+            self.active = self.rect.collidepoint(event.pos)
+            self.color = self.active_color if self.active else self.inactive_color
+        
+        if event.type == pg.KEYDOWN and self.active:
+            if event.key == pg.K_RETURN:
+                return True
+            elif event.key == pg.K_BACKSPACE:
+                self.text = self.text[:-1]
+            else:
+                self.text += event.unicode
+    
+    def update(self):
+        # Обновляем изображение для отрисовки
+        self.image.fill((0, 0, 0, 0))  # Прозрачный фон
+        pg.draw.rect(self.image, self.color, (0, 0, self.rect.w, self.rect.h), 2)
+        
+        if not self.text and not self.active:
+            text_surface = self.font.render(self.placeholder, True, (150, 150, 150))
+        else:
+            display_text = '*' * len(self.text) if self.is_password else self.text
+            text_surface = self.font.render(display_text, True, self.text_color)
+        
+        self.image.blit(text_surface, (5, 5))
+    
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
 #
 # import pygame; import random; import math
 # from pygame import SRCALPHA; from constants import *

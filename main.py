@@ -2,8 +2,9 @@ import asyncio
 import platform
 import pygame as pg
 from pygame import display, time, event
-from constants import win_width, win_height, txt_caption, FPS
+from config import win_width, win_height, txt_caption, FPS
 from states.menu_state import MenuState
+from states.login_state import LoginState
 from game_music import mixer
 
 class Game:
@@ -15,7 +16,11 @@ class Game:
         display.set_caption(txt_caption)
         self.clock = time.Clock()
         self.running = True
-        self.current_state = MenuState(self)
+        self.music_flag = 0
+        self.user_data = None
+        #Тут важно понимать какие атрибуты прописывать перед сменой State иначе те которые идут после видны не будут в других обработчиках по сслыке game
+        self.current_state = LoginState(self)
+        #self.current_state = MenuState(self)
         self.total_prizes_collected = 0
         self.completed_difficulties = 0
         # self.states={
@@ -34,8 +39,7 @@ class Game:
         while self.running:
             events = event.get()
             for e in events:
-                if e.type == pg.QUIT:
-                    self.running = False
+                if e.type == pg.QUIT: self.running = False
             self.current_state.handle_events(events)
             self.current_state.update()
             self.current_state.render(self.window)
@@ -50,9 +54,3 @@ else:
     if __name__ == "__main__":
         game = Game()
         asyncio.run(game.run())
-
-#     def start(self):
-#         if platform.system()=="Emscripten": asyncio.ensure_future(self.run())
-#         else: asyncio.run(self.run())
-#
-# if __name__=='__main__': Game().start()
