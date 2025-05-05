@@ -1,7 +1,7 @@
 import pickle
 import random
 from pygame import Rect
-from constants import WIDTH, HEIGHT
+from config import WIDTH, HEIGHT
 
 
 class DSU: #Disjoint Set Union
@@ -10,19 +10,19 @@ class DSU: #Disjoint Set Union
 
         self.rank = [0] * size  # Добавляем ранги  - высота (глубина) поддерева
 
-    #  Рекурсивно находит корень множества с оптимизацией (эвристикой) сжатия путей
+    #  рекурсивно находит корень множества с оптимизацией (эвристикой) сжатия путей
     def find(self, x):
         if self.parent[x] != x:
             self.parent[x] = self.find(self.parent[x]) # path compression
         return self.parent[x]
 
 
-    #  Объединяет два множества с учетом ранга для минимизации глубины дерева
+    #  объединяет два множества с учетом ранга для минимизации глубины дерева
     def union(self, x, y):
         root_x = self.find(x)
         root_y = self.find(y)
         if root_x != root_y:
-            # Объединение по рангу
+            # объединение по рангу
             if self.rank[root_x] < self.rank[root_y]: # если глубина дерева х меньше, то подвешиваем его к более глубокому
                 self.parent[root_x] = root_y
             elif self.rank[root_x] > self.rank[root_y]:
@@ -110,7 +110,7 @@ def get_cells_from_wall(wall, grid_width):
 
 def calculate_layout(grid_width, grid_height):
     """Рассчитывает размеры и позиционирование лабиринта"""
-    cell_size_x = (WIDTH - 40) // grid_width # 20px padding с каждой стороны
+    cell_size_x = (WIDTH - 40) // grid_width    # 20px padding с каждой стороны
     cell_size_y = (HEIGHT - 100) // grid_height # 50px сверху и снизу
     cell_size = min(cell_size_x, cell_size_y)
 

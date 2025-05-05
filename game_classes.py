@@ -1,5 +1,5 @@
 import pygame as pg
-from constants import *
+from config import *
 from base_sprite import *
 from random import randint
 
@@ -112,7 +112,6 @@ class Enemy(GameSprite):
                 if self.rect.y <= self.board1:
                     self.moving_forward = True
 
-        # Проверка коллизий со стенами
         if pg.sprite.spritecollideany(self, self.walls):
             self.rect = old_rect
             self.moving_forward = not self.moving_forward

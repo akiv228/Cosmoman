@@ -1,7 +1,7 @@
 from pygame import sprite
 from base_sprite import GameSprite
 from bullet import Bullet
-from constants import win_width, win_height, WALL_OFFSET
+from config import win_width, win_height, WALL_OFFSET
 
 
 class Player(GameSprite):
@@ -17,16 +17,31 @@ class Player(GameSprite):
 
     def fire(self, sound):
         if self.limit > 0:
-            # sound.play()  # Uncomment if sound is available
+            offset = 5
+            
             if self.direction == 'left':
-                bullet = Bullet('images\\bullet_left.png', self.rect.left, self.rect.centery, 15, 20, 15, 'left')
+                bullet = Bullet('images\\bullet_left.png', 
+                            self.rect.left - offset,
+                            self.rect.centery, 
+                            15, 20, 15, 'left')
             elif self.direction == 'right':
-                bullet = Bullet('images\\bullet.png', self.rect.right, self.rect.centery, 15, 20, 15, 'right')
+                bullet = Bullet('images\\bullet.png', 
+                            self.rect.right + offset,
+                            self.rect.centery, 
+                            15, 20, 15, 'right')
             elif self.direction == 'top':
-                bullet = Bullet('images\\bullet_up.png', self.rect.centerx, self.rect.top, 15, 20, 15, 'top')
+                bullet = Bullet('images\\bullet_up.png', 
+                            self.rect.centerx, 
+                            self.rect.top - offset,
+                            15, 20, 15, 'top')
             elif self.direction == 'bottom':
-                bullet = Bullet('images\\bullet_down.png', self.rect.centerx, self.rect.bottom, 15, 20, 15, 'bottom')
+                bullet = Bullet('images\\bullet_down.png', 
+                            self.rect.centerx, 
+                            self.rect.bottom + offset,
+                            15, 20, 15, 'bottom')
+            
             self.bullets.add(bullet)
+            if pg.sprite.spritecollideany(bullet, self.walls): bullet.kill()
             self.limit -= 1
 
     def update(self):

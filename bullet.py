@@ -1,5 +1,5 @@
 from base_sprite import GameSprite
-from constants import win_width, win_height
+from config import win_width, win_height
 
 class Bullet(GameSprite):
     def __init__(self, image, x, y, size_x, size_y, speed, direction):
