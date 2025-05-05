@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
-import pygame as pg
 
 class State(ABC):
     def __init__(self, game):
-        self.game = game  # Ссылка на класс Game для доступа к окну и переключению состояний
+        self.game = game
 
     @abstractmethod
     def handle_events(self, events):
