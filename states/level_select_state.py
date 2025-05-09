@@ -26,7 +26,11 @@ class LevelSelectState(State):
                 if self.button_back.collidepoint(*e.pos):
                     from .menu_state import MenuState
                     self.game.set_state(MenuState(self.game))
-                elif self.button_select1.collidepoint(*e.pos) and level_above >= 0: set_state(PlayState(self.game, 'EASY'))
+                # elif self.button_select1.collidepoint(*e.pos) and level_above >= 0: set_state(PlayState(self.game, 'EASY'))
+
+                elif self.button_select1.collidepoint(*e.pos) and level_above >= 0:
+                    from starfield import IntroState
+                    set_state(IntroState(self.game, lambda g: PlayState(g, 'EASY')))
                 elif self.button_select2.collidepoint(*e.pos) and level_above >= 1: set_state(PlayState(self.game, 'MEDIUM'))
                 elif self.button_select3.collidepoint(*e.pos) and level_above >= 2: set_state(PlayState(self.game, 'HARD'))
                 elif self.button_explore.collidepoint(*e.pos) and level_above >= 3: set_state(PlayState(self.game, 'EXPLORE'))

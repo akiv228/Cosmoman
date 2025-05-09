@@ -6,6 +6,7 @@ from config import win_width, win_height, txt_caption, FPS
 from states.menu_state import MenuState
 from states.login_state import LoginState
 from game_music import mixer
+from starfield import *
 
 class Game:
     def __init__(self):
@@ -19,7 +20,9 @@ class Game:
         self.music_flag = 0
         self.user_data = None
         #Тут важно понимать какие атрибуты прописывать перед сменой State иначе те которые идут после видны не будут в других обработчиках по сслыке game
-        self.current_state = LoginState(self)
+        # self.current_state = LoginState(self)
+        self.current_state = IntroState(self, LoginState);
+        # game.current_state = IntroState(game, MenuState)
         #self.current_state = MenuState(self)
         self.total_prizes_collected = 0
         self.completed_difficulties = 0

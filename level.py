@@ -6,7 +6,7 @@ from player import Player
 from game_classes import Wall, GameSprite, Enemy
 from config import WIDTH, HEIGHT
 from grafics_classes import Backgrounds, Fon
-from grafics import starfield
+from grafics import *
 import random
 import createwalls
 import path_utils
@@ -14,7 +14,7 @@ import upload_maze
 from enemy_manager import EnemyManager
 
 class Level:
-    def __init__(self, difficulty, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
+    def __init__(self, difficulty, debug_mode=False, load_from_file=False, filename="maze_data.pkl"):
         self.difficulty = difficulty
         self.debug_mode = debug_mode
         self.grid_sizes = {
