@@ -120,7 +120,7 @@ class Level:
 
     def get_background(self):
         if self.difficulty == 'EASY':
-            return Fon3(w=5000, h=900, stars_count=2000)
+            return Fon2(w=5000, h=900, stars_count=2000)
             # return Backgrounds('images/back.jpg', WIDTH, HEIGHT, 0, 0)
         elif self.difficulty in ('MEDIUM', 'HARD'):
             return Fon3(w=5000, h=900, stars_count=2000)

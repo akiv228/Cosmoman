@@ -65,6 +65,7 @@ if __name__ != '__config__':
         back = Instance('images\\menu.png', 20, 425, 100, 100)
         pre_init_back_label = (140, 0, 680, 40, GREY_BLUE)
         back_label = Text(txt_select, 62, WHITE)
+        music = Sound('sound\\fon1.mp3')
     
     class PauseState:
         bg = Instance('images\\pause.jpg', W + 20, H, 0, 0)
