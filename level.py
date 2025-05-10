@@ -44,7 +44,7 @@ class Level:
         self.init_sprites(start_pos, final_pos)
 
         # Инициализация системы "тумана войны"
-        self.init_fog_of_war()
+        # self.init_fog_of_war()
         
         self.background = self.get_background()
         self.enemy_manager = EnemyManager(self)
@@ -142,7 +142,7 @@ class Level:
         self.player.update()
         self.player.bullets.update()
         self.enemy_manager.enemies.update()
-        self.update_fog_of_war()  # Обновляем видимость облаков
+        # self.update_fog_of_war()  # Обновляем видимость облаков
 
         pg.sprite.groupcollide(self.player.bullets, self.walls, True, False)
         pg.sprite.groupcollide(self.player.bullets, self.enemy_manager.enemies, True, True)
@@ -165,7 +165,7 @@ class Level:
         self.all_sprites.draw(window)
         self.player.bullets.draw(window)
         
-        # Рисуем только видимые облака
-        for cloud in self.cloud_group:
-            if hasattr(cloud, 'visible') and cloud.visible:
-                window.blit(cloud.image, cloud.rect)
+        # # Рисуем только видимые облака
+        # for cloud in self.cloud_group:
+        #     if hasattr(cloud, 'visible') and cloud.visible:
+        #         window.blit(cloud.image, cloud.rect)

@@ -7,19 +7,64 @@ import random
 import math
 
 
+# class Star2(sprite.Sprite):
+#     def __init__(self, w, h) -> None:
+#         super().__init__()
+#         self.r = randint(1, 2)
+#         self.image = Surface((self.r * 2, self.r * 2), SRCALPHA)
+#         self.rect = self.image.get_rect()
+#         self.rect.x = randint(0, w)
+#         self.rect.y = randint(1, h)
+#         self.color = (255, 255, 255, 255)
+#         self.shine_speed = randint(1, 100)
+#         self.shine_deep = randint(150, 250)
+#         self.shine_revers = False
+#         self.shine_ok = randint(0, 1)
+#
+#     def update(self):
+#         if self.shine_ok == 1: self.color = self.__shine()
+#         draw.circle(self.image, self.color, (self.r, self.r), self.r)
+#
+#     def __shine(self):
+#         # моргание звезд - зависит от shine_speed и shine_deep
+#         # которые создаются случайно для каждой звезды
+#         color = self.color[3]
+#         if self.shine_revers:
+#             color += self.shine_speed
+#             if color >= 255:
+#                 color = 255
+#                 self.shine_revers = False
+#         else:
+#             color -= self.shine_speed
+#             if color <= 255 - self.shine_deep:
+#                 color = 255 - self.shine_deep
+#                 self.shine_revers = True
+#         return tuple(list(self.color)[0:3] + [color])
+
 class Star2(sprite.Sprite):
     def __init__(self, w, h) -> None:
         super().__init__()
-        self.r = randint(1, 2)
+        self.r = randint(1, 3)
         self.image = Surface((self.r * 2, self.r * 2), SRCALPHA)
         self.rect = self.image.get_rect()
         self.rect.x = randint(0, w)
-        self.rect.y = randint(1, h)
+        self.rect.y = randint(0, h)
         self.color = (255, 255, 255, 255)
         self.shine_speed = randint(1, 100)
         self.shine_deep = randint(150, 250)
         self.shine_revers = False
         self.shine_ok = randint(0, 1)
+        # Добавляем слой параллакса (0 — ближний, 2 — дальний)
+        self.layer = randint(0, 2)
+        # Чем дальше звезда, тем она должна быть мельче и тусклее
+        if self.layer == 0:
+            self.r = randint(2, 3)  # Ближние звёзды — крупнее
+        elif self.layer == 1:
+            self.r = randint(1, 2)
+            self.color = (255, 255, 255, 200)  # Средние — чуть прозрачнее
+        else:
+            self.r = 1
+            self.color = (255, 255, 255, 150)  # Дальние — самые тусклые
 
     def update(self):
         if self.shine_ok == 1: self.color = self.__shine()
@@ -40,7 +85,6 @@ class Star2(sprite.Sprite):
                 color = 255 - self.shine_deep
                 self.shine_revers = True
         return tuple(list(self.color)[0:3] + [color])
-
 
 class Star:
     def __init__(self, w, h):

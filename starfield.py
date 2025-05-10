@@ -211,7 +211,7 @@ class IntroState(State):
             'scale_pos': random.randint(30, 40),     # Случайный масштаб позиции
             'alpha': random.randint(20, 40),         # Случайная прозрачность следа
             'rotation_base': random.uniform(0.5, 1.0),  # Случайная базовая скорость вращения
-            'duration':  1
+            'duration':  0.5
         }
 
     def handle_events(self, events):
@@ -227,7 +227,7 @@ class IntroState(State):
         progress = self.timer / self.duration
         # Квадратичное замедление для более плавного эффекта
         # speed_multiplier = 1 - progress ** 2
-        speed_multiplier = 0.7 - progress
+        speed_multiplier = 0.2 - progress
         # Увеличение вращения к концу
         rotation_speed = self.config['rotation_base'] * (1 + progress * 2)
         # Эффект растворения через затухание
