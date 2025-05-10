@@ -46,88 +46,65 @@ class Fon:
         window.blit(self.starfield.alpha_surface, (0, 0))
         self.starfield.run()
 
-
-class Fon2():
-    def __init__(self, w, h, stars_count=1500) -> None:
+class Fon3():
+    def __init__(self, w, h, stars_count=3000) -> None:
         self.w = w
         self.h = h
         self.image = Surface((w, h))
         self.rect = self.image.get_rect()
-
-        # Выбираем случайную палитру для планеты
-        self.color_palette = choice(Star2.COLOR_PALETTES)
-        self.stars = [Star2(w, h, self.color_palette) for _ in range(stars_count)]
-
-        # Настройки движения
-        self.parallax_factors = {0: 1.8, 1: 1.0, 2: 0.2}
-        self.camera_speed = (0, -0.9)
+        self.stars = [Star2(w, h) for _ in range(stars_count)]
+        self.camera_speed = (0.5, -0.9)
+        self.parallax_factors = {0: 2.0, 1: 1.0, 2: 0.2}  # Множители для слоёв
 
     def update(self, scr):
         self.image.fill((0, 0, 0))
 
         for star in self.stars:
             # Параллакс-движение
-            dx = self.camera_speed[0] * self.parallax_factors[star.layer]
-            dy = self.camera_speed[1] * self.parallax_factors[star.layer]
-            star.rect.move_ip(dx, dy)
+            speed_mult = self.parallax_factors[star.layer]
+            star.rect.x += self.camera_speed[0] * speed_mult
+            star.rect.y += self.camera_speed[1] * speed_mult
 
-            # Телепортация звёзд
+            # Обработка границ экрана
             star.rect.x = star.rect.x % self.w
             star.rect.y = star.rect.y % self.h
 
             star.update()
             self.image.blit(star.image, star.rect)
 
-        # Убираем смещение фона
         scr.blit(self.image, (0, 0))
 
-# class Fon2():
-#     def __init__(self, w, h, stars_count=3000) -> None:
-#         self.w = w
-#         self.h = h
-#         self.x = -1000
-#         self.y = -200
-#         self.image = Surface((w, h))
-#         self.rect = self.image.get_rect()
-#         self.stars_count = stars_count
-#         self.stars = []
-#         self.fill_stars()
-#         # Скорость перемещения камеры (например, при движении корабля)
-#         self.camera_speed_x = 0
-#         self.camera_speed_y = -0.9
-#
-#     def fill_stars(self):
-#         for i in range(self.stars_count):
-#             self.stars.append(Star2(self.w, self.h))
-#
-#
-#     def update(self, scr):
-#         self.image.fill(BLACK)
-#         for star in self.stars:
-#             # Двигаем звёзды в зависимости от их слоя
-#             if star.layer == 0:  # Ближний слой — двигаем быстрее
-#                 star.rect.x -= self.camera_speed_x * 2
-#                 star.rect.y -= self.camera_speed_y * 2
-#             elif star.layer == 1:  # Средний слой — средняя скорость
-#                 star.rect.x -= self.camera_speed_x
-#                 star.rect.y -= self.camera_speed_y
-#             # Дальний слой (layer == 2) не двигаем вообще или очень медленно
-#
-#             # Если звезда ушла за границу экрана — возвращаем её на противоположную сторону
-#             if star.rect.x < 0:
-#                 star.rect.x = self.w
-#             elif star.rect.x > self.w:
-#                 star.rect.x = 0
-#
-#             if star.rect.y < 0:
-#                 star.rect.y = self.h
-#             elif star.rect.y > self.h:
-#                 star.rect.y = 0
-#
-#             star.update()
-#             self.image.blit(star.image, (star.rect.x, star.rect.y))
-#
-#         scr.blit(self.image, (self.x, self.y))
+class Fon2():
+    def __init__(self, w, h, stars_count=2000) -> None:
+        self.w = w
+        self.h = h
+        self.image = Surface((w, h))
+        self.rect = self.image.get_rect()
+
+        # Генерация уникальной палитры для планеты
+        self.palette_config = choice(Star2.COLOR_PALETTES)
+        self.stars = [Star2(w, h, self.palette_config) for _ in range(stars_count)]
+
+        # Параллакс с нелинейной зависимостью
+        self.parallax_factors = [2.5 ** i for i in [0.5, 1.0, 1.5]]
+        self.camera_speed = (uniform(-1.5, 1.5), uniform(-1.5, 1.5))
+
+    def update(self, scr):
+        self.image.fill((0, 0, 0))
+
+        # Сортировка звёзд по слоям для правильного рендеринга
+        for star in sorted(self.stars, key=lambda x: x.layer):
+            # Параллакс-движение с перспективой
+            dx = self.camera_speed[0] * self.parallax_factors[star.layer]
+            dy = self.camera_speed[1] * self.parallax_factors[star.layer]
+            star.rect.centerx = (star.rect.centerx + dx) % self.w
+            star.rect.centery = (star.rect.centery + dy) % self.h
+
+            star.update()
+            self.image.blit(star.image, star.rect.topleft)
+
+        scr.blit(self.image, (0, 0))
+
 
 class InputBox(pg.sprite.Sprite):
     def __init__(self, x, y, w, h, placeholder='', inactive_color=(200, 200, 200), active_color=(255, 255, 255), is_password=False):
