@@ -108,8 +108,6 @@
 import pygame as pg
 import random
 import math
-import asyncio
-import platform
 from states.game_state import State
 
 vec2, vec3 = pg.math.Vector2, pg.math.Vector3
@@ -117,9 +115,14 @@ vec2, vec3 = pg.math.Vector2, pg.math.Vector3
 # Configuration from config.py
 from config import WIDTH, HEIGHT, COLORS, Z_DISTANCE, ALPHA, FPS
 
-RES = WIDTH, HEIGHT
-CENTER = vec2(WIDTH // 2, HEIGHT // 2)
+
 COLORS = 'blue cyan skyblue purple magenta'.split()
+Z_DISTANCE = 90  # расстояние по оси z  с которого начнут двигаться звезды
+ALPHA = 350
+
+RES = WIDTH, HEIGHT
+NUM_STARS = 1000  # Denser starfield
+CENTER = vec2(WIDTH // 2, HEIGHT // 2)
 
 class Star:
     def __init__(self, screen, config):
