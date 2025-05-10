@@ -5,7 +5,7 @@ from maze_generation import generate_maze
 from player import Player
 from game_classes import Wall, GameSprite, Enemy
 from config import WIDTH, HEIGHT
-from grafics_classes import Backgrounds, Fon
+from grafics_classes import Backgrounds, Fon, Fon2
 from grafics import *
 import random
 import createwalls
@@ -119,10 +119,11 @@ class Level:
 
     def get_background(self):
         if self.difficulty == 'EASY':
-            return Backgrounds('images/back.jpg', WIDTH, HEIGHT, 0, 0)
+            return Fon2(w=5000, h=900, stars_count=2000)
+            # return Backgrounds('images/back.jpg', WIDTH, HEIGHT, 0, 0)
         elif self.difficulty in ('MEDIUM', 'HARD'):
             return Fon(w=5000, h=900, stars_count=2000)
-        return starfield
+        # return starfield
 
     def draw_debug_path(self, surface):
         if not self.debug_mode:
@@ -151,7 +152,8 @@ class Level:
 
     def render(self, window):
         if self.difficulty == 'EASY':
-            self.background.reset(window)
+            # self.background.reset(window)
+            self.background.update(window)
         elif self.difficulty in ('MEDIUM', 'HARD'):
             self.background.update(window)
         else:

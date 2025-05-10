@@ -1,6 +1,8 @@
 import pygame as pg
+from pygame import Surface
+from constants import *
 from base_sprite import GameSprite
-from grafics import Starfield
+from grafics import Starfield, Star2
 
 class Backgrounds:
     def __init__(self, image_path, w, h, x, y):
@@ -42,6 +44,30 @@ class Fon:
     def update(self, window):
         window.blit(self.starfield.alpha_surface, (0, 0))
         self.starfield.run()
+
+class Fon2():
+    def __init__(self, w, h, stars_count=3000) -> None:
+        self.w = w
+        self.h = h
+        self.x = -1000
+        self.y = -200
+        self.image = Surface((w, h))
+        self.rect = self.image.get_rect()
+        self.stars_count = stars_count
+        self.stars = []
+        self.fill_stars()
+
+    # заполнение звёздам
+    def fill_stars(self):
+        for i in range(self.stars_count):
+            self.stars.append(Star2(self.w, self.h))
+
+    def update(self, scr):
+        self.image.fill(BLACK)
+        for star in self.stars:
+            star.update()
+            self.image.blit(star.image, (star.rect.x, star.rect.y))
+        scr.blit(self.image, (self.x, self.y))
 
 
 class InputBox(pg.sprite.Sprite):

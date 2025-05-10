@@ -183,8 +183,17 @@ class Starfield:
             star.draw(alpha)
 
 class IntroState(State):
-    def __init__(self, game, next_state_class):
+    COLOR_SETS = {
+        'cool': ['blue', 'cyan', 'skyblue', 'purple', 'magenta'],
+        'warm': ['red', 'orange', 'yellow', (255, 215, 0), (220, 20, 60)],  # gold, crimson
+        'pastel': [(230, 230, 250), (152, 255, 152), (255, 218, 185), (137, 207, 240), (255, 182, 193)],  # lavender, mint green, peach, baby blue, pale pink
+        'monochrome': ['white', (211, 211, 211), (105, 105, 105), 'black'],  # light gray, dark gray
+        'neon': [(57, 255, 20), (255, 105, 180), (255, 255, 0), (255, 69, 0)]  # neon green, hot pink, bright yellow, fluorescent orange
+    }
+
+    def __init__(self, game, next_state_class, color_set=None):
         super().__init__(game)
+        self.color_set = color_set if color_set else random.choice(list(self.COLOR_SETS.keys()))
         self.config = self.generate_config()
         self.starfield = Starfield(game.window, self.config)
         self.timer = 0
@@ -192,16 +201,17 @@ class IntroState(State):
         self.next_state_class = next_state_class
 
     def generate_config(self):
+        # Get the selected color set
+        color_set = self.COLOR_SETS[self.color_set]
         return {
             'num_stars': random.randint(500, 1500),  # Случайное количество звезд
             'vel_min': random.uniform(1.0, 3.0),     # Случайный диапазон скоростей
             'vel_max': random.uniform(3.0, 6.0),
-            'colors': random.sample(COLORS, k=random.randint(3, len(COLORS))),
+            'colors': random.sample(color_set, k=random.randint(3, len(color_set))),
             'scale_pos': random.randint(30, 40),     # Случайный масштаб позиции
             'alpha': random.randint(20, 40),         # Случайная прозрачность следа
             'rotation_base': random.uniform(0.5, 1.0),  # Случайная базовая скорость вращения
-            # 'duration': random.uniform(2.5, 3.0)     # Случайная продолжительность
-            'duration': 2.5
+            'duration':  1
         }
 
     def handle_events(self, events):
