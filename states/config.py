@@ -51,7 +51,7 @@ if __name__ != '__config__':
         manual = Instance('images\\instruction.png', 380, 395, 110, 110)
         sound = Instance('images\\sound.png', 185, 365, 170, 170)
         label = [140, 0, 680, 40, BLACK_BLUE]
-        music = Sound('sound\\fon1.mp3')
+        music = Sound('sound\\menu.mp3')
         greetings = Text(txt_welcome, 62, WHITE)
     
     class LevelSelectState:
