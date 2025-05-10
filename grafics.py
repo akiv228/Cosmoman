@@ -2,7 +2,7 @@
 import pygame as pg
 from constants import *
 from base_sprite import *
-from random import randint, choice
+from random import randint, choice, uniform
 import random
 import math
 
@@ -42,85 +42,128 @@ import math
 #         return tuple(list(self.color)[0:3] + [color])
 
 class Star2(sprite.Sprite):
-    def __init__(self, w, h) -> None:
+    COLOR_PALETTES = [
+        # Холодная гамма (синие/фиолетовые тона)
+        {
+            'layer0': [(180, 200, 255), (200, 180, 255)],
+            'layer1': [(150, 180, 230), (170, 150, 240)],
+            'layer2': [(120, 140, 210), (140, 120, 220)]
+        },
+        # Тёплая гамма (золотистые/красные)
+        {
+            'layer0': [(255, 220, 180), (255, 180, 150)],
+            'layer1': [(230, 200, 160), (240, 160, 130)],
+            'layer2': [(210, 180, 140), (220, 140, 110)]
+        },
+        # Экзотическая гамма (пурпурные/бирюзовые)
+        {
+            'layer0': [(220, 180, 255), (180, 220, 255)],
+            'layer1': [(200, 160, 240), (160, 200, 240)],
+            'layer2': [(180, 140, 220), (140, 180, 220)]
+        }
+    ]
+
+    def __init__(self, w, h, palette) -> None:
         super().__init__()
         self.layer = randint(0, 2)
+        self.palette = palette
 
-        # Настройки цвета в зависимости от слоя
-        self.colors = {
-            0: [(200, 220, 255), (255, 255, 200)],  # Холодные и теплые для ближних
-            1: [(255, 220, 180), (220, 255, 220)],  # Нейтральные для средних
-            2: [(180, 180, 255), (255, 180, 180)]  # Приглушенные для дальних
-        }
-        base_color = choice(self.colors[self.layer])
-
-        # Параметры размера и прозрачности
-        self.r = self._get_size_by_layer()
-        self.target_alpha = self._get_alpha_by_layer()
-        self.current_alpha = 0  # Для плавного появления
+        # Генерация размера и цвета
+        self.r = self._generate_size()
+        base_color = choice(self.palette[f'layer{self.layer}'])
+        self.base_color = self._adjust_color(base_color)
 
         # Настройки мерцания
-        self.shine_speed = self._get_shine_speed()
-        self.shine_deep = randint(50, 80)
-        self.shine_revers = False
-        self.shine_ok = 1  # Все звёзды мерцают
+        self.shine_speed = randint(5, 15)
+        self.shine_phase = uniform(0, math.pi * 2)  # Для вариативности мерцания
+        self.current_alpha = 255
 
-        # Графические компоненты
+        # Позиционирование
         self.image = Surface((self.r * 2, self.r * 2), SRCALPHA)
         self.rect = self.image.get_rect()
         self.rect.x = randint(0, w)
         self.rect.y = randint(0, h)
-        self.color = (*base_color, self.current_alpha)
-        self.fade_in_complete = False
 
-    def _get_size_by_layer(self):
-        return {
-            0: randint(2, 3),
-            1: randint(1, 2),
-            2: 1
-        }[self.layer]
+    def _generate_size(self):
+        sizes = {0: (2, 3), 1: (1, 2), 2: (1, 1)}
+        return randint(*sizes[self.layer])
 
-    def _get_alpha_by_layer(self):
-        return {
-            0: 255,
-            1: 220,
-            2: 180
-        }[self.layer]
 
-    def _get_shine_speed(self):
-        return {
-            0: randint(8, 12),  # Быстрое мерцание
-            1: randint(4, 8),  # Средняя скорость
-            2: randint(1, 3)  # Медленное мерцание
-        }[self.layer]
+    def _adjust_color(self, base):
+        # Гарантируем, что base - это кортеж из 3 элементов
+        if not isinstance(base, (tuple, list)) or len(base) != 3:
+            base = (255, 255, 255)  # Значение по умолчанию
+
+        # Добавляем случайные отклонения цвета
+        return (
+            min(255, max(0, base[0] + randint(-15, 15))),
+            min(255, max(0, base[1] + randint(-15, 15))),
+            min(255, max(0, base[2] + randint(-15, 15)))
+        )
+
 
     def update(self):
-        # Плавное появление
-        if not self.fade_in_complete:
-            self.current_alpha = min(self.target_alpha, self.current_alpha + 5)
-            if self.current_alpha >= self.target_alpha:
-                self.fade_in_complete = True
+        # Проверяем и приводим base_color к правильному формату
+        if not isinstance(self.base_color, (tuple, list)) or len(self.base_color) != 3:
+            self.base_color = (255, 255, 255)  # Белый цвет по умолчанию
 
-        # Мерцание после появления
-        if self.fade_in_complete and self.shine_ok == 1:
-            self._shine()
+        # Плавное синусоидальное мерцание
+        self.current_alpha = 200 + int(55 * math.sin(self.shine_phase))
+        self.shine_phase += 0.1 * (1 - self.layer * 0.3)
 
-        self.image.fill((0, 0, 0, 0))  # Очищаем поверхность
-        draw.circle(self.image, (*self.color[:3], self.current_alpha), (self.r, self.r), self.r)
+        self.image.fill((0, 0, 0, 0))
+        draw.circle(
+            self.image,
+            (*self.base_color, self.current_alpha),  # Теперь точно будет кортеж из 3 чисел
+            (self.r, self.r),
+            self.r
+        )
 
-    def _shine(self):
-        alpha = self.current_alpha
-        if self.shine_revers:
-            alpha += self.shine_speed
-            if alpha >= self.target_alpha:
-                alpha = self.target_alpha
-                self.shine_revers = False
-        else:
-            alpha -= self.shine_speed
-            if alpha <= self.target_alpha - self.shine_deep:
-                alpha = self.target_alpha - self.shine_deep
-                self.shine_revers = True
-        self.current_alpha = alpha
+
+
+# class Star2(sprite.Sprite):
+#     def __init__(self, w, h) -> None:
+#         super().__init__()
+#         self.r = randint(1, 3)
+#         self.image = Surface((self.r * 2, self.r * 2), SRCALPHA)
+#         self.rect = self.image.get_rect()
+#         self.rect.x = randint(0, w)
+#         self.rect.y = randint(0, h)
+#         self.color = (255, 255, 255, 255)
+#         self.shine_speed = randint(1, 100)
+#         self.shine_deep = randint(150, 250)
+#         self.shine_revers = False
+#         self.shine_ok = randint(0, 1)
+#         # Добавляем слой параллакса (0 — ближний, 2 — дальний)
+#         self.layer = randint(0, 2)
+#         # Чем дальше звезда, тем она должна быть мельче и тусклее
+#         if self.layer == 0:
+#             self.r = randint(2, 3)  # Ближние звёзды — крупнее
+#         elif self.layer == 1:
+#             self.r = randint(1, 2)
+#             self.color = (255, 255, 255, 200)  # Средние — чуть прозрачнее
+#         else:
+#             self.r = 1
+#             self.color = (255, 255, 255, 150)  # Дальние — самые тусклые
+#
+#     def update(self):
+#         if self.shine_ok == 1: self.color = self.__shine()
+#         draw.circle(self.image, self.color, (self.r, self.r), self.r)
+#
+#     def __shine(self):
+#         alpha = self.color[3]  # Только альфа-канал
+#         if self.shine_revers:
+#             alpha += self.shine_speed
+#             if alpha >= 255:
+#                 alpha = 255
+#                 self.shine_revers = False
+#         else:
+#             alpha -= self.shine_speed
+#             if alpha <= 255 - self.shine_deep:
+#                 alpha = 255 - self.shine_deep
+#                 self.shine_revers = True
+#         # Возвращаем тот же RGB, но с новой альфой
+#         return (self.color[0], self.color[1], self.color[2], alpha)
 
 class Star:
     def __init__(self, w, h):

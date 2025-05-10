@@ -3,6 +3,7 @@ from pygame import Surface
 from constants import *
 from base_sprite import GameSprite
 from grafics import Starfield, Star2
+from random import randint, choice, uniform
 
 class Backgrounds:
     def __init__(self, image_path, w, h, x, y):
@@ -45,56 +46,39 @@ class Fon:
         window.blit(self.starfield.alpha_surface, (0, 0))
         self.starfield.run()
 
-# class Fon2():
-#     def __init__(self, w, h, stars_count=3000) -> None:
-#         self.w = w
-#         self.h = h
-#         self.x = -1000
-#         self.y = -200
-#         self.image = Surface((w, h))
-#         self.rect = self.image.get_rect()
-#         self.stars_count = stars_count
-#         self.stars = []
-#         self.fill_stars()
-#
-#     # заполнение звёздам
-#     def fill_stars(self):
-#         for i in range(self.stars_count):
-#             self.stars.append(Star2(self.w, self.h))
-#
-#     def update(self, scr):
-#         self.image.fill(BLACK)
-#         for star in self.stars:
-#             star.update()
-#             self.image.blit(star.image, (star.rect.x, star.rect.y))
-#         scr.blit(self.image, (self.x, self.y))
 
 class Fon2():
-    def __init__(self, w, h, stars_count=3000) -> None:
+    def __init__(self, w, h, stars_count=1500) -> None:
         self.w = w
         self.h = h
         self.image = Surface((w, h))
         self.rect = self.image.get_rect()
-        self.stars = [Star2(w, h) for _ in range(stars_count)]
-        self.camera_speed = (0.5, -0.9)
-        self.parallax_factors = {0: 2.0, 1: 1.0, 2: 0.2}  # Множители для слоёв
+
+        # Выбираем случайную палитру для планеты
+        self.color_palette = choice(Star2.COLOR_PALETTES)
+        self.stars = [Star2(w, h, self.color_palette) for _ in range(stars_count)]
+
+        # Настройки движения
+        self.parallax_factors = {0: 1.8, 1: 1.0, 2: 0.2}
+        self.camera_speed = (0, -0.9)
 
     def update(self, scr):
         self.image.fill((0, 0, 0))
 
         for star in self.stars:
             # Параллакс-движение
-            speed_mult = self.parallax_factors[star.layer]
-            star.rect.x += self.camera_speed[0] * speed_mult
-            star.rect.y += self.camera_speed[1] * speed_mult
+            dx = self.camera_speed[0] * self.parallax_factors[star.layer]
+            dy = self.camera_speed[1] * self.parallax_factors[star.layer]
+            star.rect.move_ip(dx, dy)
 
-            # Обработка границ экрана
+            # Телепортация звёзд
             star.rect.x = star.rect.x % self.w
             star.rect.y = star.rect.y % self.h
 
             star.update()
             self.image.blit(star.image, star.rect)
 
+        # Убираем смещение фона
         scr.blit(self.image, (0, 0))
 
 # class Fon2():
