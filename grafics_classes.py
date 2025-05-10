@@ -73,49 +73,77 @@ class Fon2():
     def __init__(self, w, h, stars_count=3000) -> None:
         self.w = w
         self.h = h
-        self.x = -1000
-        self.y = -200
         self.image = Surface((w, h))
         self.rect = self.image.get_rect()
-        self.stars_count = stars_count
-        self.stars = []
-        self.fill_stars()
-        # Скорость перемещения камеры (например, при движении корабля)
-        self.camera_speed_x = 0
-        self.camera_speed_y = -0.9
-
-    def fill_stars(self):
-        for i in range(self.stars_count):
-            self.stars.append(Star2(self.w, self.h))
-
+        self.stars = [Star2(w, h) for _ in range(stars_count)]
+        self.camera_speed = (0.5, -0.9)
+        self.parallax_factors = {0: 2.0, 1: 1.0, 2: 0.2}  # Множители для слоёв
 
     def update(self, scr):
-        self.image.fill(BLACK)
+        self.image.fill((0, 0, 0))
+
         for star in self.stars:
-            # Двигаем звёзды в зависимости от их слоя
-            if star.layer == 0:  # Ближний слой — двигаем быстрее
-                star.rect.x -= self.camera_speed_x * 2
-                star.rect.y -= self.camera_speed_y * 2
-            elif star.layer == 1:  # Средний слой — средняя скорость
-                star.rect.x -= self.camera_speed_x
-                star.rect.y -= self.camera_speed_y
-            # Дальний слой (layer == 2) не двигаем вообще или очень медленно
+            # Параллакс-движение
+            speed_mult = self.parallax_factors[star.layer]
+            star.rect.x += self.camera_speed[0] * speed_mult
+            star.rect.y += self.camera_speed[1] * speed_mult
 
-            # Если звезда ушла за границу экрана — возвращаем её на противоположную сторону
-            if star.rect.x < 0:
-                star.rect.x = self.w
-            elif star.rect.x > self.w:
-                star.rect.x = 0
-
-            if star.rect.y < 0:
-                star.rect.y = self.h
-            elif star.rect.y > self.h:
-                star.rect.y = 0
+            # Обработка границ экрана
+            star.rect.x = star.rect.x % self.w
+            star.rect.y = star.rect.y % self.h
 
             star.update()
-            self.image.blit(star.image, (star.rect.x, star.rect.y))
+            self.image.blit(star.image, star.rect)
 
-        scr.blit(self.image, (self.x, self.y))
+        scr.blit(self.image, (0, 0))
+
+# class Fon2():
+#     def __init__(self, w, h, stars_count=3000) -> None:
+#         self.w = w
+#         self.h = h
+#         self.x = -1000
+#         self.y = -200
+#         self.image = Surface((w, h))
+#         self.rect = self.image.get_rect()
+#         self.stars_count = stars_count
+#         self.stars = []
+#         self.fill_stars()
+#         # Скорость перемещения камеры (например, при движении корабля)
+#         self.camera_speed_x = 0
+#         self.camera_speed_y = -0.9
+#
+#     def fill_stars(self):
+#         for i in range(self.stars_count):
+#             self.stars.append(Star2(self.w, self.h))
+#
+#
+#     def update(self, scr):
+#         self.image.fill(BLACK)
+#         for star in self.stars:
+#             # Двигаем звёзды в зависимости от их слоя
+#             if star.layer == 0:  # Ближний слой — двигаем быстрее
+#                 star.rect.x -= self.camera_speed_x * 2
+#                 star.rect.y -= self.camera_speed_y * 2
+#             elif star.layer == 1:  # Средний слой — средняя скорость
+#                 star.rect.x -= self.camera_speed_x
+#                 star.rect.y -= self.camera_speed_y
+#             # Дальний слой (layer == 2) не двигаем вообще или очень медленно
+#
+#             # Если звезда ушла за границу экрана — возвращаем её на противоположную сторону
+#             if star.rect.x < 0:
+#                 star.rect.x = self.w
+#             elif star.rect.x > self.w:
+#                 star.rect.x = 0
+#
+#             if star.rect.y < 0:
+#                 star.rect.y = self.h
+#             elif star.rect.y > self.h:
+#                 star.rect.y = 0
+#
+#             star.update()
+#             self.image.blit(star.image, (star.rect.x, star.rect.y))
+#
+#         scr.blit(self.image, (self.x, self.y))
 
 class InputBox(pg.sprite.Sprite):
     def __init__(self, x, y, w, h, placeholder='', inactive_color=(200, 200, 200), active_color=(255, 255, 255), is_password=False):
