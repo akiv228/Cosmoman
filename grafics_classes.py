@@ -1,8 +1,11 @@
+from cmath import sqrt
+from math import radians, cos, sin, atan2, pi, hypot
+
 import pygame as pg
-from pygame import Surface
+from pygame import Surface, SRCALPHA
 from constants import *
 from base_sprite import GameSprite
-from grafics import Starfield, Star2
+from grafics import  Star2
 from random import randint, choice, uniform
 
 class Backgrounds:
@@ -74,7 +77,7 @@ class Fon3():
 
         scr.blit(self.image, (0, 0))
 
-class Fon2():
+class Fon2_2():
     def __init__(self, w, h, stars_count=2000) -> None:
         self.w = w
         self.h = h
@@ -105,6 +108,118 @@ class Fon2():
 
         scr.blit(self.image, (0, 0))
 
+
+class Fon2():
+    def __init__(self, w, h, stars_count=2000) -> None:
+        self.w = w
+        self.h = h
+        self.image = Surface((w, h), SRCALPHA)
+        self.rect = self.image.get_rect()
+
+        # Генерация градиентов
+        self.gradient_layers = []
+        self._generate_gradient_background()
+
+        # Остальная инициализация
+        self.palette_config = choice(Star2.COLOR_PALETTES)
+        self.stars = [Star2(w, h, self.palette_config) for _ in range(stars_count)]
+        self.parallax_factors = [2.5 ** i for i in [0.5, 1.0, 1.5]]
+        self.camera_speed = (uniform(-1.5, 1.5), uniform(-1.5, 1.5))
+        self.time = 0
+
+    def _generate_gradient_background(self):
+        # Создаём 3 типа градиентов
+        num_layers = 3
+        for _ in range(num_layers):
+            layer = Surface((self.w, self.h), SRCALPHA)
+            grad_type = choice(['radial', 'linear', 'angular'])
+            colors = [(randint(0, 50), randint(0, 50), randint(50, 100), randint(10, 50))
+                      for _ in range(3)]
+
+            # if grad_type == 'radial':
+            #     self._create_radial_gradient(layer, colors)
+            if grad_type == 'linear':
+                self._create_linear_gradient(layer, colors)
+            else:
+                self._create_angular_gradient(layer, colors)
+
+            self.gradient_layers.append(layer)
+
+    def _create_radial_gradient(self, surface, colors):
+        center_x = randint(0, self.w)
+        center_y = randint(0, self.h)
+        max_radius = hypot(self.w, self.h) * 1.5
+
+        # Рисуем только в области влияния градиента
+        for x in range(int(center_x - max_radius), int(center_x + max_radius)):
+            for y in range(int(center_y - max_radius), int(center_y + max_radius)):
+                if 0 <= x < self.w and 0 <= y < self.h:
+                    dx = x - center_x
+                    dy = y - center_y
+                    dist = hypot(dx, dy)
+                    ratio = min(dist / max_radius, 1.0)
+                    color = self._interpolate_colors(colors, ratio)
+                    surface.set_at((x, y), color)
+
+    def _create_linear_gradient(self, surface, colors):
+        angle = radians(randint(0, 360))
+        max_dist = (self.w + self.h) * 0.7
+
+        for x in range(self.w):
+            for y in range(self.h):
+                dist = x * cos(angle) + y * sin(angle)
+                ratio = dist / max_dist
+                color = self._interpolate_colors(colors, ratio % 1.0)
+                surface.set_at((x, y), color)
+
+    def _create_angular_gradient(self, surface, colors):
+        center = (randint(0, self.w), randint(0, self.h))
+        for x in range(self.w):
+            for y in range(self.h):
+                dx = x - center[0]
+                dy = y - center[1]
+                angle = (atan2(dy, dx) + pi) / (2 * pi)
+                color = self._interpolate_colors(colors, angle)
+                surface.set_at((x, y), color)
+
+    def _interpolate_colors(self, colors, ratio):
+        ratio = min(max(ratio, 0.0), 1.0)
+        num_segments = len(colors) - 1
+        segment = ratio * num_segments
+        idx = int(segment)
+        t = segment - idx
+
+        if idx >= len(colors) - 1:
+            return colors[-1]
+
+        r = int(colors[idx][0] * (1 - t) + colors[idx + 1][0] * t)
+        g = int(colors[idx][1] * (1 - t) + colors[idx + 1][1] * t)
+        b = int(colors[idx][2] * (1 - t) + colors[idx + 1][2] * t)
+        a = int(colors[idx][3] * (1 - t) + colors[idx + 1][3] * t)
+
+        return (r, g, b, a)
+
+    def update(self, scr):
+        self.time += 1
+        self.image.fill((0, 0, 0, 0))
+
+        # Рисуем градиенты с анимацией
+        for i, layer in enumerate(self.gradient_layers):
+            alpha = 30 + int(20 * sin(self.time * 0.05 + i))
+            temp_layer = layer.copy()
+            temp_layer.set_alpha(alpha)
+            self.image.blit(temp_layer, (0, 0))
+
+        # Рисуем звёзды поверх градиентов
+        for star in sorted(self.stars, key=lambda x: x.layer):
+            dx = self.camera_speed[0] * self.parallax_factors[star.layer]
+            dy = self.camera_speed[1] * self.parallax_factors[star.layer]
+            star.rect.centerx = (star.rect.centerx + dx) % self.w
+            star.rect.centery = (star.rect.centery + dy) % self.h
+            star.update()
+            self.image.blit(star.image, star.rect.topleft)
+
+        scr.blit(self.image, (0, 0))
 
 class InputBox(pg.sprite.Sprite):
     def __init__(self, x, y, w, h, placeholder='', inactive_color=(200, 200, 200), active_color=(255, 255, 255), is_password=False):
