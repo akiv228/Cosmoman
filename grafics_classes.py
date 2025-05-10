@@ -88,6 +88,7 @@ class Fon2():
         for i in range(self.stars_count):
             self.stars.append(Star2(self.w, self.h))
 
+
     def update(self, scr):
         self.image.fill(BLACK)
         for star in self.stars:
@@ -100,11 +101,16 @@ class Fon2():
                 star.rect.y -= self.camera_speed_y
             # Дальний слой (layer == 2) не двигаем вообще или очень медленно
 
-            # Если звезда ушла за границу экрана — возвращаем её
+            # Если звезда ушла за границу экрана — возвращаем её на противоположную сторону
             if star.rect.x < 0:
                 star.rect.x = self.w
+            elif star.rect.x > self.w:
+                star.rect.x = 0
+
             if star.rect.y < 0:
                 star.rect.y = self.h
+            elif star.rect.y > self.h:
+                star.rect.y = 0
 
             star.update()
             self.image.blit(star.image, (star.rect.x, star.rect.y))

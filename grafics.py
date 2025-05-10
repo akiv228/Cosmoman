@@ -71,20 +71,19 @@ class Star2(sprite.Sprite):
         draw.circle(self.image, self.color, (self.r, self.r), self.r)
 
     def __shine(self):
-        # моргание звезд - зависит от shine_speed и shine_deep
-        # которые создаются случайно для каждой звезды
-        color = self.color[3]
+        alpha = self.color[3]  # Только альфа-канал
         if self.shine_revers:
-            color += self.shine_speed
-            if color >= 255:
-                color = 255
+            alpha += self.shine_speed
+            if alpha >= 255:
+                alpha = 255
                 self.shine_revers = False
         else:
-            color -= self.shine_speed
-            if color <= 255 - self.shine_deep:
-                color = 255 - self.shine_deep
+            alpha -= self.shine_speed
+            if alpha <= 255 - self.shine_deep:
+                alpha = 255 - self.shine_deep
                 self.shine_revers = True
-        return tuple(list(self.color)[0:3] + [color])
+        # Возвращаем тот же RGB, но с новой альфой
+        return (self.color[0], self.color[1], self.color[2], alpha)
 
 class Star:
     def __init__(self, w, h):
