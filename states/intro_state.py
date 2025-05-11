@@ -2,7 +2,7 @@ import pygame as pg
 import random
 from states.game_state import State
 from .config_state import IntroState as cfg
-from grafics_elements_stash.grafics_for_intro import Starfield
+from grafics.grafics_for_intro import Starfield
 
 
 class IntroState(State):

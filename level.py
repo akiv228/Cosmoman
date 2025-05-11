@@ -1,16 +1,16 @@
 import pygame as pg
-from maze_generation import generate_maze
-from player import Player
-from game_sprites import Wall, GameSprite
-from grafics.maze_fons import Starfield_white, Starfield_palette
-# from grafics_classes import Backgrounds, Starfield_white, Starfield_palette
-from grafics import *
-from test_gradient_for_labirints import Fon2_2
 import random
+from maze_generation import generate_maze
+from grafics.maze_fons import Starfield_white, Starfield_palette
 import createwalls
 import path_utils
 import upload_maze
+from player import Player
+from game_sprites import Wall, GameSprite
 from enemy_manager import EnemyManager
+# from grafics_classes import Backgrounds, Starfield_white, Starfield_palette
+from grafics import *
+from test_gradient_for_labirints import Fon2_2
 
 class Level:
     def __init__(self, difficulty, debug_mode=False, load_from_file=False, filename="maze_data.pkl"):
