@@ -1,6 +1,6 @@
 import pygame as pg
 import random
-from game_classes import Enemy
+from game_sprites import Enemy
 import path_utils
 
 

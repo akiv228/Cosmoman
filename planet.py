@@ -18,7 +18,7 @@ fps = 60
 fpsClock = pygame.time.Clock()
 
 # Window Size
-windowdim = Vector2(800, 800)
+windowdim = Vector2(1100, 800)
 screen = pygame.display.set_mode((int(windowdim.x), int(windowdim.y)))
 
 # all the Planets are stored here
@@ -86,25 +86,25 @@ class Planet():
         )
 
 # Sun and two opposing Planets
-""" Planet(Vector2(400, 400), radius=50, imovable=True)
-
-Planet(Vector2(400, 200), delta=Vector2(3, 0), radius=10)
-Planet(Vector2(400, 600), delta=Vector2(-3, 0), radius=10) """
+# Planet(Vector2(400, 400), radius=50, imovable=True)
+#
+# Planet(Vector2(400, 200), delta=Vector2(3, 0), radius=10)
+# Planet(Vector2(400, 600), delta=Vector2(-3, 0), radius=10)
 
 # Sun and four opposing Planets
-""" Planet(Vector2(400, 400), radius=50, imovable=True)
+Planet(Vector2(400, 400), radius=50, imovable=True)
 
 Planet(Vector2(400, 200), delta=Vector2(3, 0), radius=10)
 Planet(Vector2(400, 600), delta=Vector2(-3, 0), radius=10)
 Planet(Vector2(600, 400), delta=Vector2(0, 3), radius=10)
-Planet(Vector2(200, 400), delta=Vector2(0, -3), radius=10) """
+Planet(Vector2(200, 400), delta=Vector2(0, -3), radius=10)
 
 # Two Suns and two planets
-""" Planet(Vector2(600, 400), radius=20, imovable=True)
-Planet(Vector2(200, 400), radius=20, imovable=True)
-
-Planet(Vector2(400, 200), delta=Vector2(0, 0), radius=10)
-Planet(Vector2(400, 210), delta=Vector2(1, 2), radius=5) """
+# Planet(Vector2(600, 400), radius=20, imovable=True)
+# Planet(Vector2(200, 400), radius=20, imovable=True)
+#
+# Planet(Vector2(400, 200), delta=Vector2(0, 0), radius=10)
+# Planet(Vector2(400, 210), delta=Vector2(1, 2), radius=5)
 
 # Grid
 gridDimension = 10
@@ -112,8 +112,8 @@ gridgap = 80
 for x in range(gridDimension):
     for y in range(gridDimension):
         Planet(Vector2(gridgap * x + 40, gridgap * y + 40), radius=3, imovable=True)
-
-Planet(Vector2(200, 200), delta=Vector2(randrange(-3, 3), 2), radius=5)
+#
+# Planet(Vector2(200, 200), delta=Vector2(randrange(-3, 3), 2), radius=5)
 
 # Game loop.
 while  True:

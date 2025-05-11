@@ -79,7 +79,7 @@ SETTINGS = {
 class Button:
     def __init__(self, text, y_pos):
         cfg = SETTINGS['buttons']
-        self.font = pygame.font.Font('nasalization-rg.otf', 40)
+        self.font = pygame.font.Font('grafics/nasalization-rg.otf', 40)
         self.text = text
         self.base_color = cfg['base_color']
         self.hover_color = cfg['hover_color']
@@ -169,7 +169,7 @@ class Star:
 class NeonText:
     def __init__(self):
         cfg = SETTINGS['title']
-        self.font = pygame.font.Font('nasalization-rg.otf', cfg['font_size'])
+        self.font = pygame.font.Font('grafics/nasalization-rg.otf', cfg['font_size'])
         self.base_text = self.font.render(cfg['text'], True, (255, 255, 255))
         self.glow_size = 0
         self.glow_dir = 1

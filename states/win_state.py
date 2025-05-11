@@ -1,6 +1,6 @@
 import pygame as pg
 from states.game_state import State
-from grafics_classes import Backgrounds, Menu, Label
+from grafics_classes_stash import Backgrounds, Menu, Label
 from .config_state import WinState as cfg
 
 class WinState(State):

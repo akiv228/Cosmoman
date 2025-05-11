@@ -1,16 +1,9 @@
-from cmath import sqrt
-from math import radians, cos, sin, atan2, pi, hypot
-
 import pygame as pg
-from pygame import Surface, SRCALPHA
-from constants import *
 from base_sprite import GameSprite
-from grafics import Star2, Star3
-from random import randint, choice, uniform
+from grafics_elements_stash import ColorStar, WhiteStar
 from pygame import *
 from random import *
-from math import hypot, cos, sin, radians, atan2, pi
-import pygame.gfxdraw
+
 
 
 class Backgrounds:
@@ -45,148 +38,6 @@ class Label:
         if self.text:
             window.blit(self.text, (self.rect.x + shift_x, self.rect.y + shift_y))
 
-
-
-class Fon3():
-    def __init__(self, w, h, stars_count=3000) -> None:
-        self.w = w
-        self.h = h
-        self.image = Surface((w, h))
-        self.rect = self.image.get_rect()
-        self.stars = [Star3(w, h) for _ in range(stars_count)]
-        self.camera_speed = (0.5, -0.9)
-        self.parallax_factors = {0: 2.0, 1: 1.0, 2: 0.2}  # Множители для слоёв
-
-    def update(self, scr):
-        self.image.fill((0, 0, 0))
-
-        for star in self.stars:
-            # Параллакс-движение
-            speed_mult = self.parallax_factors[star.layer]
-            star.rect.x += self.camera_speed[0] * speed_mult
-            star.rect.y += self.camera_speed[1] * speed_mult
-
-            # Обработка границ экрана
-            star.rect.x = star.rect.x % self.w
-            star.rect.y = star.rect.y % self.h
-
-            star.update()
-            self.image.blit(star.image, star.rect)
-
-        scr.blit(self.image, (0, 0))
-
-class Fon2():
-    def __init__(self, w, h, stars_count=2000) -> None:
-        self.w = w
-        self.h = h
-        self.image = Surface((w, h))
-        self.rect = self.image.get_rect()
-
-        # Генерация уникальной палитры для планеты
-        self.palette_config = choice(Star2.COLOR_PALETTES)
-        self.stars = [Star2(w, h, self.palette_config) for _ in range(stars_count)]
-
-        # Параллакс с нелинейной зависимостью
-        self.parallax_factors = [2.5 ** i for i in [0.5, 1.0, 1.5]]
-        self.camera_speed = (uniform(-1.5, 1.5), uniform(-1.5, 1.5))
-
-    def update(self, scr):
-        self.image.fill((0, 0, 0))
-
-        # Сортировка звёзд по слоям для правильного рендеринга
-        for star in sorted(self.stars, key=lambda x: x.layer):
-            # Параллакс-движение с перспективой
-            dx = self.camera_speed[0] * self.parallax_factors[star.layer]
-            dy = self.camera_speed[1] * self.parallax_factors[star.layer]
-            star.rect.centerx = (star.rect.centerx + dx) % self.w
-            star.rect.centery = (star.rect.centery + dy) % self.h
-
-            star.update()
-            self.image.blit(star.image, star.rect.topleft)
-
-        scr.blit(self.image, (0, 0))
-
-
-class Fon2_2():
-    def __init__(self, w, h, stars_count=2000) -> None:
-        self.w = w
-        self.h = h
-        self.image = Surface((w, h), SRCALPHA)
-        self.rect = self.image.get_rect()
-
-        # Оптимизированная генерация градиентов
-        self.gradient_layers = self._generate_gradient_background()
-
-        # Инициализация звезд
-        self.stars = [Star2(w, h) for _ in range(stars_count)]
-        self.parallax_factors = [2.5 ** i for i in [0.5, 1.0, 1.5]]
-        self.camera_speed = (uniform(-1.5, 1.5), uniform(-1.5, 1.5))
-        self.time = 0
-
-    def _generate_gradient_background(self):
-        layers = []
-        for _ in range(3):
-            layer = Surface((self.w, self.h), SRCALPHA)
-            # Упрощенная генерация цветов
-            colors = [
-                (randint(0, 50), randint(0, 50), randint(50, 100), randint(10, 30)),
-                (randint(0, 30), randint(0, 30), randint(30, 80), randint(10, 30))
-            ]
-            # Рисуем только линейные градиенты для стабильности
-            self._create_linear_gradient(layer, colors)
-            layers.append(layer)
-        return layers
-
-    def _interpolate_colors(self, colors, ratio):
-        ratio = min(max(ratio, 0.0), 1.0)
-        num_segments = len(colors) - 1
-        segment = ratio * num_segments
-        idx = int(segment)
-        t = segment - idx
-
-        if idx >= len(colors) - 1:
-            return colors[-1]
-
-        r = int(colors[idx][0] * (1 - t) + colors[idx + 1][0] * t)
-        g = int(colors[idx][1] * (1 - t) + colors[idx + 1][1] * t)
-        b = int(colors[idx][2] * (1 - t) + colors[idx + 1][2] * t)
-        a = int(colors[idx][3] * (1 - t) + colors[idx + 1][3] * t)
-
-        return (r, g, b, a)
-
-
-    def _create_linear_gradient(self, surface, colors):
-        angle = radians(randint(0, 360))
-        max_dist = (self.w + self.h) * 0.5
-
-        # Оптимизированный алгоритм с шагом 2 пикселя
-        for x in range(0, self.w, 2):
-            for y in range(0, self.h, 2):
-                dist = x * cos(angle) + y * sin(angle)
-                ratio = (dist / max_dist) % 1.0
-                color = self._interpolate_colors(colors, ratio)
-                pygame.gfxdraw.box(surface, (x, y, 2, 2), color)
-
-    def update(self, scr):
-        self.time += 1
-        self.image.fill((0, 0, 0, 0))
-
-        # Быстрая отрисовка градиентов
-        for i, layer in enumerate(self.gradient_layers):
-            alpha = 30 + int(20 * sin(self.time * 0.05 + i))
-            layer.set_alpha(alpha)
-            self.image.blit(layer, (0, 0))
-
-        # Обновление звезд
-        for star in self.stars:
-            dx = self.camera_speed[0] * self.parallax_factors[star.layer]
-            dy = self.camera_speed[1] * self.parallax_factors[star.layer]
-            star.rect.centerx = (star.rect.centerx + dx) % self.w
-            star.rect.centery = (star.rect.centery + dy) % self.h
-            star.update()
-            self.image.blit(star.image, star.rect)
-
-        scr.blit(self.image, (0, 0))
 
 class InputBox(pg.sprite.Sprite):
     def __init__(self, x, y, w, h, placeholder='', inactive_color=(200, 200, 200), active_color=(255, 255, 255), is_password=False):
@@ -232,7 +83,67 @@ class InputBox(pg.sprite.Sprite):
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
+
+# class Starfield_white():
+#     def __init__(self, w, h, stars_count=3000) -> None:
+#         self.w = w
+#         self.h = h
+#         self.image = Surface((w, h))
+#         self.rect = self.image.get_rect()
+#         self.stars = [WhiteStar(w, h) for _ in range(stars_count)]
+#         self.camera_speed = (0.5, -0.9)
+#         self.parallax_factors = {0: 2.0, 1: 1.0, 2: 0.2}  # Множители для слоёв
 #
+#     def update(self, scr):
+#         self.image.fill((0, 0, 0))
+#
+#         for star in self.stars:
+#             # Параллакс-движение
+#             speed_mult = self.parallax_factors[star.layer]
+#             star.rect.x += self.camera_speed[0] * speed_mult
+#             star.rect.y += self.camera_speed[1] * speed_mult
+#
+#             # Обработка границ экрана
+#             star.rect.x = star.rect.x % self.w
+#             star.rect.y = star.rect.y % self.h
+#
+#             star.update()
+#             self.image.blit(star.image, star.rect)
+#
+#         scr.blit(self.image, (0, 0))
+#
+# class Starfield_palette():
+#     def __init__(self, w, h, stars_count=2000) -> None:
+#         self.w = w
+#         self.h = h
+#         self.image = Surface((w, h))
+#         self.rect = self.image.get_rect()
+#
+#         # Генерация уникальной палитры для планеты
+#         self.palette_config = choice(ColorStar.COLOR_PALETTES)
+#         self.stars = [ColorStar(w, h, self.palette_config) for _ in range(stars_count)]
+#
+#         # Параллакс с нелинейной зависимостью
+#         self.parallax_factors = [2.5 ** i for i in [0.5, 1.0, 1.5]]
+#         self.camera_speed = (uniform(-1.5, 1.5), uniform(-1.5, 1.5))
+#
+#     def update(self, scr):
+#         self.image.fill((0, 0, 0))
+#
+#         # Сортировка звёзд по слоям для правильного рендеринга
+#         for star in sorted(self.stars, key=lambda x: x.layer):
+#             # Параллакс-движение с перспективой
+#             dx = self.camera_speed[0] * self.parallax_factors[star.layer]
+#             dy = self.camera_speed[1] * self.parallax_factors[star.layer]
+#             star.rect.centerx = (star.rect.centerx + dx) % self.w
+#             star.rect.centery = (star.rect.centery + dy) % self.h
+#
+#             star.update()
+#             self.image.blit(star.image, star.rect.topleft)
+#
+#         scr.blit(self.image, (0, 0))
+#
+
 # import pygame; import random; import math
 # from pygame import SRCALPHA; from constants import *
 #

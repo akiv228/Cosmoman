@@ -6,7 +6,7 @@ from config import win_width, win_height, txt_caption, FPS
 from states.menu_state import MenuState
 from states.login_state import LoginState
 from game_music import mixer
-from starfield import *
+from test_intro import *
 
 class Game:
     def __init__(self):

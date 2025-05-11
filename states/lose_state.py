@@ -1,6 +1,6 @@
 import pygame as pg
 from .game_state import State
-from grafics_classes import Backgrounds, Menu
+from grafics_classes_stash import Backgrounds, Menu
 from .config_state import LoseState as cfg
 
 class LoseState(State):

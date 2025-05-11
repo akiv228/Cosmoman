@@ -1,13 +1,11 @@
 import pygame as pg
-from collections import defaultdict, deque
-from pygame import Rect
 from maze_generation import generate_maze
 from player import Player
-from game_classes import Wall, GameSprite, Enemy
-from config import WIDTH, HEIGHT
-from grafics_classes import Backgrounds, Fon3, Fon2
+from game_sprites import Wall, GameSprite
+from grafics.maze_fons import Starfield_white, Starfield_palette
+# from grafics_classes import Backgrounds, Starfield_white, Starfield_palette
 from grafics import *
-from fon import Fon2_2
+from test_gradient_for_labirints import Fon2_2
 import random
 import createwalls
 import path_utils
@@ -120,10 +118,10 @@ class Level:
 
     def get_background(self):
         if self.difficulty == 'EASY':
-            return Fon3(w=5000, h=900, stars_count=2000)
+            return Starfield_white(w=5000, h=900, stars_count=2000)
             # return Backgrounds('images/back.jpg', WIDTH, HEIGHT, 0, 0)
         elif self.difficulty in ('MEDIUM', 'HARD', 'EXPLORE'):
-            return Fon2(w=5000, h=900, stars_count=2000)
+            return Starfield_palette(w=5000, h=900, stars_count=2000)
 
     def draw_debug_path(self, surface):
         if not self.debug_mode:

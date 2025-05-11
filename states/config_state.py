@@ -191,16 +191,6 @@ if __name__ != '__config__':
 
 
     class IntroState:
-        starfield = {
-            'num_stars': 1000,
-            'vel_min': 1.0,
-            'vel_max': 6.0,
-            'colors': ['blue', 'cyan', 'skyblue', 'purple', 'magenta'],
-            'scale_pos': 35,
-            'alpha': 30,
-            'rotation_base': 0.5,
-            'duration': 3.0
-        }
         color_sets = {
             'cool': ['blue', 'cyan', 'skyblue', 'purple', 'magenta'],
             'warm': ['red', 'orange', 'yellow', (255, 215, 0), (220, 20, 60)],
@@ -208,3 +198,12 @@ if __name__ != '__config__':
             'monochrome': ['white', (211, 211, 211), (105, 105, 105), 'black'],
             'neon': [(57, 255, 20), (255, 105, 180), (255, 255, 0), (255, 69, 0)]
         }
+        starfield_ranges = {
+            'num_stars': (500, 1500),
+            'vel_min': (1.0, 3.0),
+            'vel_max': (3.0, 6.0),
+            'scale_pos': (30, 40),
+            'alpha': (20, 40),
+            'rotation_base': (0.5, 1.0),
+        }
+        default_duration = 1

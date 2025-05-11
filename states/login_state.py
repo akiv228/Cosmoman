@@ -1,10 +1,9 @@
 import pygame as pg
-from pygame import sprite
 from .game_state import State
-from grafics_classes import Menu, Label, InputBox
+from grafics_classes_stash import Menu, Label, InputBox
 from .config_state import LoginState as cfg
 import asyncio
-from grafic_elements import Star, NeonText
+from grafics.elements_for_menu_select_login import Star, NeonText
 
 class LoginState(State):
     def __init__(self, game):

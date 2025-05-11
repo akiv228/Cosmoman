@@ -1,5 +1,4 @@
 import pygame as pg
-from constants import *
 from base_sprite import *
 from random import *
 import path_utils
