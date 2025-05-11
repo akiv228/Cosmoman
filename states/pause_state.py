@@ -1,7 +1,7 @@
 import pygame as pg
 from states.game_state import State
 from grafics_classes import Backgrounds, Menu
-from .config import PauseState as cfg
+from .config_state import PauseState as cfg
 
 class PauseState(State):
     def __init__(self, game, previous_state):

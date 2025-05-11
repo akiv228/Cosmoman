@@ -2,7 +2,7 @@ from pygame import sprite
 import pygame as pg
 from .game_state import State
 from grafics_classes import Backgrounds, Menu, Label
-from .config import MenuState as cfg
+from .config_state import MenuState as cfg
 from game_music import mixer
 from grafic_elements import Star, NeonText, Button
 

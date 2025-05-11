@@ -112,8 +112,7 @@ from states.game_state import State
 
 vec2, vec3 = pg.math.Vector2, pg.math.Vector3
 
-# Configuration from config_state.py
-from config import WIDTH, HEIGHT, COLORS, Z_DISTANCE, ALPHA, FPS
+from config import WIDTH, HEIGHT, Z_DISTANCE, ALPHA, FPS
 
 
 COLORS = 'blue cyan skyblue purple magenta'.split()

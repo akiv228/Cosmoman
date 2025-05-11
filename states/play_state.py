@@ -3,7 +3,7 @@ import pygame as pg
 from game_music import mixer
 from states.game_state import State
 from states.pause_state import PauseState
-from .config import PlayState as cfg
+from .config_state import PlayState as cfg
 from level import Level
 from grafics_classes import Label
 # from game_music import win as win_sound, lose as lose_sound

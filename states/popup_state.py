@@ -1,8 +1,8 @@
 from .game_state import State
 from grafics_classes import Menu
-import config
-from config import W, H, WHITE
-from .config import PopupState as cfg
+import config_state
+from config_state import W, H, WHITE
+from .config_state import PopupState as cfg
 import pygame as pg
 import os
 

@@ -2,7 +2,7 @@ import pygame as pg
 from pygame import sprite
 from .game_state import State
 from grafics_classes import Menu, Label, InputBox
-from .config import LoginState as cfg
+from .config_state import LoginState as cfg
 import asyncio
 from grafic_elements import Star, NeonText
 

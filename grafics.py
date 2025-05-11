@@ -1,7 +1,5 @@
-
 import pygame as pg
 from pygame.math import clamp
-
 from constants import *
 from pygame import *
 from random import *
