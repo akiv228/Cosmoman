@@ -67,7 +67,9 @@ SETTINGS = {
 
         'bg_color': (0, 0, 50, 100),  # Цвет фона кнопки (RGBA)
         'glow_transparency': 30,  # Прозрачность свечения (0-255)
-        'glow_size': 15 # Размер свечения
+        'glow_size': 15, # Размер свечения
+        'inactive_color': (150, 150, 150, 100),  # Цвет неактивной кнопки
+        'inactive_bg_color': (0, 0, 30, 50)  # Фон неактивной кнопки
 
     }
 }
@@ -81,28 +83,42 @@ class Button:
         self.text = text
         self.base_color = cfg['base_color']
         self.hover_color = cfg['hover_color']
+        self.inactive_color = cfg['inactive_color']
+        self.bg_color = cfg['bg_color']
+        self.inactive_bg = cfg['inactive_bg_color']
         self.current_color = self.base_color
         self.rect = pygame.Rect(0, y_pos, cfg['width'], cfg['height'])
         self.rect.centerx = screen_width // 2
         self.glow = False
+        self.active = True  # Добавляем статус активности
+
+    def set_active(self, is_active):
+        """Метод для изменения статуса активности"""
+        self.active = is_active
 
     def update(self, mouse_pos):
-        self.glow = self.rect.collidepoint(mouse_pos)
-        self.current_color = self.hover_color if self.glow else self.base_color
+        if self.active:
+            self.glow = self.rect.collidepoint(mouse_pos)
+            self.current_color = self.hover_color if self.glow else self.base_color
+        else:
+            self.glow = False
+            self.current_color = self.inactive_color
 
     def draw(self):
         cfg = SETTINGS['buttons']
 
-        # Фон кнопки
-        pygame.draw.rect(screen, cfg['bg_color'], self.rect, border_radius=10)
+        # Выбираем цвет фона в зависимости от активности
+        bg_color = self.bg_color if self.active else self.inactive_bg
 
-        # Эффект свечения
-        if self.glow:
+        # Фон кнопки
+        pygame.draw.rect(screen, bg_color, self.rect, border_radius=10)
+
+        # Эффект свечения только для активных кнопок
+        if self.glow and self.active:
             glow_surf = pygame.Surface((self.rect.width + cfg['glow_size'] * 2,
                                         self.rect.height + cfg['glow_size'] * 2),
                                        pygame.SRCALPHA)
 
-            # Рисуем градиентное свечение
             for i in range(cfg['glow_size']):
                 alpha = int(cfg['glow_transparency'] * (1 - i / cfg['glow_size']))
                 color = (*self.current_color[:3], alpha)
@@ -120,7 +136,6 @@ class Button:
         text_surf = self.font.render(self.text, True, self.current_color)
         text_rect = text_surf.get_rect(center=self.rect.center)
         screen.blit(text_surf, text_rect)
-
 
 
 
@@ -257,7 +272,9 @@ while running:
     for btn in buttons:
         btn.update(mouse_pos)
         btn.draw()
-
+    buttons[0].set_active(False)  # Делаем первую кнопку неактивной
+    buttons[1].set_active(False)  # Делаем третью кнопку неактивной
+    buttons[2].set_active(False)
     pygame.display.flip()
     clock.tick(60)
 

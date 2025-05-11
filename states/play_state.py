@@ -1,4 +1,6 @@
 import pygame as pg
+
+from game_music import mixer
 from states.game_state import State
 from states.pause_state import PauseState
 from .config import PlayState as cfg
@@ -12,6 +14,7 @@ class PlayState(State):
         self.level = Level(difficulty)
         self.finish = False
         self.txt_lives = Label(*cfg.hp)
+        self.music = cfg.music
 
     def handle_events(self, events):
         for e in events:
@@ -31,6 +34,7 @@ class PlayState(State):
         if not self.finish:
             self.level.update()
             self.check_game_state()
+        mixer.music.set_volume(0.2)
 
     def render(self, window):
         self.level.render(window)
@@ -47,7 +51,7 @@ class PlayState(State):
         elif pg.sprite.collide_rect(player, self.level.final):
             from states.win_state import WinState
             self.finish = True
-            self.game.total_prizes_collected += player.collected_prizes
+            # self.game.total_prizes_collected += player.collected_prizes
             self.game.completed_difficulties += 1
             # win_sound()
             self.game.set_state(WinState(self.game))

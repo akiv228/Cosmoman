@@ -120,10 +120,10 @@ class Level:
 
     def get_background(self):
         if self.difficulty == 'EASY':
-            return Fon2(w=5000, h=900, stars_count=2000)
-            # return Backgrounds('images/back.jpg', WIDTH, HEIGHT, 0, 0)
-        elif self.difficulty in ('MEDIUM', 'HARD'):
             return Fon3(w=5000, h=900, stars_count=2000)
+            # return Backgrounds('images/back.jpg', WIDTH, HEIGHT, 0, 0)
+        elif self.difficulty in ('MEDIUM', 'HARD', 'EXPLORE'):
+            return Fon2(w=5000, h=900, stars_count=2000)
 
     def draw_debug_path(self, surface):
         if not self.debug_mode:
@@ -154,11 +154,12 @@ class Level:
         if self.difficulty == 'EASY':
             # self.background.reset(window)
             self.background.update(window)
-        elif self.difficulty in ('MEDIUM', 'HARD'):
+        elif self.difficulty in ('MEDIUM'):
+            self.background.update(window)
+        elif self.difficulty in ('HARD'):
             self.background.update(window)
         else:
-            window.blit(self.background.alpha_surface, (0, 0))
-            self.background.run()
+            window.fill((0, 0, 0))
 
         self.draw_debug_path(window)
         self.enemy_manager.enemies.draw(window)

@@ -4,14 +4,18 @@ from .game_state import State
 from grafics_classes import Menu, Label, InputBox
 from .config import LoginState as cfg
 import asyncio
+from grafic_elements import Star, NeonText
 
 class LoginState(State):
     def __init__(self, game):
         super().__init__(game)
         self.ui_elements = pg.sprite.Group()
         self.input_boxes = pg.sprite.Group()
-        self.title = Label(*cfg.title)
-        self.title.set_text(*cfg.label)
+
+        self.stars = [Star(cfg.stars) for _ in range(cfg.stars['count'])]
+        # self.title = Label(*cfg.title)
+        # self.title.set_text(*cfg.label)
+        self.neon_text = NeonText(cfg.title)
         self.username_box = InputBox(*cfg.username_box[:4], *cfg.username_box[4:])
         self.password_box = InputBox(*cfg.password_box[:4], *cfg.password_box[4:])
         self.input_boxes.add(self.username_box, self.password_box)
@@ -55,9 +59,15 @@ class LoginState(State):
     
     def update(self):
         self.input_boxes.update()
+        self.neon_text.update()
+        for star in self.stars:
+            star.update()
     
     def render(self, window):
         window.fill((0, 0, 0))
+        for star in self.stars:
+            star.draw(window)
         self.ui_elements.draw(window)
-        self.title.draw(window, 0, -200)
+        self.neon_text.draw(window)
+        # self.title.draw(window, 0, -200)
         self.message.draw(window, 0, 150)

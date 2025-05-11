@@ -1,9 +1,9 @@
 # win_width = 710
 # win_height = 540
-W = win_width = 1000
-H = win_height = 700
+W = win_width = 1100
+H = win_height = 800
 # RES = WIDTH, HEIGHT = 710, 540
-RES = WIDTH, HEIGHT = 1000, 700
+RES = WIDTH, HEIGHT = 1100, 800
 NUM_STARS = 100
 #COLORS1 = 'red green blue orange purple cyan'.split()
 COLORS1 = 'red|green|blue|orange|purple'

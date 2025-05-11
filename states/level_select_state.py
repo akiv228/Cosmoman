@@ -1,52 +1,52 @@
 from pygame import sprite
 import pygame as pg
-from states.game_state import State
+from .game_state import State
 from grafics_classes import Backgrounds, Menu, Label
 from .config import LevelSelectState as cfg
+from grafic_elements import Star, NeonText, Button
 
 class LevelSelectState(State):
     def __init__(self, game):
         super().__init__(game)
-        self.background = Backgrounds(*cfg.bg)
-        self.select_but = sprite.Group()
-        self.button_select1, self.button_select2 = Menu(*cfg.btn[0]), Menu(*cfg.btn[1])
-        self.button_select3, self.button_explore = Menu(*cfg.btn[2]), Menu(*cfg.explore)
+        self.stars = [Star(cfg.stars) for _ in range(cfg.stars['count'])]
+        self.neon_text = NeonText(cfg.title)
+        button_count = len(cfg.buttons['names'])
+        total_height = (button_count * cfg.buttons['height']) + ((button_count - 1) * cfg.buttons['vertical_spacing'])
+        start_y = cfg.buttons['top_margin']
+        self.buttons = [Button(name, start_y + i * (cfg.buttons['height'] + cfg.buttons['vertical_spacing']), cfg.buttons)
+                        for i, name in enumerate(cfg.buttons['names'])]
+        for i, button in enumerate(self.buttons):
+            button.set_active(i <= self.game.completed_difficulties)
         self.button_back = Menu(*cfg.back)
-        self.select_but.add(self.button_select1, self.button_select2, self.button_select3,
-                            self.button_explore, self.button_back)
-        self.text_back = Label(*cfg.pre_init_back_label)
-        self.text_back.set_text(*cfg.back_label)
+        self.music = cfg.music
 
     def handle_events(self, events):
         for e in events:
             if e.type == pg.MOUSEBUTTONDOWN:
-                set_state = self.game.set_state
-                level_above = self.game.completed_difficulties
-                if not self.button_back.collidepoint(*e.pos): from .play_state import PlayState
-                if self.button_back.collidepoint(*e.pos):
+                if self.button_back.rect.collidepoint(e.pos):
                     from .menu_state import MenuState
                     self.game.set_state(MenuState(self.game))
-                # elif self.button_select1.collidepoint(*e.pos) and level_above >= 0: set_state(PlayState(self.game, 'EASY'))
-
-                elif self.button_select1.collidepoint(*e.pos) and level_above >= 0:
-                    from starfield import IntroState
-                    set_state(IntroState(self.game, lambda g: PlayState(g, 'EASY')))
-                elif self.button_select2.collidepoint(*e.pos) and level_above >= 1: set_state(PlayState(self.game, 'MEDIUM'))
-                elif self.button_select3.collidepoint(*e.pos) and level_above >= 2: set_state(PlayState(self.game, 'HARD'))
-                elif self.button_explore.collidepoint(*e.pos) and level_above >= 3: set_state(PlayState(self.game, 'EXPLORE'))
+                for button in self.buttons:
+                    if button.rect.collidepoint(e.pos) and button.active:
+                        difficulty_map = {"LEVEL1": "EASY", "LEVEL2": "MEDIUM", "LEVEL3": "HARD", "EXPLORE UNIVERSITY": "EXPLORE"}
+                        from .play_state import PlayState
+                        from starfield import IntroState
+                        self.game.set_state(IntroState(self.game, lambda g: PlayState(g, difficulty_map[button.text])))
+                        # self.game.set_state(PlayState(self.game, difficulty_map[button.text]))
 
     def update(self):
-        pass
+        for star in self.stars:
+            star.update()
+        self.neon_text.update()
+        mouse_pos = pg.mouse.get_pos()
+        for button in self.buttons:
+            button.update(mouse_pos)
 
     def render(self, window):
-        self.background.reset(window)
-        self.text_back.draw(window, 0, 0)
-        button_rules = {
-            0: self.button_select1,
-            1: self.button_select2,
-            2: self.button_select3,
-            3: self.button_explore
-        }
-        for level, button in button_rules.items():
-            if self.game.completed_difficulties >= level: button.reset(window)
+        window.fill((0, 0, 0))
+        for star in self.stars:
+            star.draw(window)
+        self.neon_text.draw(window)
+        for button in self.buttons:
+            button.draw(window)
         self.button_back.reset(window)

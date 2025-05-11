@@ -19,24 +19,17 @@ class Game:
         self.running = True
         self.music_flag = 0
         self.user_data = None
-        #Тут важно понимать какие атрибуты прописывать перед сменой State иначе те которые идут после видны не будут в других обработчиках по сслыке game
-        # self.current_state = LoginState(self)
-        self.current_state = IntroState(self, LoginState);
-        # game.current_state = IntroState(game, MenuState)
-        #self.current_state = MenuState(self)
-        self.total_prizes_collected = 0
+        self.current_music = None
+        self.current_state = IntroState(self, LoginState)
         self.completed_difficulties = 0
-        # self.states={
-        #     'menu':MenuState(self),
-        #     'level_select':LevelSelectState(self),
-        #     'play':PlayState(self),
-        #     'pause':PauseState(self),
-        #     'win':WinState(self),
-        #     'lose':LoseState(self)
-        # }
 
     def set_state(self, state):
         self.current_state = state
+        if hasattr(state, 'music') and state.music != self.current_music:
+            mixer.music.load(state.music)
+            mixer.music.set_volume(0.8)
+            mixer.music.play(-1)
+            self.current_music = state.music
 
     async def run(self):
         while self.running:
