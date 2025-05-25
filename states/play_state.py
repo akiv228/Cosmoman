@@ -25,7 +25,9 @@ class PlayState(State):
                 elif e.key == pg.K_UP: player.y_speed = -10
                 elif e.key == pg.K_DOWN: player.y_speed = 10
                 elif e.key == pg.K_SPACE: player.fire(None)
-                elif e.key == pg.K_ESCAPE: self.game.set_state(PauseState(self.game, self))
+                elif e.key == pg.K_ESCAPE:
+                    self.game.set_state(PauseState(self.game, self))
+                    self.game.toggle_sound()
             elif e.type == pg.KEYUP:
                 if e.key in (pg.K_LEFT, pg.K_RIGHT): player.x_speed = 0
                 elif e.key in (pg.K_UP, pg.K_DOWN): player.y_speed = 0

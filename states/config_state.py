@@ -161,52 +161,20 @@ if __name__ != '__config__':
 
 
     class PauseState:
-        # Полупрозрачное затемнение
+        # Фон (полупрозрачное затемнение)
         overlay_color = (0, 0, 0, 180)  # Черный с прозрачностью
 
         # Окно паузы
-        window_width = 600
-        window_height = 300
+        window = Instance('', 600, 300, 400, 300)  # x, y, width, height
         window_color = (30, 30, 50, 220)  # Темный с прозрачностью
-        window_border_radius = 20
 
         # Текст "Пауза"
-        pause_text = {
-            'text': "ПАУЗА",
-            'font_size': 72,
-            'color': (255, 255, 255),
-            'y_offset': 40
-        }
+        pause_text = Text("ПАУЗА", (255, 255, 255), 72)
 
-        # Кнопки (теперь три в ряд)
-        buttons = [
-            {
-                'image': 'images\\home.png',
-                'width': 120,
-                'height': 120,
-                'y': 150,
-                'action': 'menu'
-            },
-            {
-                'image': 'images\\info.png',
-                'width': 150,
-                'height': 150,
-                'y': 140,
-                'action': 'resume'
-            },
-            {
-                'image': 'images\\pause_play.png',
-                'width': 120,
-                'height': 120,
-                'y': 150,
-                'action': 'restart'
-            }
-        ]
-
-        # Звуки
-        sound_hover = 'sound\\button_hover.wav'
-        sound_click = 'sound\\button_click.wav'
-
+        # Кнопки (три в ряд)
+        resume_btn = Instance('images\\home.png', 250, 250, 150, 80)
+        menu_btn = Instance('images\\info.png', 420, 250, 150, 80)
+        restart_btn = Instance('images\\pause_play.png', 590, 250, 150, 80)
 
     class PlayState:
         hp = (10, 0, 70, 30, BLACK_BLUE)

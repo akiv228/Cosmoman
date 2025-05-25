@@ -1,7 +1,8 @@
 import pygame as pg
 from states.game_state import State
-from grafics_classes_stash import Menu
+from grafics_classes_stash import Backgrounds, Menu
 from .config_state import PauseState as cfg
+from config import win_width as W, win_height as H
 
 
 class PauseState(State):
@@ -9,81 +10,82 @@ class PauseState(State):
         super().__init__(game)
         self.previous_state = previous_state
 
-        # Создаем полупрозрачное затемнение
-        self.overlay = pg.Surface((self.game.WIDTH, self.game.HEIGHT), pg.SRCALPHA)
-        self.overlay.fill(cfg.overlay_color)
+        # Полупрозрачное затемнение
+        self.overlay = pg.Surface((W, H), pg.SRCALPHA)
+        self.overlay.fill((0, 0, 0, 200))  # Черный с прозрачностью 50%
 
-        # Создаем окно паузы
-        self.window = pg.Surface((cfg.window_width, cfg.window_height), pg.SRCALPHA)
-        self.window.fill(cfg.window_color)
-        if hasattr(cfg, 'window_border_radius'):
-            # Если поддерживается, делаем скругленные углы
-            pg.draw.rect(self.window, cfg.window_color,
-                         (0, 0, cfg.window_width, cfg.window_height),
-                         border_radius=cfg.window_border_radius)
-        self.window_rect = self.window.get_rect(center=(self.game.WIDTH // 2, self.game.HEIGHT // 2))
+        # Окно паузы
+        self.pause_window = pg.Surface((600, 300), pg.SRCALPHA)
+        self.pause_window.fill((50, 50, 50, 200))
+        self.window_rect = self.pause_window.get_rect(center=(W // 2, H // 2))
 
-        # Создаем текст "Пауза"
-        self.font = pg.font.Font(None, cfg.pause_text['font_size'])
-        self.pause_text = self.font.render(cfg.pause_text['text'], True, cfg.pause_text['color'])
-        self.text_rect = self.pause_text.get_rect(
-            centerx=self.window_rect.centerx,
-            y=self.window_rect.y + cfg.pause_text['y_offset']
+        # Параметры кнопок
+        button_width, button_height = 80, 85
+        total_buttons_width = 3 * button_width  # Ширина всех трех кнопок
+        spacing = 50  # Расстояние между кнопками
+
+        # Вычисляем начальную позицию для первой кнопки (чтобы все три были по центру)
+        start_x = self.window_rect.centerx - (total_buttons_width + spacing * 2) // 2 + 30
+
+        # Создаем кнопки в горизонтальный ряд
+        self.button_home = Menu(
+            'images\\home.png',
+            start_x,
+            self.window_rect.centery - (button_height - 80) // 2,
+            button_width,
+            button_height
         )
 
-        # Создаем кнопки (три в ряд)
-        self.buttons = []
-        total_buttons_width = sum(btn['width'] for btn in cfg.buttons)
-        spacing = (cfg.window_width - total_buttons_width) // (len(cfg.buttons) + 1)
+        self.button_info = Menu(
+            'images\\info.png',
+            start_x + button_width + spacing,
+            self.window_rect.centery - (button_height - 80) // 2,
+            button_width,
+            button_height
+        )
 
-        x_offset = self.window_rect.x + spacing
-        for btn_cfg in cfg.buttons:
-            btn = Menu(
-                btn_cfg['image'],
-                btn_cfg['width'],
-                btn_cfg['height'],
-                x_offset,
-                self.window_rect.y + btn_cfg['y'],
-                action=btn_cfg['action']
-            )
-            self.buttons.append(btn)
-            x_offset += btn_cfg['width'] + spacing
+        self.button_unpause = Menu(
+            'images\\pause_play.png',
+            start_x + 2 * (button_width + spacing),
+            self.window_rect.centery - (button_height - 80) // 2,
+            button_width,
+            button_height
+        )
+        # Текст "Пауза"
+        self.font = pg.font.Font(None, 70)
+        self.pause_text = self.font.render("PAUSE", True, (255, 255, 255))
+        self.text_rect = self.pause_text.get_rect(center=(self.window_rect.centerx, self.window_rect.top + 50))
 
     def handle_events(self, events):
         for e in events:
             if e.type == pg.MOUSEBUTTONDOWN:
                 mouse_pos = pg.mouse.get_pos()
-                for btn in self.buttons:
-                    if btn.collidepoint(*mouse_pos):
-                        self.handle_button_action(btn.action)
-                        break
-
-    def handle_button_action(self, action):
-        if action == 'resume':
-            self.game.set_state(self.previous_state)
-        elif action == 'menu':
-            from states.menu_state import MenuState
-            self.game.set_state(MenuState(self.game))
-        elif action == 'restart':
-            from states.play_state import PlayState
-            self.game.set_state(PlayState(self.game, self.previous_state.level.difficulty))
+                if self.button_unpause.collidepoint(*mouse_pos):
+                    self.game.set_state(self.previous_state)
+                    self.game.toggle_sound()
+                elif self.button_home.collidepoint(*mouse_pos):
+                    from states.menu_state import MenuState
+                    self.game.set_state(MenuState(self.game))
+                    self.game.toggle_sound()
+                elif self.button_info.collidepoint(*mouse_pos):
+                    # Добавьте обработку кнопки info
+                    pass
 
     def update(self):
         pass
 
     def render(self, window):
-        # Рендерим предыдущее состояние (игровой экран)
+        # Рендерим предыдущее состояние
         self.previous_state.render(window)
 
         # Затемнение
         window.blit(self.overlay, (0, 0))
 
         # Окно паузы
-        window.blit(self.window, self.window_rect)
-
-        # Текст "Пауза"
+        window.blit(self.pause_window, self.window_rect)
         window.blit(self.pause_text, self.text_rect)
 
         # Кнопки
-        for btn in self.buttons:
-            btn.reset(window)
+        self.button_home.reset(window)
+        self.button_info.reset(window)
+        self.button_unpause.reset(window)
