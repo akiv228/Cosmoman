@@ -17,11 +17,11 @@ class MenuState(State):
         start_y = cfg.buttons['top_margin']
         self.buttons = [Button(name, start_y + i * (cfg.buttons['height'] + cfg.buttons['vertical_spacing']), cfg.buttons)
                         for i, name in enumerate(cfg.buttons['names'])]
-        self.button_sound = Menu(*cfg.sound)
+        # self.button_sound = Menu(*cfg.sound)
         self.cross_image = cfg.cross.convert_alpha()
         self.cross_image = pg.transform.scale(self.cross_image, (40, 40))
         self.cross_rect = self.cross_image.get_rect()
-        self.cross_rect.center = (self.button_sound.rect.right - 80, self.button_sound.rect.centery)
+        # self.cross_rect.center = (self.button_sound.rect.right - 80, self.button_sound.rect.centery)
         # self.check_sound = 0
         self.music = cfg.music
 
@@ -36,8 +36,8 @@ class MenuState(State):
                         elif button.text == "CONTROLS":
                             from .popup_state import PopupState
                             self.game.set_state(PopupState(self.game, self))
-                if self.button_sound.rect.collidepoint(e.pos):
-                    self.game.toggle_sound()
+                # if self.button_sound.rect.collidepoint(e.pos):
+                #     self.game.toggle_sound()
 
             if e.type == pg.KEYDOWN:
                 if e.key == pg.K_m:
@@ -58,7 +58,7 @@ class MenuState(State):
         self.neon_text.draw(window)
         for button in self.buttons:
             button.draw(window)
-        self.button_sound.reset(window)
+        # self.button_sound.reset(window)
 
-        if not self.game.sound_enabled:
-            window.blit(self.cross_image, self.cross_rect)
+        # if not self.game.sound_enabled:
+        #     window.blit(self.cross_image, self.cross_rect)

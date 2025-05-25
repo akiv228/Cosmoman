@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+import states.config_state as cfg
 
 class Star:
     def __init__(self, config):
@@ -121,3 +122,60 @@ class Button:
         text_surf = self.font.render(self.text, True, self.current_color)
         text_rect = text_surf.get_rect(center=self.rect.center)
         surface.blit(text_surf, text_rect)
+
+
+class SoundNotification:
+    def __init__(self, game):
+        self.game = game
+        self.alpha = 0
+        self.duration = cfg.SoundIcons.duration
+        self.fade_in = cfg.SoundIcons.fade_in
+        self.fade_out = cfg.SoundIcons.fade_out
+        self.timer = 0
+        self.active = False
+
+        # Загружаем иконки из конфига
+        self.icon_on = pygame.image.load(cfg.SoundIcons.on.src).convert_alpha()  # Используем .src
+        self.icon_off = pygame.image.load(cfg.SoundIcons.off.src).convert_alpha()  # Используем .src
+
+        # Масштабируем согласно конфигу
+        self.icon_on = pygame.transform.scale(self.icon_on,
+                                          (cfg.SoundIcons.on.width, cfg.SoundIcons.on.height))
+        self.icon_off = pygame.transform.scale(self.icon_off,
+                                           (cfg.SoundIcons.off.width, cfg.SoundIcons.off.height))
+
+        # Создаем поверхность для отрисовки
+        self.image = pygame.Surface((cfg.SoundIcons.on.width, cfg.SoundIcons.on.height), pygame.SRCALPHA)
+
+    def show(self):
+        self.active = True
+        self.timer = 0
+        self.alpha = 255
+
+    def update(self, dt):
+        if self.active:
+            self.timer += dt
+            if self.timer >= self.duration:
+                self.active = False
+            else:
+                # Плавное появление и затухание
+                if self.timer < self.fade_in:
+                    progress = self.timer / self.fade_in
+                    self.alpha = int(255 * progress)
+                else:
+                    progress = (self.timer - self.fade_in) / self.fade_out
+                    self.alpha = int(255 * (1 - progress ** 2))
+
+    def draw(self, surface):
+        if self.active:
+            # Выбираем текущую иконку
+            current_icon = self.icon_on if self.game.sound_enabled else self.icon_off
+
+            # Создаем временную поверхность с альфа-каналом
+            temp_surface = pygame.Surface(current_icon.get_size(), pygame.SRCALPHA)
+            temp_surface.blit(current_icon, (0, 0))
+            temp_surface.fill((255, 255, 255, self.alpha), special_flags=pygame.BLEND_RGBA_MULT)
+
+            # Позиционируем согласно конфигу
+            x, y = cfg.SoundIcons.position
+            surface.blit(temp_surface, (x, y))

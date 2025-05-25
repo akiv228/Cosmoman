@@ -125,7 +125,7 @@ if __name__ != '__config__':
         ]
         explore = Instance('images\\explore.png', 400, 375, 190, 100)
         # back = Instance('images\\menu.png', 70, 420, 100, 100)
-        back = Instance('images\\back.png', 185, 365, 100, 100)
+        back = Instance('images\\back2.png', 140, 100, 120, 65)
         pre_init_back_label = (140, 0, 680, 40, GREY_BLUE)
         back_label = Text(txt_select, 62, WHITE)
         music = Sound('sound\\menu.mp3')
@@ -235,8 +235,8 @@ if __name__ != '__config__':
 
 
     class SoundIcons:
-        on = Instance('images/sound.png', 0, 0, 80, 80)  # Иконка включенного звука
-        off = Instance('images/sound.png', 0, 0, 80, 80)  # Иконка выключенного звука
+        on = Instance('images/sound_on.png', 0, 0, 80, 80)  # Иконка включенного звука
+        off = Instance('images/sound_off.png', 0, 0, 80, 80)  # Иконка выключенного звука
         position = (W // 2 - 40, H - 100)  # Позиция по центру внизу
         duration = 1.0  # Длительность анимации в секундах
         fade_in = 0.3  # Время появления
