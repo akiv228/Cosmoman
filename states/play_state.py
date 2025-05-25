@@ -29,6 +29,9 @@ class PlayState(State):
             elif e.type == pg.KEYUP:
                 if e.key in (pg.K_LEFT, pg.K_RIGHT): player.x_speed = 0
                 elif e.key in (pg.K_UP, pg.K_DOWN): player.y_speed = 0
+            if e.type == pg.KEYDOWN:
+                if e.key == pg.K_m:
+                    self.game.toggle_sound()  # Используем метод из Game
 
     def update(self):
         if not self.finish:

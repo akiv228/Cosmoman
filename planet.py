@@ -92,19 +92,19 @@ class Planet():
 # Planet(Vector2(400, 600), delta=Vector2(-3, 0), radius=10)
 
 # Sun and four opposing Planets
-Planet(Vector2(400, 400), radius=50, imovable=True)
-
-Planet(Vector2(400, 200), delta=Vector2(3, 0), radius=10)
-Planet(Vector2(400, 600), delta=Vector2(-3, 0), radius=10)
-Planet(Vector2(600, 400), delta=Vector2(0, 3), radius=10)
-Planet(Vector2(200, 400), delta=Vector2(0, -3), radius=10)
+# Planet(Vector2(400, 400), radius=50, imovable=True)
+#
+# Planet(Vector2(400, 200), delta=Vector2(3, 0), radius=10)
+# Planet(Vector2(400, 600), delta=Vector2(-3, 0), radius=10)
+# Planet(Vector2(600, 400), delta=Vector2(0, 3), radius=10)
+# Planet(Vector2(200, 400), delta=Vector2(0, -3), radius=10)
 
 # Two Suns and two planets
-# Planet(Vector2(600, 400), radius=20, imovable=True)
-# Planet(Vector2(200, 400), radius=20, imovable=True)
-#
-# Planet(Vector2(400, 200), delta=Vector2(0, 0), radius=10)
-# Planet(Vector2(400, 210), delta=Vector2(1, 2), radius=5)
+Planet(Vector2(600, 400), radius=20, imovable=True)
+Planet(Vector2(200, 400), radius=20, imovable=True)
+
+Planet(Vector2(400, 200), delta=Vector2(0, 0), radius=10)
+Planet(Vector2(400, 210), delta=Vector2(1, 2), radius=5)
 
 # Grid
 gridDimension = 10

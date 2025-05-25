@@ -22,7 +22,7 @@ class MenuState(State):
         self.cross_image = pg.transform.scale(self.cross_image, (40, 40))
         self.cross_rect = self.cross_image.get_rect()
         self.cross_rect.center = (self.button_sound.rect.right - 80, self.button_sound.rect.centery)
-        self.check_sound = 0
+        # self.check_sound = 0
         self.music = cfg.music
 
     def handle_events(self, events):
@@ -37,11 +37,11 @@ class MenuState(State):
                             from .popup_state import PopupState
                             self.game.set_state(PopupState(self.game, self))
                 if self.button_sound.rect.collidepoint(e.pos):
-                    self.check_sound += 1
-                    if self.check_sound % 2:
-                        mixer.music.pause()
-                    else:
-                        mixer.music.unpause()
+                    self.game.toggle_sound()
+
+            if e.type == pg.KEYDOWN:
+                if e.key == pg.K_m:
+                    self.game.toggle_sound()  #
 
     def update(self):
         for star in self.stars:
@@ -59,5 +59,6 @@ class MenuState(State):
         for button in self.buttons:
             button.draw(window)
         self.button_sound.reset(window)
-        if self.check_sound % 2:
+
+        if not self.game.sound_enabled:
             window.blit(self.cross_image, self.cross_rect)

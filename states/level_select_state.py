@@ -36,6 +36,9 @@ class LevelSelectState(State):
                         # self.game.set_state(IntroState(self.game, lambda g, diff=difficulty: PlayState(g, diff)))
                         # self.game.set_state(IntroState(self.game, lambda g: PlayState(g, difficulty_map[button.text])))
                         # self.game.set_state(PlayState(self.game, difficulty_map[button.text]))
+            if e.type == pg.KEYDOWN:
+                if e.key == pg.K_m:
+                    self.game.toggle_sound()
 
     def update(self):
         for star in self.stars:

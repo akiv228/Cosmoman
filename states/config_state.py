@@ -4,16 +4,41 @@ from game_music import mixer
 import pygame as pg
 
 
+# class Instance:
+#     def __init__(self, src, *args):
+#         self.__src = src
+#         if (len(args) != 4): raise AttributeError('Надо передать 4 параметра: x, y, width, height')
+#         for arg in args:
+#             if type(arg) not in (int, float): raise TypeError
+#         self.__args = (src,) + tuple(map(int, args))
+#
+#     def __iter__(self):
+#         return iter(self.__args)
+
 class Instance:
     def __init__(self, src, *args):
-        self.__src = src
-        if (len(args) != 4): raise AttributeError('Надо передать 4 параметра: x, y, width, height')
-        for arg in args:
-            if type(arg) not in (int, float): raise TypeError
-        self.__args = (src,) + tuple(map(int, args))
+        self.src = src  # Делаем атрибут публичным
+        if len(args) != 4:
+            raise AttributeError('Надо передать 4 параметра: x, y, width, height')
+        self.x, self.y, self.width, self.height = map(int, args)
 
+    # Добавляем возможность обращения по индексу
+    def __getitem__(self, index):
+        if index == 0:
+            return self.src
+        elif index == 1:
+            return self.x
+        elif index == 2:
+            return self.y
+        elif index == 3:
+            return self.width
+        elif index == 4:
+            return self.height
+        raise IndexError("Instance index out of range")
+
+    # Для удобства можно добавить итерацию
     def __iter__(self):
-        return iter(self.__args)
+        return iter((self.src, self.x, self.y, self.width, self.height))
 
 
 class Img:
@@ -100,7 +125,7 @@ if __name__ != '__config__':
         ]
         explore = Instance('images\\explore.png', 400, 375, 190, 100)
         # back = Instance('images\\menu.png', 70, 420, 100, 100)
-        back = Instance('images\\menu.png', 185, 365, 100, 100)
+        back = Instance('images\\back.png', 185, 365, 100, 100)
         pre_init_back_label = (140, 0, 680, 40, GREY_BLUE)
         back_label = Text(txt_select, 62, WHITE)
         music = Sound('sound\\menu.mp3')
@@ -207,3 +232,12 @@ if __name__ != '__config__':
             'rotation_base': (0.5, 1.0),
         }
         default_duration = 1
+
+
+    class SoundIcons:
+        on = Instance('images/sound.png', 0, 0, 80, 80)  # Иконка включенного звука
+        off = Instance('images/sound.png', 0, 0, 80, 80)  # Иконка выключенного звука
+        position = (W // 2 - 40, H - 100)  # Позиция по центру внизу
+        duration = 1.0  # Длительность анимации в секундах
+        fade_in = 0.3  # Время появления
+        fade_out = 0.7  # Время исчезновения
