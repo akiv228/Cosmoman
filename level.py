@@ -13,7 +13,7 @@ from grafics import *
 from test_gradient_for_labirints import Fon2_2
 
 class Level:
-    def __init__(self, difficulty, debug_mode=False, load_from_file=False, filename="maze_data.pkl"):
+    def __init__(self, difficulty, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
         self.difficulty = difficulty
         self.debug_mode = debug_mode
         self.grid_sizes = {

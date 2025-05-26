@@ -35,7 +35,7 @@ class EnemyManager:
             return
 
         cfg = {
-            'EASY': {'count': 20, 'speed': 1},
+            'EASY': {'count': 8, 'speed': 1},
             'MEDIUM': {'count': 15, 'speed': 2},
             'HARD': {'count': 5, 'speed': 3},
             'EXPLORE': {'count': 4, 'speed': 2}
