@@ -1,4 +1,7 @@
+
+
 import pygame as pg
+from pygame import time
 import random
 from maze_generation import generate_maze
 from grafics.maze_fons import Starfield_white, Starfield_palette
@@ -147,9 +150,12 @@ class Level:
             pg.draw.lines(surface, (255,0,0), False, path_pixels, 3)
 
     def update(self):
+        self.clock = time.Clock()
+        delta_time = self.clock.tick(60) / 1000.0
         self.player.update()
         self.player.bullets.update()
         self.enemy_manager.enemies.update()
+        # self.final.update(delta_time)
         self.all_sprites.update()
         # self.update_fog_of_war()  # Обновляем видимость облаков
 
