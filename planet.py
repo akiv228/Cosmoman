@@ -1,130 +1,54 @@
-# Imports
-import sys
 import pygame
-
-# We will work with the Vector2 because it has some useful functions.
-from pygame.math import Vector2
-
-from random import randrange
-
-import ctypes
-
-# Enable High Dots Per Inch so the image displayed on the window is sharper.
-ctypes.windll.shcore.SetProcessDpiAwareness(1)
-
-# Configuration
-pygame.init()
-fps = 60
-fpsClock = pygame.time.Clock()
-
-# Window Size
-windowdim = Vector2(1100, 800)
-screen = pygame.display.set_mode((int(windowdim.x), int(windowdim.y)))
-
-# all the Planets are stored here
-# They will append themselves.
-planets = []
-
-# The Planet Class which will handle drawing and calculating planets.
-class Planet():
-    def __init__(self, position, delta=Vector2(0, 0), radius=10, imovable=False):
-
-        # Where the planet is at the moment
-        self.position = position
-
-        # The Radius determines how much this planet effects others
-        self.radius = radius
-
-        # The Velocity
-        self.delta = delta
-
-        # If this planet is moving
-        self.imovable = imovable
-
-        # If this planet can be eaten by others.
-        self.eatable = False
+from pygame.sprite import Sprite
+from PIL import Image, ImageSequence
 
 
-        # Appending itself to the list so its process
-        # function will later be called in a loop.
-        planets.append(self)
+class FinalGifSprite(Sprite):  # Наследуемся от Sprite
+    def __init__(self, x, y, gif_path, scale=1.0, rotation_speed=1):
+        super().__init__()  # Важно вызвать конструктор родителя
 
+        # Загрузка кадров
+        self.frames = self._load_gif_frames(gif_path, scale)
+        self.current_frame = 0
+        self.last_update = pygame.time.get_ticks()
 
-    def process(self):
-        # This function will be called once every frame
-        # and it is responsible for calculating where the planet will go.
+        # Настройки анимации
+        self.animation_speed = 62  # ms per frame
+        self.rotation_speed = rotation_speed
+        self.angle = 0
 
-        # No Movement Calculations will happen if the planet doesnt move at all.
-        # it also wont be eaten.
-        if not self.imovable:
-            for i in planets:
+        # Инициализация изображения и rect (обязательные атрибуты)
+        self.image = self.frames[self.current_frame]
+        self.rect = self.image.get_rect(center=(x, y))
 
-                if not i is self:
-                    try:
-                        if self.eatable:
-                            if self.position.distance_to(i.position) < self.radius + i.radius:
-                                print('Eaten')
+        # Сохраняем оригинальные изображения для вращения
+        self.original_images = self.frames.copy()
 
-                                i.radius += self.radius
+    def _load_gif_frames(self, path, scale):
+        # Тот же код загрузки, что и ранее
+        frames = []
+        gif = Image.open(path)
+        for frame in ImageSequence.Iterator(gif):
+            frame = frame.convert("RGBA")
+            pygame_frame = pygame.image.fromstring(
+                frame.tobytes(), frame.size, "RGBA"
+            ).convert_alpha()
+            if scale != 1.0:
+                new_size = (int(pygame_frame.get_width() * scale),
+                            int(pygame_frame.get_height() * scale))
+                pygame_frame = pygame.transform.scale(pygame_frame, new_size)
+            frames.append(pygame_frame)
+        return frames
 
-                                planets.remove(self)
+    def update(self, *args, **kwargs):  # Метод update обязателен
+        # Обновление анимации
+        now = pygame.time.get_ticks()
+        if now - self.last_update > self.animation_speed:
+            self.current_frame = (self.current_frame + 1) % len(self.frames)
+            self.last_update = now
 
-                        dir_from_obj  = (i.position - self.position).normalize() * 0.01 * (i.radius / 10)
-                        self.delta += dir_from_obj
-
-                    except:
-                        print('In the same spot')
-
-            self.position += self.delta
-
-        # Drawing the planet at the current position.
-        pygame.draw.circle(
-            screen,
-            [255, 255, 255],
-            self.position,
-            self.radius,
-        )
-
-# Sun and two opposing Planets
-# Planet(Vector2(400, 400), radius=50, imovable=True)
-#
-# Planet(Vector2(400, 200), delta=Vector2(3, 0), radius=10)
-# Planet(Vector2(400, 600), delta=Vector2(-3, 0), radius=10)
-
-# Sun and four opposing Planets
-# Planet(Vector2(400, 400), radius=50, imovable=True)
-#
-# Planet(Vector2(400, 200), delta=Vector2(3, 0), radius=10)
-# Planet(Vector2(400, 600), delta=Vector2(-3, 0), radius=10)
-# Planet(Vector2(600, 400), delta=Vector2(0, 3), radius=10)
-# Planet(Vector2(200, 400), delta=Vector2(0, -3), radius=10)
-
-# Two Suns and two planets
-Planet(Vector2(600, 400), radius=20, imovable=True)
-Planet(Vector2(200, 400), radius=20, imovable=True)
-
-Planet(Vector2(400, 200), delta=Vector2(0, 0), radius=10)
-Planet(Vector2(400, 210), delta=Vector2(1, 2), radius=5)
-
-# Grid
-gridDimension = 10
-gridgap = 80
-for x in range(gridDimension):
-    for y in range(gridDimension):
-        Planet(Vector2(gridgap * x + 40, gridgap * y + 40), radius=3, imovable=True)
-#
-# Planet(Vector2(200, 200), delta=Vector2(randrange(-3, 3), 2), radius=5)
-
-# Game loop.
-while  True:
-    screen.fill((0, 0, 0))
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-
-    for p in planets:
-        p.process()
-
-    pygame.display.flip()
-    fpsClock.tick(fps)
+        # Обновление вращения
+        self.angle = (self.angle + self.rotation_speed) % 360
+        original = self.original_images[self.current_frame]
+        self.image = pygame.transform.rotate(original, self.angle)
+        self.rect = self.image.get_rect(center=self.rect.center)

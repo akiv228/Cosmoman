@@ -1,7 +1,7 @@
 import pygame as pg
 from .game_state import State
 from grafics_classes_stash import Menu, Label, InputBox
-from .config_state import LoginState as cfg
+from .config_state import LoginState as cfg, WinState
 import asyncio
 from grafics.elements_for_menu_select_login import Star, NeonText
 
@@ -37,6 +37,8 @@ class LoginState(State):
         asyncio.sleep(0.5)
         from .menu_state import MenuState
         self.game.set_state(MenuState(self.game))
+        # from states.win_state import WinState
+        # self.game.set_state(WinState(self.game))
         return {
             "status": "success",
             "user": {

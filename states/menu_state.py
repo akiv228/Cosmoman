@@ -36,6 +36,12 @@ class MenuState(State):
                         elif button.text == "CONTROLS":
                             from .popup_state import PopupState
                             self.game.set_state(PopupState(self.game, self))
+                        elif button.text == "RATING":
+                            from states.win_state import WinState
+                            self.game.set_state(WinState(self.game))
+                        elif button.text == "FOUND PLANETS":
+                            from states.lose_state import LoseState
+                            self.game.set_state(LoseState(self.game))
                 # if self.button_sound.rect.collidepoint(e.pos):
                 #     self.game.toggle_sound()
 

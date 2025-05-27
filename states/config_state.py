@@ -69,12 +69,6 @@ class Text:
 
 
 if __name__ != '__config__':
-    class LoseState:
-        bg = Instance('images\\lose.jpg', W, H, 0, 0)
-        back = Instance('images\\menu.png', 30, 380, 130, 135)
-        reset = Instance('images\\restart.png', 520, 390, 120, 120)
-        lose_label = Img('images\\textlose.png')
-
 
     class MenuState:
         bg = Instance('images\\m_start_back2.jpg', W + 20, H + 20, -10, 0)
@@ -197,10 +191,29 @@ if __name__ != '__config__':
     class WinState:
         bg = Instance('images\\win.jpg', W, H, 0, 0)
         back_label = (230, 5, 200, 50, DARK_BLUE)
-        per_init_back_label = (txt_win, 55, WHITE)
-        back = Instance('images\\menu.png', 30, 380, 130, 135)
-        restart = Instance('images\\restart.png', 520, 390, 120, 120)
+        # per_init_back_label = (txt_win, 55, WHITE)
+        back = Instance('images\\home.png', 150, H - 100, 130, 135)
+        restart = Instance('images\\restart (2).png', W - 180, H - 100, 120, 120)
+        title = {
+            'text': 'You win',
+            'font_size': 100,
+            'pulsation': True,
+            'reflection': True,
+            'flash_probability': 0.01,
+            'color_change_speed': 0.02
+        }
 
+    class LoseState:
+        back = Instance('images\\home.png', 150, H - 100, 130, 135)
+        restart = Instance('images\\restart (2).png', W - 180, H - 100, 120, 120)
+        title = {
+            'text': 'You lose',
+            'font_size': 100,
+            'pulsation': True,
+            'reflection': True,
+            'flash_probability': 0.01,
+            'color_change_speed': 0.02
+        }
 
     class LoginState:
         stars = {

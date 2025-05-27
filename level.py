@@ -5,6 +5,7 @@ from grafics.maze_fons import Starfield_white, Starfield_palette
 import createwalls
 import path_utils
 import upload_maze
+from planet import FinalGifSprite
 from player import Player
 from game_sprites import Wall, GameSprite
 from enemy_manager import EnemyManager
@@ -108,12 +109,21 @@ class Level:
             'HARD': 10, 'EXPLORE': 15
         }[self.difficulty]
 
-        self.final = GameSprite(
-            'images/planet.png',
-            end_pos[0], end_pos[1],
-            40, 40, False
-        )
+        # self.final = GameSprite(
+        #     'images/planet.png',
+        #     end_pos[0], end_pos[1],
+        #     40, 40, False
+        # )
 
+
+        # self.final = FinalGifSprite(
+        #     x=400,
+        #     y=300,
+        #     gif_path="images/2537512610.gif",
+        #     scale=0.5,
+        #     rotation_speed=2
+        # )
+        self.final = FinalGifSprite(end_pos[0], end_pos[1], "images/2537512610.gif", scale=0.17, rotation_speed=1)
         self.all_sprites.add(self.walls, self.player, self.final)
 
     def get_background(self):
@@ -140,6 +150,7 @@ class Level:
         self.player.update()
         self.player.bullets.update()
         self.enemy_manager.enemies.update()
+        self.all_sprites.update()
         # self.update_fog_of_war()  # Обновляем видимость облаков
 
         pg.sprite.groupcollide(self.player.bullets, self.walls, True, False)
