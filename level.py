@@ -14,6 +14,8 @@ from game_sprites import Wall, GameSprite
 from enemy_manager import EnemyManager
 # from grafics_classes import Backgrounds, Starfield_white, Starfield_palette
 from grafics import *
+from sprite_config import SPRITE_SETS
+from states.config_state import used_explore_finals
 from test_gradient_for_labirints import Fon2_2
 
 class Level:
@@ -43,6 +45,8 @@ class Level:
         self.grid = (gw, gh)
         self.path = []
 
+        # Загрузка спрайтов из конфигурации
+        self.sprite_set = SPRITE_SETS[difficulty]
         start_pos, final_pos, self.path = path_utils.calculate_positions(self.maze_info, self.grid, self.debug_mode)
         self.init_sprites(start_pos, final_pos)
 
@@ -96,14 +100,35 @@ class Level:
                         (cloud.rect.centery - self.player.rect.centery)**2)**0.5
                 cloud.visible = distance > reveal_distance
 
+    # def init_sprites(self, start_pos, end_pos):
+    #     self.all_sprites = pg.sprite.Group()
+    #     self.enemies = pg.sprite.Group()
+    #
+    #     self.player = Player(
+    #         'images/astronaut.png',
+    #         start_pos[0], start_pos[1],
+    #         30, 35, 0, 0, False, False, 5
+    #     )
+    #     self.player.walls = self.walls
+    #     self.player.bullets = pg.sprite.Group()
+    #     self.player.limit = {
+    #         'EASY': 20, 'MEDIUM': 15,
+    #         'HARD': 10, 'EXPLORE': 15
+    #     }[self.difficulty]
+    #
+    #
+    #     self.final = FinalGifSprite(end_pos[0], end_pos[1], "images/2537512610.gif", scale=0.17, rotation_speed=1)
+    #     self.all_sprites.add(self.walls, self.player, self.final)
+
     def init_sprites(self, start_pos, end_pos):
         self.all_sprites = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
 
+        # Используем спрайт игрока из набора
         self.player = Player(
-            'images/astronaut.png',
+            self.sprite_set['player'],
             start_pos[0], start_pos[1],
-            30, 35, 0, 0, False, False, 5
+            40, 25, 0, 0, False, False, 5
         )
         self.player.walls = self.walls
         self.player.bullets = pg.sprite.Group()
@@ -112,22 +137,23 @@ class Level:
             'HARD': 10, 'EXPLORE': 15
         }[self.difficulty]
 
-        # self.final = GameSprite(
-        #     'images/planet.png',
-        #     end_pos[0], end_pos[1],
-        #     40, 40, False
-        # )
+        # Финальный спрайт
+        if self.difficulty == 'EXPLORE':
+            self.final = FinalGifSprite(end_pos[0], end_pos[1], self.select_explore_final(), scale=0.17,
+                                        rotation_speed=1)
+        else:
+            self.final = FinalGifSprite(end_pos[0], end_pos[1], self.sprite_set['final'], scale=0.17, rotation_speed=1)
 
-
-        # self.final = FinalGifSprite(
-        #     x=400,
-        #     y=300,
-        #     gif_path="images/2537512610.gif",
-        #     scale=0.5,
-        #     rotation_speed=2
-        # )
-        self.final = FinalGifSprite(end_pos[0], end_pos[1], "images/2537512610.gif", scale=0.17, rotation_speed=1)
         self.all_sprites.add(self.walls, self.player, self.final)
+
+    def select_explore_final(self):
+        available_finals = [sprite for sprite in self.sprite_set['final_pool'] if sprite not in used_explore_finals]
+        if not available_finals:  # Если все использованы, можно сбросить или оставить пустым
+            used_explore_finals.clear()
+            available_finals = self.sprite_set['final_pool']
+        selected_final = random.choice(available_finals)
+        used_explore_finals.add(selected_final)
+        return selected_final
 
     def get_background(self):
         if self.difficulty == 'EASY':

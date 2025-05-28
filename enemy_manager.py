@@ -2,12 +2,14 @@ import pygame as pg
 import random
 from game_sprites import Enemy
 import path_utils
+from sprite_config import SPRITE_SETS
 
 
 class EnemyManager:
     def __init__(self, level):
         self.level = level
         self.enemies = pg.sprite.Group()
+        self.enemy_images = SPRITE_SETS[level.difficulty]['enemies']
 
     def filter(self, segments, used_segments, min_distance):
         non_adjacent = []
@@ -81,33 +83,34 @@ class EnemyManager:
         direction = path_utils.get_segment_direction(segment)
         start = segment[0]
         end = segment[-1]
+        enemy_image = random.choice(self.enemy_images)
 
         if direction == 'right':
             x1 = maze_x + start[1] * cell_size + wall_thickness + 5
             x2 = maze_x + end[1] * cell_size - wall_thickness - 5
             y = maze_y + start[0] * cell_size + cell_size // 2
-            return Enemy('images/alien1.png', (x1 + x2) // 2, y, 30, 35,
+            return Enemy(enemy_image, (x1 + x2) // 2, y, 40, 40,
                          speed, 'h', x1, x2, self.level.walls)
 
         elif direction == 'left':
             x1 = maze_x + start[1] * cell_size + wall_thickness + 5
             x2 = maze_x + end[1] * cell_size - wall_thickness - 5
             y = maze_y + start[0] * cell_size + cell_size // 2
-            return Enemy('images/alien2.png', (x1 + x2) // 2, y, 30, 35,
+            return Enemy(enemy_image, (x1 + x2) // 2, y, 40, 40,
                          speed, 'h', x2, x1, self.level.walls)
 
         elif direction == 'down':
             y1 = maze_y + start[0] * cell_size + wall_thickness + 5
             y2 = maze_y + end[0] * cell_size - wall_thickness - 5
             x = maze_x + start[1] * cell_size + cell_size // 2
-            return Enemy('images/alien1.png', x, (y1 + y2) // 2, 30, 35,
+            return Enemy(enemy_image, x, (y1 + y2) // 2, 40, 40,
                          speed, 'v', y1, y2, self.level.walls)
 
         elif direction == 'up':
             y1 = maze_y + start[0] * cell_size + wall_thickness + 5
             y2 = maze_y + end[0] * cell_size - wall_thickness - 5
             x = maze_x + start[1] * cell_size + cell_size // 2
-            return Enemy('images/alien2.png', x, (y1 + y2) // 2, 30, 35,
+            return Enemy(enemy_image, x, (y1 + y2) // 2, 40, 45,
                          speed, 'v', y2, y1, self.level.walls)
 
     def check_enemy_collisions(self, new_enemy, min_distance):

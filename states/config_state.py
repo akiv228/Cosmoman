@@ -3,6 +3,7 @@ from config import win_width as W, win_height as H, txt_welcome, txt_select, txt
 from game_music import mixer
 import pygame as pg
 
+used_explore_finals = set()
 
 # class Instance:
 #     def __init__(self, src, *args):

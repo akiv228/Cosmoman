@@ -3,20 +3,22 @@ from pygame.sprite import Sprite
 from PIL import Image, ImageSequence
 
 
-class FinalGifSprite(pygame.sprite.Sprite):
-    def __init__(self, x, y, gif_path, scale=1.0, rotation_speed=1):
+class FinalGifSprite(Sprite):
+    def __init__(self, x, y, gif_path, scale=1.0, rotation_speed=36):
         super().__init__()
         self.frames = self._load_gif_frames(gif_path, scale)
         self.original_images = self.frames.copy()
 
-        # Параметры анимации
+        # Параметры анимации (10 секунд на 60 кадров)
+        self.total_frames = 60
+        self.frame_delay = 0.167  # 167 ms per frame
         self.current_frame = 0
-        self.animation_speed = 62  # ms per frame
-        self.last_update = pygame.time.get_ticks()
+        self.last_frame_update = pygame.time.get_ticks()
 
-        # Параметры вращения
-        self.rotation_speed = rotation_speed
-        self.angle = 0.0  # Используем float для плавности
+        # Параметры вращения (36 градусов/сек для полного оборота за 10 сек)
+        self.rotation_speed = rotation_speed  # градусов за кадр
+        self.angle = 0.0
+        self.last_rotation_update = pygame.time.get_ticks()
         self.center = (x, y)
 
         # Инициализация
@@ -27,14 +29,10 @@ class FinalGifSprite(pygame.sprite.Sprite):
         frames = []
         gif = Image.open(path)
 
-        # Для сохранения качества используем LANCZOS-интерполяцию
         for frame in ImageSequence.Iterator(gif):
             frame = frame.convert("RGBA")
             if scale != 1.0:
-                new_size = (
-                    int(frame.width * scale),
-                    int(frame.height * scale)
-                )
+                new_size = (int(frame.width * scale), int(frame.height * scale))
                 frame = frame.resize(new_size, Image.Resampling.LANCZOS)
 
             pygame_frame = pygame.image.fromstring(
@@ -42,29 +40,24 @@ class FinalGifSprite(pygame.sprite.Sprite):
                 frame.size,
                 "RGBA"
             ).convert_alpha()
-
             frames.append(pygame_frame)
-
         return frames
 
     def update(self, *args):
-        # Плавное вращение с учетом delta time
-        delta_time = pygame.time.get_ticks() - self.last_update
-        self.angle += self.rotation_speed * (delta_time / 16.6667)
+        now = pygame.time.get_ticks()
+
+        # Обновление анимации (строго по таймингу кадров)
+        if now - self.last_frame_update >= self.frame_delay * 1000:
+            self.current_frame = (self.current_frame + 1) % self.total_frames
+            self.last_frame_update = now
+
+        # Плавное вращение с фиксированной скоростью
+        time_since_last_rotation = now - self.last_rotation_update
+        self.angle += self.rotation_speed * (time_since_last_rotation / 1000)
         self.angle %= 360
+        self.last_rotation_update = now
 
-        # Обновление кадров
-        if delta_time > self.animation_speed:
-            self.current_frame = (self.current_frame + 1) % len(self.frames)
-            self.last_update = pygame.time.get_ticks()
-
-        # Создаем повернутое изображение
+        # Применение трансформаций
         original = self.original_images[self.current_frame]
-        self.image = pygame.transform.rotozoom(
-            original,
-            self.angle,
-            1  # Масштаб (1 = без изменения)
-        )
-
-        # Корректируем позицию
+        self.image = pygame.transform.rotozoom(original, self.angle, 1)
         self.rect = self.image.get_rect(center=self.center)

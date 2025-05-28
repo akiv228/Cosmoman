@@ -15,7 +15,8 @@ class LevelSelectState(State):
         self.buttons = [Button(name, start_y + i * (cfg.buttons['height'] + cfg.buttons['vertical_spacing']), cfg.buttons)
                         for i, name in enumerate(cfg.buttons['names'])]
         for i, button in enumerate(self.buttons):
-            button.set_active(i <= self.game.completed_difficulties)
+            # button.set_active(i <= self.game.completed_difficulties)
+            button.set_active(i >= 0)
         self.button_back = Menu(*cfg.back)
         self.music = cfg.music
 

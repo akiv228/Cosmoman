@@ -3,7 +3,7 @@ import pygame as pg
 from game_music import mixer
 from states.game_state import State
 from states.pause_state import PauseState
-from .config_state import PlayState as cfg
+from .config_state import PlayState as cfg, used_explore_finals
 from level import Level
 from grafics_classes_stash import Label
 # from game_music import win as win_sound, lose as lose_sound
@@ -46,17 +46,33 @@ class PlayState(State):
         self.txt_lives.set_text(*cfg.hp_text(self.level.player))
         self.txt_lives.draw(window, 0, 0)
 
+    # def check_game_state(self):
+    #     player = self.level.player
+    #     if player.lives <= 0:
+    #         from states.lose_state import LoseState
+    #         self.finish = True
+    #         # lose_sound()
+    #         self.game.set_state(LoseState(self.game))
+    #     elif pg.sprite.collide_rect(player, self.level.final):
+    #         from states.win_state import WinState
+    #         self.finish = True
+    #         # self.game.total_prizes_collected += player.collected_prizes
+    #         self.game.completed_difficulties += 1
+    #         # win_sound()
+    #         self.game.set_state(WinState(self.game))
+
     def check_game_state(self):
         player = self.level.player
         if player.lives <= 0:
             from states.lose_state import LoseState
             self.finish = True
-            # lose_sound()
             self.game.set_state(LoseState(self.game))
         elif pg.sprite.collide_rect(player, self.level.final):
             from states.win_state import WinState
             self.finish = True
-            # self.game.total_prizes_collected += player.collected_prizes
             self.game.completed_difficulties += 1
-            # win_sound()
+            # Если уровень EXPLORE, фиксируем финальный спрайт как использованный
+            if self.level.difficulty == 'EXPLORE':
+                used_explore_finals.add(
+                    self.level.final.image_path)  # Предполагается, что у FinalGifSprite есть image_path
             self.game.set_state(WinState(self.game))

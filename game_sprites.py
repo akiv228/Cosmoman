@@ -116,32 +116,3 @@ class Enemy(GameSprite):
             self.rect = old_rect
             self.moving_forward = not self.moving_forward
 
-
-# class Enemy(GameSprite):
-#     def __init__(self, image_path, x, y, width, height, speed, direction, board1, board2):
-#         super().__init__(image_path, x, y, width, height, anime=False)
-#         self.speed = speed
-#         self.direction = direction  # 'h' - горизонтально, 'v' - вертикально
-#         self.board1 = board1
-#         self.board2 = board2
-#         self.moving_forward = True
-#
-#     def update(self):
-#         if self.direction == 'h':
-#             if self.moving_forward:
-#                 self.rect.x += self.speed
-#                 if self.rect.x >= self.board2:
-#                     self.moving_forward = False
-#             else:
-#                 self.rect.x -= self.speed
-#                 if self.rect.x <= self.board1:
-#                     self.moving_forward = True
-#         elif self.direction == 'v':
-#             if self.moving_forward:
-#                 self.rect.y += self.speed
-#                 if self.rect.y >= self.board2:
-#                     self.moving_forward = False
-#             else:
-#                 self.rect.y -= self.speed
-#                 if self.rect.y <= self.board1:
-#                     self.moving_forward = True
