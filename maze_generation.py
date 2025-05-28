@@ -54,12 +54,12 @@ def generate_maze(grid_width, grid_height, difficulty):
             removed_walls.add((wall[0], wall[1], wall[2]))
 
     # цикл через возвражение стен + проверка связности
-    # add_cycles(grid_width, grid_height, removed_walls, get_cycles_config(grid_width, grid_height, difficulty))
-    # Этап 4: Добавление циклов через удаление "лишних" стен
-    add_cycles_after_mst(grid_width, grid_height, removed_walls, walls, 5)
-
-    # Этап 5: Добавление тупиков - возвращение стен
-    add_dead_ends_safe2(grid_width, grid_height, removed_walls, 5)
+    add_cycles(grid_width, grid_height, removed_walls, get_cycles_config(grid_width, grid_height, difficulty))
+    # # Этап 4: Добавление циклов через удаление "лишних" стен
+    # add_cycles_after_mst(grid_width, grid_height, removed_walls, walls, 5)
+    #
+    # # Этап 5: Добавление тупиков - возвращение стен
+    # add_dead_ends_safe2(grid_width, grid_height, removed_walls, 5)
 
 
 # Этап 5:

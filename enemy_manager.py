@@ -9,7 +9,8 @@ class EnemyManager:
     def __init__(self, level):
         self.level = level
         self.enemies = pg.sprite.Group()
-        self.enemy_images = SPRITE_SETS[level.difficulty]['enemies']
+
+        self.enemy_configs = SPRITE_SETS[level.difficulty]['enemies']
 
     def filter(self, segments, used_segments, min_distance):
         non_adjacent = []
@@ -37,10 +38,10 @@ class EnemyManager:
             return
 
         cfg = {
-            'EASY': {'count': 8, 'speed': 1},
-            'MEDIUM': {'count': 15, 'speed': 2},
-            'HARD': {'count': 5, 'speed': 3},
-            'EXPLORE': {'count': 4, 'speed': 2}
+            'EASY': {'count': 6, 'speed': 1},
+            'MEDIUM': {'count': 8, 'speed': 2},
+            'HARD': {'count': 10, 'speed': 3},
+            'EXPLORE': {'count': 15, 'speed': 2}
         }[self.level.difficulty]
 
         segments = path_utils.split_path_into_segments(self.level.path)
@@ -79,38 +80,40 @@ class EnemyManager:
         maze_y = self.level.maze_info['maze_y']
         cell_size = self.level.maze_info['cell_size']
         wall_thickness = self.level.maze_info['wall_thickness']
-
         direction = path_utils.get_segment_direction(segment)
         start = segment[0]
         end = segment[-1]
-        enemy_image = random.choice(self.enemy_images)
+
+        # Выбор конфигурации врага
+        enemy_config = random.choice(self.enemy_configs)
+        image_path = enemy_config['image']
+        width = enemy_config['width']
+        height = enemy_config['height']
 
         if direction == 'right':
             x1 = maze_x + start[1] * cell_size + wall_thickness + 5
             x2 = maze_x + end[1] * cell_size - wall_thickness - 5
             y = maze_y + start[0] * cell_size + cell_size // 2
-            return Enemy(enemy_image, (x1 + x2) // 2, y, 40, 40,
+            return Enemy(image_path, (x1 + x2) // 2, y, width, height,
                          speed, 'h', x1, x2, self.level.walls)
-
+        # Аналогично для других направлений ('left', 'down', 'up')
         elif direction == 'left':
             x1 = maze_x + start[1] * cell_size + wall_thickness + 5
             x2 = maze_x + end[1] * cell_size - wall_thickness - 5
             y = maze_y + start[0] * cell_size + cell_size // 2
-            return Enemy(enemy_image, (x1 + x2) // 2, y, 40, 40,
+            return Enemy(image_path, (x1 + x2) // 2, y, width, height,
                          speed, 'h', x2, x1, self.level.walls)
-
         elif direction == 'down':
             y1 = maze_y + start[0] * cell_size + wall_thickness + 5
             y2 = maze_y + end[0] * cell_size - wall_thickness - 5
             x = maze_x + start[1] * cell_size + cell_size // 2
-            return Enemy(enemy_image, x, (y1 + y2) // 2, 40, 40,
+            return Enemy(image_path, x, (y1 + y2) // 2, width, height,
                          speed, 'v', y1, y2, self.level.walls)
-
         elif direction == 'up':
             y1 = maze_y + start[0] * cell_size + wall_thickness + 5
             y2 = maze_y + end[0] * cell_size - wall_thickness - 5
             x = maze_x + start[1] * cell_size + cell_size // 2
-            return Enemy(enemy_image, x, (y1 + y2) // 2, 40, 45,
+            return Enemy(image_path, x, (y1 + y2) // 2, width, height,
                          speed, 'v', y2, y1, self.level.walls)
 
     def check_enemy_collisions(self, new_enemy, min_distance):

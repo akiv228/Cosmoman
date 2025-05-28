@@ -23,11 +23,23 @@ class Level:
         self.difficulty = difficulty
         self.debug_mode = debug_mode
         self.grid_sizes = {
-            'EASY': (16, 12),
+            # 'EASY': (16, 12),
+            # 'MEDIUM': (16, 12),
+            # 'HARD': (20, 15),
+            # 'EXPLORE': (random.randint(18, 22), random.randint(13, 17))
+            # 'EASY': (12, 9),
+            'EASY': (14, 11),
             'MEDIUM': (16, 12),
-            'HARD': (20, 15),
-            'EXPLORE': (random.randint(18, 22), random.randint(13, 17))
+            # 'MEDIUM': (24, 18),
+            'HARD': (24, 16),
+            # 'HARD': (32, 18),
+            # 'EXPLORE': (random.randint(18, 22), random.randint(13, 17))
+            'EXPLORE': Level.get_explore_size(min_cell_size=40)
         }
+        # Ширина: 22 Высота: 15
+        # Ширина: 20 Высота: 13
+        explore_size = self.grid_sizes['EXPLORE']
+        print("Ширина:", explore_size[0], "Высота:", explore_size[1])
 
         if load_from_file:
             self.maze_info = upload_maze.load_maze(filename)
@@ -56,6 +68,34 @@ class Level:
         self.background = self.get_background()
         self.enemy_manager = EnemyManager(self)
         self.enemy_manager.spawn_enemies()
+
+    # def get_explore_size(self):
+    #     while True:
+    #         width = random.randint(16, 20)
+    #         height = random.randint(12, 16)
+    #
+    #         # Проверяем пропорции (ширина должна быть заметно больше высоты)
+    #         if width / height >= 1.25:  # Соотношение не менее 5:4
+    #             return width, height
+    @staticmethod
+    def get_explore_size(min_cell_size=40, screen_width=1100, screen_height=800, max_attempts=10):
+        max_cols = screen_width // min_cell_size
+        max_rows = screen_height // min_cell_size
+        default_size = (18, 12)  # Размер по умолчанию
+
+        for _ in range(max_attempts):
+            cols = random.randint(12, max_cols)
+            rows = random.randint(8, max_rows)
+
+            if (cols <= max_cols and
+                    rows <= max_rows and
+                    cols / rows >= 1.25 and
+                    cols * rows <= 300):
+                return cols, rows
+
+        print(
+            f"Не удалось сгенерировать размер за {max_attempts} попыток. Используется размер по умолчанию {default_size}")
+        return default_size
 
     def init_fog_of_war(self):
         """Инициализирует систему тумана войны с облаками"""
@@ -100,35 +140,16 @@ class Level:
                         (cloud.rect.centery - self.player.rect.centery)**2)**0.5
                 cloud.visible = distance > reveal_distance
 
-    # def init_sprites(self, start_pos, end_pos):
-    #     self.all_sprites = pg.sprite.Group()
-    #     self.enemies = pg.sprite.Group()
-    #
-    #     self.player = Player(
-    #         'images/astronaut.png',
-    #         start_pos[0], start_pos[1],
-    #         30, 35, 0, 0, False, False, 5
-    #     )
-    #     self.player.walls = self.walls
-    #     self.player.bullets = pg.sprite.Group()
-    #     self.player.limit = {
-    #         'EASY': 20, 'MEDIUM': 15,
-    #         'HARD': 10, 'EXPLORE': 15
-    #     }[self.difficulty]
-    #
-    #
-    #     self.final = FinalGifSprite(end_pos[0], end_pos[1], "images/2537512610.gif", scale=0.17, rotation_speed=1)
-    #     self.all_sprites.add(self.walls, self.player, self.final)
-
     def init_sprites(self, start_pos, end_pos):
         self.all_sprites = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
 
-        # Используем спрайт игрока из набора
+        player_size = self.sprite_set['player_size']
         self.player = Player(
             self.sprite_set['player'],
             start_pos[0], start_pos[1],
-            40, 25, 0, 0, False, False, 5
+            player_size[0], player_size[1],
+            0, 0, False, False, 5
         )
         self.player.walls = self.walls
         self.player.bullets = pg.sprite.Group()
@@ -137,20 +158,38 @@ class Level:
             'HARD': 10, 'EXPLORE': 15
         }[self.difficulty]
 
-        # Финальный спрайт
-        if self.difficulty == 'EXPLORE':
-            self.final = FinalGifSprite(end_pos[0], end_pos[1], self.select_explore_final(), scale=0.17,
-                                        rotation_speed=1)
-        else:
-            self.final = FinalGifSprite(end_pos[0], end_pos[1], self.sprite_set['final'], scale=0.17, rotation_speed=1)
 
+
+        # Выбор финального спрайта
+        if self.difficulty == 'EXPLORE':
+            final_image = self.select_explore_final()  # Returns a string (path)
+        else:
+            final_config = self.sprite_set['final']
+            if isinstance(final_config, dict):
+                final_image = final_config['image']
+                width = final_config.get('width', 50)  # Default size if not specified
+                height = final_config.get('height', 50)
+            else:
+                final_image = final_config
+                width = 50
+                height = 50
+
+        # Проверка формата файла
+        if final_image.endswith('.gif'):
+            if self.difficulty == 'EXPLORE':
+                self.final = FinalGifSprite(end_pos[0], end_pos[1], final_image, scale=0.1, rotation_speed=1)
+            else:
+                self.final = FinalGifSprite(end_pos[0], end_pos[1], final_image, scale=0.17, rotation_speed=1)
+
+        else:
+            self.final = GameSprite(final_image, end_pos[0], end_pos[1], width, height)
         self.all_sprites.add(self.walls, self.player, self.final)
 
     def select_explore_final(self):
-        available_finals = [sprite for sprite in self.sprite_set['final_pool'] if sprite not in used_explore_finals]
-        if not available_finals:  # Если все использованы, можно сбросить или оставить пустым
+        available_finals = [path for key, path in self.sprite_set['finals'].items() if path not in used_explore_finals]
+        if not available_finals:  # Если все использованы, сбрасываем
             used_explore_finals.clear()
-            available_finals = self.sprite_set['final_pool']
+            available_finals = list(self.sprite_set['finals'].values())
         selected_final = random.choice(available_finals)
         used_explore_finals.add(selected_final)
         return selected_final
@@ -198,6 +237,8 @@ class Level:
         elif self.difficulty in ('MEDIUM'):
             self.background.update(window)
         elif self.difficulty in ('HARD'):
+            self.background.update(window)
+        elif self.difficulty in ('EXPLORE'):
             self.background.update(window)
         else:
             window.fill((0, 0, 0))
