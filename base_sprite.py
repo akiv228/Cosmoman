@@ -4,7 +4,7 @@ from config import win_width, win_height
 #класс-родитель для других спрайтов
 class GameSprite(sprite.Sprite):
     def __init__(self, player_image, player_x, player_y, size_x, size_y, anime=None):
-        super().__init__()
+        sprite.Sprite.__init__(self)
         # каждый спрайт должен хранить свойство image - изображение
         self.image = transform.scale(image.load(player_image), (size_x, size_y))
         self.anime = anime

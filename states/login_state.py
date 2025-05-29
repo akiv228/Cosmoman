@@ -1,4 +1,6 @@
 import pygame as pg
+import time
+
 from .game_state import State
 from grafics_classes_stash import Menu, Label, InputBox
 from .config_state import LoginState as cfg, WinState
@@ -50,7 +52,8 @@ class LoginState(State):
 
     def handle_register(self, username, password):
         """Заглушка2"""
-        asyncio.sleep(0.5)
+        # asyncio.sleep(0.5)
+        time.sleep(0.5)
         from .menu_state import MenuState
         self.game.set_state(MenuState(self.game))
         return {

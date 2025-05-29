@@ -1,5 +1,3 @@
-
-
 import pygame as pg
 from pygame import time
 import random
@@ -19,8 +17,29 @@ from states.config_state import used_explore_finals
 from test_gradient_for_labirints import Fon2_2
 
 class Level:
-    def __init__(self, difficulty, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
+    @staticmethod
+    def get_explore_size(min_cell_size=40, screen_width=1100, screen_height=800, max_attempts=10):
+        max_cols = screen_width // min_cell_size
+        max_rows = screen_height // min_cell_size
+        default_size = (18, 12)  # Размер по умолчанию
+
+        for _ in range(max_attempts):
+            cols = random.randint(12, max_cols)
+            rows = random.randint(8, max_rows)
+
+            if (cols <= max_cols and
+                    rows <= max_rows and
+                    cols / rows >= 1.0 and
+                    cols * rows <= 330):
+                return cols, rows
+
+        print(
+            f"Не удалось сгенерировать размер за {max_attempts} попыток. Используется размер по умолчанию {default_size}")
+        return default_size
+
+    def __init__(self, difficulty, debug_mode=False, load_from_file=False, filename="maze_data.pkl"):
         self.difficulty = difficulty
+        self.sprite_set = SPRITE_SETS[difficulty]
         self.debug_mode = debug_mode
         self.grid_sizes = {
             # 'EASY': (16, 12),
@@ -31,13 +50,14 @@ class Level:
             'EASY': (14, 11),
             'MEDIUM': (16, 12),
             # 'MEDIUM': (24, 18),
-            'HARD': (24, 16),
-            # 'HARD': (32, 18),
+            # 'HARD': (24, 15),
+            'HARD': (19, 15),
             # 'EXPLORE': (random.randint(18, 22), random.randint(13, 17))
-            'EXPLORE': Level.get_explore_size(min_cell_size=40)
+            'EXPLORE': Level.get_explore_size(min_cell_size=35)
         }
         # Ширина: 22 Высота: 15
         # Ширина: 20 Высота: 13
+        # (18, 11) (15, 14) (22, 13) (19, 14), (19, 12)
         explore_size = self.grid_sizes['EXPLORE']
         print("Ширина:", explore_size[0], "Высота:", explore_size[1])
 
@@ -58,7 +78,6 @@ class Level:
         self.path = []
 
         # Загрузка спрайтов из конфигурации
-        self.sprite_set = SPRITE_SETS[difficulty]
         start_pos, final_pos, self.path = path_utils.calculate_positions(self.maze_info, self.grid, self.debug_mode)
         self.init_sprites(start_pos, final_pos)
 
@@ -77,25 +96,6 @@ class Level:
     #         # Проверяем пропорции (ширина должна быть заметно больше высоты)
     #         if width / height >= 1.25:  # Соотношение не менее 5:4
     #             return width, height
-    @staticmethod
-    def get_explore_size(min_cell_size=40, screen_width=1100, screen_height=800, max_attempts=10):
-        max_cols = screen_width // min_cell_size
-        max_rows = screen_height // min_cell_size
-        default_size = (18, 12)  # Размер по умолчанию
-
-        for _ in range(max_attempts):
-            cols = random.randint(12, max_cols)
-            rows = random.randint(8, max_rows)
-
-            if (cols <= max_cols and
-                    rows <= max_rows and
-                    cols / rows >= 1.25 and
-                    cols * rows <= 300):
-                return cols, rows
-
-        print(
-            f"Не удалось сгенерировать размер за {max_attempts} попыток. Используется размер по умолчанию {default_size}")
-        return default_size
 
     def init_fog_of_war(self):
         """Инициализирует систему тумана войны с облаками"""
@@ -215,8 +215,8 @@ class Level:
             pg.draw.lines(surface, (255,0,0), False, path_pixels, 3)
 
     def update(self):
-        self.clock = time.Clock()
-        delta_time = self.clock.tick(60) / 1000.0
+        # self.clock = time.Clock()
+        # delta_time = self.clock.tick(60) / 1000.0
         self.player.update()
         self.player.bullets.update()
         self.enemy_manager.enemies.update()
@@ -235,9 +235,11 @@ class Level:
             # self.background.reset(window)
             self.background.update(window)
         elif self.difficulty in ('MEDIUM'):
-            self.background.update(window)
+            # self.background.update(window)
+            window.fill((0, 0, 0))
         elif self.difficulty in ('HARD'):
-            self.background.update(window)
+            # self.background.update(window)
+            window.fill((0, 0, 0))
         elif self.difficulty in ('EXPLORE'):
             self.background.update(window)
         else:

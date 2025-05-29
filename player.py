@@ -1,4 +1,6 @@
+import pygame as pg
 from pygame import sprite
+
 from base_sprite import GameSprite
 from bullet import Bullet
 from config import win_width, win_height, WALL_OFFSET
@@ -126,7 +128,7 @@ class Player(GameSprite):
             prize.kill()
 
 
-import pygame as pg
+
 from base_sprite import GameSprite
 # from bullet import Bullet
 
