@@ -51,7 +51,8 @@ class Level:
             'MEDIUM': (16, 12),
             # 'MEDIUM': (24, 18),
             # 'HARD': (24, 15),
-            'HARD': (19, 15),
+            # 'HARD': (19, 15),
+            'HARD': (18, 12),
             # 'EXPLORE': (random.randint(18, 22), random.randint(13, 17))
             'EXPLORE': Level.get_explore_size(min_cell_size=35)
         }
@@ -177,7 +178,7 @@ class Level:
         # Проверка формата файла
         if final_image.endswith('.gif'):
             if self.difficulty == 'EXPLORE':
-                self.final = FinalGifSprite(end_pos[0], end_pos[1], final_image, scale=0.1, rotation_speed=1)
+                self.final = FinalGifSprite(end_pos[0], end_pos[1], final_image, scale=0.15, rotation_speed=1)
             else:
                 self.final = FinalGifSprite(end_pos[0], end_pos[1], final_image, scale=0.17, rotation_speed=1)
 

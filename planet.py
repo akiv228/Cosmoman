@@ -9,19 +9,18 @@ class FinalGifSprite(Sprite):
         self.frames = self._load_gif_frames(gif_path, scale)
         self.original_images = self.frames.copy()
 
-        # Параметры анимации (10 секунд на 60 кадров)
+        # (10 секунд на 60 кадров)
         self.total_frames = 60
         self.frame_delay = 0.167  # 167 ms per frame
         self.current_frame = 0
         self.last_frame_update = pygame.time.get_ticks()
 
-        # Параметры вращения (36 градусов/сек для полного оборота за 10 сек)
+        # (36 градусов/сек для полного оборота за 10 сек)
         self.rotation_speed = rotation_speed  # градусов за кадр
         self.angle = 0.0
         self.last_rotation_update = pygame.time.get_ticks()
         self.center = (x, y)
 
-        # Инициализация
         self.image = self.frames[0]
         self.rect = self.image.get_rect(center=self.center)
 
@@ -46,18 +45,18 @@ class FinalGifSprite(Sprite):
     def update(self, *args):
         now = pygame.time.get_ticks()
 
-        # Обновление анимации (строго по таймингу кадров)
+        # обновление анимации (строго по таймингу кадров)
         if now - self.last_frame_update >= self.frame_delay * 1000:
             self.current_frame = (self.current_frame + 1) % self.total_frames
             self.last_frame_update = now
 
-        # Плавное вращение с фиксированной скоростью
+        # плавное вращение с фиксированной скоростью
         time_since_last_rotation = now - self.last_rotation_update
         self.angle += self.rotation_speed * (time_since_last_rotation / 1000)
         self.angle %= 360
         self.last_rotation_update = now
 
-        # Применение трансформаций
+        # применение трансформаций
         original = self.original_images[self.current_frame]
         self.image = pygame.transform.rotozoom(original, self.angle, 1)
         self.rect = self.image.get_rect(center=self.center)

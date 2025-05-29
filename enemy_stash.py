@@ -5,15 +5,13 @@ import path_utils
 
 
 
-
-# Updated Enemy class with behavior parameter
 class Enemy(GameSprite):
     def __init__(self, maze_info, image_path, x, y, width, height, speed, direction, board1, board2, walls,
                  behavior='bfs'):
         super().__init__(image_path, x, y, width, height, anime=False)
         self.maze_info = maze_info
         self.speed = speed
-        self.direction = direction  # 'north', 'east', 'south', 'west' for left-hand, 'h' or 'v' for BFS
+        self.direction = direction
         self.walls = walls
         self.cell_size = maze_info['cell_size']
         self.behavior = behavior
@@ -31,7 +29,7 @@ class Enemy(GameSprite):
     def check_wall(self, direction):
         y, x = self.get_current_cell()
         for wall in self.walls:
-            if wall.type is None:  # Skip outer walls
+            if wall.type is None:
                 continue
             if direction == 'north' and wall.type == 'h' and wall.row == y - 1 and wall.col == x:
                 return True
