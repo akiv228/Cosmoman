@@ -53,12 +53,9 @@ class Level:
             # 'HARD': (24, 15),
             # 'HARD': (19, 15),
             'HARD': (18, 12),
-            # 'EXPLORE': (random.randint(18, 22), random.randint(13, 17))
             # 'EXPLORE': Level.get_explore_size(min_cell_size=35)
             'EXPLORE': Level.get_explore_size2()
         }
-        # Ширина: 22 Высота: 15
-        # Ширина: 20 Высота: 13
         # (18, 11) (15, 14) (22, 13) (19, 14), (19, 12)
         explore_size = self.grid_sizes['EXPLORE']
         print("Ширина:", explore_size[0], "Высота:", explore_size[1])
@@ -92,15 +89,27 @@ class Level:
         self.enemy_manager = EnemyManager(self)
         self.enemy_manager.spawn_enemies()
 
+    # @staticmethod
+    # def get_explore_size2():
+    #     while True:
+    #         width = random.randint(16, 21)
+    #         height = random.randint(12, 16)
+    #
+    #         # Проверяем пропорции (ширина должна быть заметно больше высоты)
+    #         if width / height >= 1.2:  # Соотношение не менее 5:4
+    #             return width, height
+
     @staticmethod
-    def get_explore_size2():
-        while True:
+    def get_explore_size2(min_cell_size=37, screen_width=1100, screen_height=800, max_attempts=10):
+        for _ in range(max_attempts):
             width = random.randint(16, 21)
             height = random.randint(12, 16)
+            cell_size_x = screen_width / width
+            cell_size_y = screen_height / height
 
-            # Проверяем пропорции (ширина должна быть заметно больше высоты)
-            if width / height >= 1.25:  # Соотношение не менее 5:4
+            if cell_size_x >= min_cell_size and cell_size_y >= min_cell_size and width / height >= 1.15:
                 return width, height
+        return 21, 14
 
     def init_fog_of_war(self):
         """Инициализирует систему тумана войны с облаками"""
