@@ -73,7 +73,7 @@ SPRITE_SETS = {
             {'image': 'images/robots/robot9.png', 'width': 35, 'height': 45}
 
         ],
-        'final': {'image': 'images/final_2.png', 'width': 55, 'height': 50}
+        'final': {'image': 'images/heart.png', 'width': 55, 'height': 50}
     },
     'HARD': {
         'player': 'images/sprite1_1.png',
@@ -110,16 +110,33 @@ SPRITE_SETS = {
         'player': 'images/sheep3.png',
 'player_size': (35, 30),
         'enemies': [
-            {'image': 'images/nlo/nlo1_1.png', 'width': 35, 'height': 35},
-            {'image': 'images/nlo/nlo1_2.png', 'width': 33, 'height': 35},
-            {'image': 'images/nlo/nlo1_3.png', 'width': 35, 'height': 35},
-            {'image': 'images/nlo/nlo1_4.png', 'width': 35, 'height': 30},
-            {'image': 'images/nlo/nlo1_5.png', 'width': 35, 'height': 30},
+            # {'image': 'images/nlo/nlo1_1.png', 'width': 35, 'height': 35},
+            # {'image': 'images/nlo/nlo1_2.png', 'width': 33, 'height': 35},
+            # {'image': 'images/nlo/nlo1_3.png', 'width': 35, 'height': 35},
+            # {'image': 'images/nlo/nlo1_4.png', 'width': 35, 'height': 30},
+            # {'image': 'images/nlo/nlo1_5.png', 'width': 35, 'height': 30},
+            #
+            # {'image': 'images/nlo/nlo2_1.png', 'width': 35, 'height': 30},
+            # {'image': 'images/nlo/nlo2_2.png', 'width': 37, 'height': 33},
+            # {'image': 'images/nlo/nlo2_3.png', 'width': 37, 'height': 33},
+            # {'image': 'images/nlo/nlo2_4.png', 'width': 37, 'height': 33},
 
-            {'image': 'images/nlo/nlo2_1.png', 'width': 35, 'height': 30},
-            {'image': 'images/nlo/nlo2_2.png', 'width': 37, 'height': 33},
-            {'image': 'images/nlo/nlo2_3.png', 'width': 37, 'height': 33},
-            {'image': 'images/nlo/nlo2_4.png', 'width': 37, 'height': 33},
+            # {'image': 'images/nlo/nlo3_1.png', 'width': 35, 'height': 30},
+            # {'image': 'images/nlo/nlo3_2.png', 'width': 33, 'height': 36},
+            # {'image': 'images/nlo/nlo3_3.png', 'width': 33, 'height': 36},
+            # {'image': 'images/nlo/nlo3_4.png', 'width': 33, 'height': 36},
+            # {'image': 'images/nlo/nlo3_5.png', 'width': 35, 'height': 30},
+            # {'image': 'images/nlo/nlo3_6.png', 'width': 37, 'height': 33},
+            # {'image': 'images/nlo/nlo3_7.png', 'width': 35, 'height': 35},
+            # {'image': 'images/nlo/nlo3_8.png', 'width': 35, 'height': 35},
+            # {'image': 'images/nlo/nlo3_9.png', 'width': 35, 'height': 35},
+
+            {'image': 'images/nlo/nlo4_1.png', 'width': 35, 'height': 33},
+            {'image': 'images/nlo/nlo4_2.png', 'width': 35, 'height': 33},
+            {'image': 'images/nlo/nlo4_3.png', 'width': 35, 'height': 30},
+            {'image': 'images/nlo/nlo4_4.png', 'width': 35, 'height': 30},
+            {'image': 'images/nlo/nlo4_5.png', 'width': 35, 'height': 30}
+
         ],
         # 'final_pool': [f'images/planet_explore{i}.gif' for i in range(1, 21)]  # 20 уникальных финальных спрайтов
         'finals': {

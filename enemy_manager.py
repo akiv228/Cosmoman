@@ -9,12 +9,18 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger('EnemyManager')
 
-
 class EnemyManager:
     def __init__(self, level):
         self.level = level
         self.enemies = pg.sprite.Group()
         self.enemy_configs = SPRITE_SETS[level.difficulty]['enemies']
+        # Define speed ranges for each difficulty
+        self.speed_ranges = {
+            'EASY': (1, 2),
+            'MEDIUM': (1, 3),
+            'HARD': (1, 4),
+            'EXPLORE': (1, 3)
+        }
 
     def filter(self, segments, used_segments, min_distance):
         non_adjacent = []
@@ -44,15 +50,15 @@ class EnemyManager:
 
         # Конфигурация в зависимости от сложности
         cfg = {
-            'EASY': {'count_factor': 0.05, 'speed': 1},
-            'MEDIUM': {'count_factor': 0.04, 'speed': 2},
-            'HARD': {'count_factor': 0.07, 'speed': 2},
-            'EXPLORE': {'count_factor': 0.05, 'speed': 2}
+            'EASY': {'count_factor': 0.05},
+            'MEDIUM': {'count_factor': 0.04},
+            'HARD': {'count_factor': 0.07},
+            'EXPLORE': {'count_factor': 0.05}
         }[self.level.difficulty]
 
         # Расстояние между врагами
         enemy_spacing = self.level.maze_info['cell_size'] * {
-            'EASY': 1.5,
+            'EASY': 2,
             'MEDIUM': 2,
             'HARD': 2.0,
             'EXPLORE': 2.0
@@ -60,74 +66,100 @@ class EnemyManager:
 
         # Расчет количества врагов
         cell_count = self.level.grid_width * self.level.grid_height
-        planned_enemy_count = round(cell_count * cfg['count_factor'])
-        logger.info(f"Planned enemies: {planned_enemy_count} (based on {cell_count} cells)")
+        planned_bfs_enemies = round(cell_count * cfg['count_factor'])
+        planned_off_bfs_enemies = round(cell_count * cfg['count_factor'] * 0.7)  # Half the BFS count for off-BFS
 
-        # Разделение пути на сегменты
-        segments = path_utils.split_path_into_segments(self.level.path)
-        logger.info(f"Total segments: {len(segments)}")
+        # Find all segments in the maze
+        all_segments = path_utils.find_all_segments(self.level.maze_info)
+        bfs_segments = path_utils.split_path_into_segments(self.level.path)
+        off_bfs_segments = [seg for seg in all_segments if not any(cell in self.level.path for cell in seg)]
 
-        # Фильтрация сегментов
-        valid_segments = [
-            seg for seg in segments
-            if len(seg) >= 2 and not self.is_near_start_end(seg)
-        ]
-        logger.info(f"Valid segments (length>=2, not near start/end): {len(valid_segments)}")
+        logger.info(f"Planned BFS enemies: {planned_bfs_enemies}, Planned off-BFS enemies: {planned_off_bfs_enemies}")
+        logger.info(f"BFS segments: {len(bfs_segments)}, Off-BFS segments: {len(off_bfs_segments)}")
 
         used_segments = []
         created_enemies = 0
         failed_placement = 0
 
-        # Попытки размещения врагов
-        for _ in range(planned_enemy_count):
-            if not valid_segments:
-                logger.warning("No valid segments left")
+        # Place enemies on BFS segments
+        valid_bfs_segments = [
+            seg for seg in bfs_segments
+            if len(seg) >= 2 and not self.is_near_start_end(seg)
+        ]
+        for _ in range(planned_bfs_enemies):
+            if not valid_bfs_segments:
+                logger.warning("No valid BFS segments left")
                 break
 
-            # Фильтрация доступных сегментов
-            available_segments = self.filter(valid_segments, used_segments, enemy_spacing)
+            available_segments = self.filter(valid_bfs_segments, used_segments, enemy_spacing)
             if not available_segments:
-                logger.warning("No available segments after filtering")
+                logger.warning("No available BFS segments after filtering")
                 break
 
-            # Выбор наиболее удаленного сегмента
             segment = self.choose_distant_segment(available_segments, enemy_spacing)
             if not segment:
-                logger.debug("No distant segment found")
                 failed_placement += 1
                 continue
 
-            # Создание врага
-            enemy = self.create_enemy_for_segment(segment, cfg['speed'])
+            # Assign random speed within range
+            speed = random.randint(*self.speed_ranges[self.level.difficulty])
+            enemy = self.create_enemy_for_segment(segment, speed)
             if not enemy:
-                logger.error("Failed to create enemy")
+                logger.error("Failed to create BFS enemy")
                 continue
 
-            # Проверка коллизий
             if self.check_enemy_collisions(enemy, enemy_spacing):
-                logger.debug("Enemy collision detected")
+                logger.debug("BFS enemy collision detected")
                 failed_placement += 1
                 continue
 
-            # Успешное размещение
             self.level.all_sprites.add(enemy)
             self.enemies.add(enemy)
             used_segments.append(segment)
-            valid_segments.remove(segment)
+            valid_bfs_segments.remove(segment)
+            created_enemies += 1
+
+        # Place enemies on off-BFS segments
+        valid_off_bfs_segments = [seg for seg in off_bfs_segments if len(seg) >= 2]
+        for _ in range(planned_off_bfs_enemies):
+            if not valid_off_bfs_segments:
+                logger.warning("No valid off-BFS segments left")
+                break
+
+            available_segments = self.filter(valid_off_bfs_segments, used_segments, enemy_spacing)
+            if not available_segments:
+                logger.warning("No available off-BFS segments after filtering")
+                break
+
+            segment = random.choice(available_segments)  # Simpler selection for off-BFS
+            speed = random.randint(*self.speed_ranges[self.level.difficulty])
+            enemy = self.create_enemy_for_segment(segment, speed)
+            if not enemy:
+                logger.error("Failed to create off-BFS enemy")
+                continue
+
+            if self.check_enemy_collisions(enemy, enemy_spacing):
+                logger.debug("Off-BFS enemy collision detected")
+                failed_placement += 1
+                continue
+
+            self.level.all_sprites.add(enemy)
+            self.enemies.add(enemy)
+            used_segments.append(segment)
+            valid_off_bfs_segments.remove(segment)
             created_enemies += 1
 
         # Логирование результатов
-        logger.info(f"Created enemies: {created_enemies}/{planned_enemy_count}")
-        if created_enemies < planned_enemy_count:
+        total_planned = planned_bfs_enemies + planned_off_bfs_enemies
+        logger.info(f"Created enemies: {created_enemies}/{total_planned}")
+        if created_enemies < total_planned:
             reason = "Reasons: "
-            if created_enemies + failed_placement < planned_enemy_count:
+            if created_enemies + failed_placement < total_planned:
                 reason += "Not enough valid segments, "
             if failed_placement > 0:
                 reason += f"{failed_placement} failed placements (collisions/distance), "
-            reason += f"Valid segments left: {len(valid_segments)}"
+            reason += f"Valid BFS segments left: {len(valid_bfs_segments)}, Off-BFS segments left: {len(valid_off_bfs_segments)}"
             logger.warning(reason)
-
-    # Остальные методы без изменений (is_near_start_end, create_enemy_for_segment, и т.д.)
 
     def is_near_start_end(self, segment):
         start_node = segment[0]
@@ -147,7 +179,6 @@ class EnemyManager:
         start = segment[0]
         end = segment[-1]
 
-        # Выбор конфигурации врага
         enemy_config = random.choice(self.enemy_configs)
         image_path = enemy_config['image']
         width = enemy_config['width']
@@ -159,7 +190,6 @@ class EnemyManager:
             y = maze_y + start[0] * cell_size + cell_size // 2
             return Enemy(image_path, (x1 + x2) // 2, y, width, height,
                          speed, 'h', x1, x2, self.level.walls)
-        # Аналогично для других направлений ('left', 'down', 'up')
         elif direction == 'left':
             x1 = maze_x + start[1] * cell_size + wall_thickness + 5
             x2 = maze_x + end[1] * cell_size - wall_thickness - 5

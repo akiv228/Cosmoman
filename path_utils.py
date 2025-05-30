@@ -135,3 +135,45 @@ def get_segment_direction(segment):
     if len(segment) < 2:
         return None
     return get_direction(segment[0], segment[1])
+
+def find_all_segments(maze_info):
+    """
+    Находит все прямые сегменты в лабиринте на основе удаленных стен.
+    Алгоритм:
+    - Для горизонтальных сегментов: ищет последовательности ячеек в строке, соединенных удаленными вертикальными стенами.
+    - Для вертикальных сегментов: ищет последовательности ячеек в столбце, соединенных удаленными горизонтальными стенами.
+    Возвращает список сегментов, где каждый сегмент - список координат ячеек.
+    """
+    removed_walls = maze_info['removed_walls']
+    gw, gh = maze_info['grid_width'], maze_info['grid_height']
+    segments = []
+
+    # Горизонтальные сегменты
+    for r in range(gh):
+        c = 0
+        while c < gw - 1:
+            if ('v', r, c) in removed_walls:
+                start = c
+                while c < gw - 1 and ('v', r, c) in removed_walls:
+                    c += 1
+                segment = [(r, i) for i in range(start, c + 1)]
+                if len(segment) >= 2:
+                    segments.append(segment)
+            else:
+                c += 1
+
+    # Вертикальные сегменты
+    for c in range(gw):
+        r = 0
+        while r < gh - 1:
+            if ('h', r, c) in removed_walls:
+                start = r
+                while r < gh - 1 and ('h', r, c) in removed_walls:
+                    r += 1
+                segment = [(i, c) for i in range(start, r + 1)]
+                if len(segment) >= 2:
+                    segments.append(segment)
+            else:
+                r += 1
+
+    return segments
