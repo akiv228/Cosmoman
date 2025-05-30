@@ -9,7 +9,6 @@ def get_image_size(image_path):
 
 
 def parse_collections(base_path=None):
-    # Группируем изображения по префиксу (например, col5_1.png, col5_2.png -> коллекция col5)
     collections = {}
     for img in os.listdir(base_path):
         if img.endswith('.png'):
@@ -46,39 +45,30 @@ def parse_planets(base_path='images/planets'):
         }
     return planets
 
-def create_sprite_config(collections, player_image, player_size, final, size_mapping=None):
+
+def create_sprite_config(collections, player_image, player_size, final, collection_name=None):
     config = {
         'player': player_image,
         'player_size': player_size,
         'enemies': [],
         'final': final
     }
+
     for collection in collections:
         for img in collection:
-            # Определяем размеры для изображения
-            if size_mapping:
-                filename = os.path.basename(img)
-                size = size_mapping.get(filename, get_image_size(img))
+            if collection_name and collection_name in COLLECTION_SIZES:
+                size = COLLECTION_SIZES[collection_name]
             else:
-                size = get_image_size(img)
+                # size = get_image_size(img)
+                (35, 35)
 
             config['enemies'].append({
                 'image': img,
-                # 'width': size[0],
-                # 'height': size[1]
-                'width': 35,
-                'height': 35
+                'width': size[0],
+                'height': size[1]
             })
     return config
 
-
-# Задаем индивидуальные размеры для определенных изображений
-astr_size_mapping = {
-    # 'col5_1.png': (45, 45),
-    # 'col5_2.png': (45, 45),
-    # 'col6_1.png': (45, 45),
-
-}
 
 astr_collections = parse_collections('images/astr')
 robots_collections = parse_robots_collections()
@@ -86,34 +76,56 @@ alians_collections = parse_collections('images/alians')
 nlo_collections = parse_collections('images/nlo')
 planets = parse_planets()
 
+COLLECTION_SIZES = {
+    'astr': (35, 35),
+    'robots': (33, 40),
+    'alians': (30, 35),
+    'nlo': (35, 35)
+}
+
 SPRITE_SETS = {
     'EASY': create_sprite_config(
-        collections=robots_collections,
+        collections=nlo_collections,
         player_image='images/sheep3.png',
         player_size=(40, 35),
-        final='images/2537512610.gif'
+        final='images/2537512610.gif',
+        collection_name='nlo'
     ),
     'MEDIUM': create_sprite_config(
         collections=robots_collections,
         player_image='images/sprite1_1.png',
         player_size=(33, 35),
-        final={'image': 'images/heart.png', 'width': 55, 'height': 50}
+        final={'image': 'images/heart.png', 'width': 55, 'height': 50},
+        collection_name='robots'
     ),
     'HARD': create_sprite_config(
         collections=alians_collections,
         player_image='images/sprite1_1.png',
         player_size=(28, 32),
-        final={'image': 'images/sprite_girl.png', 'width': 40, 'height': 40}
+        final={'image': 'images/sprite_girl.png', 'width': 40, 'height': 40},
+        collection_name='alians'
     ),
     'EXPLORE': {
         'player': 'images/sheep3.png',
         'player_size': (35, 30),
         'enemies': [
             {'image': img, 'width': 35, 'height': 35}
-            for collection in astr_collections + nlo_collections for img in collection
+                for img in random.choice([
+                [img for collection in astr_collections for img in collection],
+                [img for collection in nlo_collections for img in collection]
+            ])
+            # for collection in astr_collections + nlo_collections for img in collection
         ],
         'finals': planets
     }
+}
+
+# Задаем индивидуальные размеры для определенных изображений
+astr_size_mapping = {
+    # 'col5_1.png': (45, 45),
+    # 'col5_2.png': (45, 45),
+    # 'col6_1.png': (45, 45),
+
 }
 
 

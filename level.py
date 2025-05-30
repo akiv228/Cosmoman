@@ -18,26 +18,6 @@ from states.config_state import used_explore_finals
 from test_gradient_for_labirints import Fon2_2
 
 class Level:
-    @staticmethod
-    def get_explore_size(min_cell_size=40, screen_width=1100, screen_height=800, max_attempts=10):
-        max_cols = screen_width // min_cell_size
-        max_rows = screen_height // min_cell_size
-        default_size = (18, 12)  # Размер по умолчанию
-
-        for _ in range(max_attempts):
-            cols = random.randint(12, max_cols)
-            rows = random.randint(8, max_rows)
-
-            if (cols <= max_cols and
-                    rows <= max_rows and
-                    cols / rows >= 1.0 and
-                    cols * rows <= 330):
-                return cols, rows
-
-        print(
-            f"Не удалось сгенерировать размер за {max_attempts} попыток. Используется размер по умолчанию {default_size}")
-        return default_size
-
     def __init__(self, difficulty, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
         self.difficulty = difficulty
         self.sprite_set = SPRITE_SETS[difficulty]
@@ -74,7 +54,7 @@ class Level:
         19, 12
         """
         if difficulty == 'EASY':
-            selected_collection = random.choice(astr_collections)
+            selected_collection = random.choice(nlo_collections)
             self.sprite_set['enemies'] = [
                 {'image': img, 'width': self.sprite_set['enemies'][0]['width'],
                  'height': self.sprite_set['enemies'][0]['height']}
@@ -100,7 +80,11 @@ class Level:
             self.sprite_set['enemies'] = [
                 {'image': img, 'width': self.sprite_set['enemies'][0]['width'],
                  'height': self.sprite_set['enemies'][0]['height']}
-                for img in selected_collection
+                # for img in selected_collection
+                for img in random.choice([
+                    [img for collection in astr_collections for img in collection],
+                    [img for collection in nlo_collections for img in collection]
+                ])
             ]
         explore_size = self.grid_sizes['EXPLORE']
         print("Ширина:", explore_size[0], "Высота:", explore_size[1])
