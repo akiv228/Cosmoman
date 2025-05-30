@@ -42,11 +42,6 @@ class Level:
         self.sprite_set = SPRITE_SETS[difficulty]
         self.debug_mode = debug_mode
         self.grid_sizes = {
-            # 'EASY': (16, 12),
-            # 'MEDIUM': (16, 12),
-            # 'HARD': (20, 15),
-            # 'EXPLORE': (random.randint(18, 22), random.randint(13, 17))
-            # 'EASY': (12, 9),
             'EASY': (14, 11),
             'MEDIUM': (16, 12),
             # 'MEDIUM': (24, 18),
@@ -55,6 +50,7 @@ class Level:
             'HARD': (18, 12),
             # 'EXPLORE': Level.get_explore_size(min_cell_size=35)
             'EXPLORE': Level.get_explore_size2()
+            # 'EXPLORE': (22, 13)
         }
         # (18, 11) (15, 14) (22, 13) (19, 14), (19, 12)
         explore_size = self.grid_sizes['EXPLORE']
@@ -89,6 +85,18 @@ class Level:
         self.enemy_manager = EnemyManager(self)
         self.enemy_manager.spawn_enemies()
 
+    """
+    21, 14
+    20, 14
+    16, 13
+    21, 14
+    17, 12
+    19, 15
+    18, 12
+    17, 14
+    18, 12
+    18, 14
+    """
     # @staticmethod
     # def get_explore_size2():
     #     while True:
@@ -100,14 +108,14 @@ class Level:
     #             return width, height
 
     @staticmethod
-    def get_explore_size2(min_cell_size=37, screen_width=1100, screen_height=800, max_attempts=10):
+    def get_explore_size2(min_cell_size=40, screen_width=1100, screen_height=800, max_attempts=10):
         for _ in range(max_attempts):
-            width = random.randint(16, 21)
+            width = random.randint(16, 19)
             height = random.randint(12, 16)
             cell_size_x = screen_width / width
             cell_size_y = screen_height / height
-
-            if cell_size_x >= min_cell_size and cell_size_y >= min_cell_size and width / height >= 1.15:
+            print(f"Реальный размер клетки: {cell_size_x}x{cell_size_y}")
+            if cell_size_x >= min_cell_size and cell_size_y >= min_cell_size:
                 return width, height
         return 21, 14
 

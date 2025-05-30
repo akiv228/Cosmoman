@@ -53,13 +53,22 @@ def generate_maze(grid_width, grid_height, difficulty):
             dsu.union(cell_a, cell_b)
             removed_walls.add((wall[0], wall[1], wall[2]))
 
-    # цикл через возвражение стен + проверка связности
-    add_cycles(grid_width, grid_height, removed_walls, get_cycles_config(grid_width, grid_height, difficulty))
-    # # Этап 4: Добавление циклов через удаление "лишних" стен
-    # add_cycles_after_mst(grid_width, grid_height, removed_walls, walls, 5)
-    #
-    # # Этап 5: Добавление тупиков - возвращение стен
-    # add_dead_ends_safe2(grid_width, grid_height, removed_walls, 5)
+    grid_size = grid_width * grid_height
+    print(grid_size)
+
+    num_cycles = get_num_cycles_to_add(difficulty, grid_size)
+    if (difficulty == 'EASY'):
+        add_cycles(grid_width, grid_height, removed_walls, num_cycles)
+        print(1)
+    # Этап 4: Добавление циклов через удаление "лишних" стен
+    else:
+        # цикл через возвражение стен + проверка связности
+        add_cycles_after_mst(grid_width, grid_height, removed_walls, walls, num_cycles)
+        print(2)
+
+    # Этап 5: Добавление тупиков - возвращение стен
+    num_dead_ends = get_num_dead_ends_to_add(difficulty, grid_size)
+    add_dead_ends_safe2(grid_width, grid_height, removed_walls, num_dead_ends)
 
 
 # Этап 5:
@@ -82,6 +91,33 @@ def generate_maze(grid_width, grid_height, difficulty):
         'present_walls': present_walls,
         'wall_thickness': 3
     }
+
+def get_num_cycles_to_add(difficulty, grid_size):
+    return {
+        'EASY': 2,
+        'MEDIUM': 3,
+        'HARD': 3,
+        'EXPLORE': int(grid_size * 0.02)
+    }[difficulty]
+
+def get_num_dead_ends_to_add(difficulty, grid_size):
+    return {
+        'EASY': 0,
+        'MEDIUM': 0,
+        'HARD': 2,
+        'EXPLORE': 2
+    }[difficulty]
+
+# def get_cycles_config(grid_width, grid_height, difficulty):
+#     """Возвращает количество циклов для заданной сложности"""
+#     grid_size = grid_width * grid_height
+#     return {
+#         'EASY': int(grid_size * 0.2),
+#         'MEDIUM': int(grid_size * 0.05),
+#         'HARD': int(grid_size * 0.1),
+#         'EXPLORE': int(grid_size * 0.2)
+#     }[difficulty]
+
 
 
 def get_cells_from_wall(wall, grid_width):
@@ -146,23 +182,11 @@ def get_wall_weight(wall_type, difficulty):
     weights = {
         'EASY': {'v': (1, 10), 'h': (1, 10)},
         'MEDIUM': {'v': (5, 20), 'h': (5, 20)},  # Более высокие веса
-        'HARD': {'v': (1, 5), 'h': (1, 5)},  # Максимальные веса
+        'HARD': {'v': (5, 30), 'h': (5, 30)},  # Максимальные веса
         'EXPLORE': {'v': (1, 100), 'h': (1, 100)} # Полный рандом
     }
     min_w, max_w = weights[difficulty][wall_type]
     return random.randint(min_w, max_w)
-
-
-def get_cycles_config(grid_width, grid_height, difficulty):
-    """Возвращает количество циклов для заданной сложности"""
-    grid_size = grid_width * grid_height
-    return {
-        'EASY': int(grid_size * 0.2),
-        'MEDIUM': int(grid_size * 0.05),
-        'HARD': int(grid_size * 0.1),
-        'EXPLORE': int(grid_size * 0.2)
-    }[difficulty]
-
 
 def build_dsu_from_walls(grid_width, grid_height, walls):
     """Строит DSU на основе набора стен"""
@@ -261,22 +285,3 @@ def add_dead_ends_safe2(grid_width, grid_height, removed_walls, num_dead_ends):
             #  не создали тупик — откатываем
             removed_walls.add(wall)
     print(dead_ends_added)
-
-def add_dead_ends_safe(grid_width, grid_height, removed_walls, num_dead_ends):
-    present_walls = [wall for wall in generate_all_walls(grid_width, grid_height) if wall not in removed_walls]
-    dead_ends_added = 0
-
-    for wall in present_walls:
-        if dead_ends_added >= num_dead_ends:
-            break
-
-        cell_a, cell_b = get_cells_from_wall(wall, grid_width)
-        connections_a = count_connections(cell_a, removed_walls, grid_width)
-        connections_b = count_connections(cell_b, removed_walls, grid_width)
-
-        # удаляем стену только если одна из клеток станет тупиком (1 проход)
-        # и при этом не изолируется
-        if (connections_a == 1 or connections_b == 1) and validate_maze2(grid_width, grid_height,
-                                                                         removed_walls - {wall}):
-            removed_walls.add(wall)
-            dead_ends_added += 1

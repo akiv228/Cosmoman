@@ -4,15 +4,7 @@ SPRITE_SETS = {
         'player': 'images/sheep3.png',
         'player_size': (40, 35),
         'enemies': [
-            # {'image': 'images/level1/al1.png', 'width': 40, 'height': 30},
-            # {'image': 'images/level1/al2.png', 'width': 40, 'height': 35},
-            # {'image': 'images/level1/al3.png', 'width': 40, 'height': 35},
-            # {'image': 'images/level1/al5.png', 'width': 40, 'height': 30},
-            # {'image': 'images/level1/al6.png', 'width': 40, 'height': 35},
-            # {'image': 'images/level1/al7.png', 'width': 40, 'height': 35}
-            # {'image': 'images/level1/alian1.png', 'width': 40, 'height': 30},
-            # {'image': 'images/level1/alian2.png', 'width': 40, 'height': 35},
-            # {'image': 'images/level1/alian3.png', 'width': 40, 'height': 35}
+
 
             # {'image': 'images/astr/col2_1.png', 'width': 45, 'height': 45},
             # {'image': 'images/astr/col2_2.png','width': 45, 'height': 45},
@@ -50,45 +42,35 @@ SPRITE_SETS = {
             {'image': 'images/astr/col6_5.png', 'width': 45, 'height': 45},
             {'image': 'images/astr/col6_6.png', 'width': 45, 'height': 45},
 
-            # {'image': 'images/level1/as8.png',  'width': 45, 'height': 45},
-            # {'image': 'images/level1/as9.png',  'width': 45, 'height': 45},
-            # {'image': 'images/level1/as10.png', 'width': 45, 'height': 45},
-            # {'image': 'images/level1/as11.png',  'width': 45, 'height': 45},
-            # {'image': 'images/level1/as12.png',  'width': 45, 'height': 45},
-            # {'image': 'images/level1/as1.png',  'width': 45, 'height': 45},
-            # {'image': 'images/level1/as1.png',  'width': 45, 'height': 45},
+            {'image': 'images/astr/col7_1.png', 'width': 45, 'height': 45},
+            {'image': 'images/astr/col7_2.png', 'width': 45, 'height': 45},
+            {'image': 'images/astr/col7_3.png', 'width': 45, 'height': 45},
+            {'image': 'images/astr/col7_4.png', 'width': 45, 'height': 45},
+            {'image': 'images/astr/col7_5.png', 'width': 45, 'height': 45},
+
+            {'image': 'images/astr/col8_1.png', 'width': 45, 'height': 45},
+            {'image': 'images/astr/col8_2.png', 'width': 45, 'height': 45},
+            {'image': 'images/astr/col8_3.png', 'width': 45, 'height': 45},
+            {'image': 'images/astr/col8_4.png', 'width': 45, 'height': 45},
+            {'image': 'images/astr/col8_5.png', 'width': 45, 'height': 45},
+            {'image': 'images/astr/col8_6.png', 'width': 45, 'height': 45}
 
         ],
         'final': 'images/2537512610.gif'
     },
     'MEDIUM': {
         'player': 'images/sprite1_1.png',
-        'player_size': (35, 40),
+        'player_size': (33, 35),
         'enemies': [
             {'image': 'images/robots/robot1.png', 'width': 40, 'height': 40},
             {'image': 'images/robots/robot2.png', 'width': 40, 'height': 40},
-            {'image': 'images/robots/robot3.png', 'width': 35, 'height': 45},
-            {'image': 'images/robots/robot4.png', 'width': 35, 'height': 45},
-            {'image': 'images/robots/robot5.png', 'width': 35, 'height': 45},
-            {'image': 'images/robots/robot6.png', 'width': 35, 'height': 45},
-            {'image': 'images/robots/robot7.png', 'width': 35, 'height': 45},
-            {'image': 'images/robots/robot8.png', 'width': 35, 'height': 45}
-
-
-            # {'image': 'images/level1/as1.png', 'width': 50, 'height': 50},
-            # {'image': 'images/level1/alian1.png', 'width': 40, 'height': 40},
-            # {'image': 'images/level1/alian3.png', 'width': 40, 'height': 40},
-            # {'image': 'images/level1/alian2.png', 'width': 40, 'height': 40},
-            # {'image': 'images/level1/alian3.png', 'width': 40, 'height': 40},
-
-
-            # {'image': 'images/level1/as8.png', 'width': 35, 'height': 35},
-            # {'image': 'images/level1/as9.png', 'width': 35, 'height': 35},
-            # {'image': 'images/level1/as10.png', 'width': 35, 'height': 35},
-            # {'image': 'images/level1/as11.png', 'width': 35, 'height': 30},
-            # {'image': 'images/level1/as12.png', 'width': 35, 'height': 35},
-            # {'image': 'images/level1/as1.png', 'width': 40, 'height': 40},
-            # {'image': 'images/level1/as1.png', 'width': 40, 'height': 40}
+            {'image': 'images/robots/robot3.png', 'width': 33, 'height': 47},
+            {'image': 'images/robots/robot4.png', 'width': 33, 'height': 47},
+            {'image': 'images/robots/robot5.png', 'width': 33, 'height': 47},
+            {'image': 'images/robots/robot6.png', 'width': 33, 'height': 47},
+            {'image': 'images/robots/robot7.png', 'width': 33, 'height': 47},
+            {'image': 'images/robots/robot8.png', 'width': 35, 'height': 45},
+            {'image': 'images/robots/robot9.png', 'width': 35, 'height': 45}
 
         ],
         'final': {'image': 'images/final_2.png', 'width': 55, 'height': 50}
@@ -128,53 +110,16 @@ SPRITE_SETS = {
         'player': 'images/sheep3.png',
 'player_size': (35, 30),
         'enemies': [
-            # {'image': 'images/level1/as8.png', 'width': 35, 'height': 35},
-            # {'image': 'images/level1/as9.png', 'width': 35, 'height': 35},
-            # {'image': 'images/level1/as10.png', 'width': 35, 'height': 35},
-            # {'image': 'images/level1/as11.png', 'width': 35, 'height': 30},
-            # {'image': 'images/level1/as12.png', 'width': 35, 'height': 35},
-            # {'image': 'images/level1/as1.png', 'width': 40, 'height': 40},
-            # {'image': 'images/level1/as1.png', 'width': 40, 'height': 40}
+            {'image': 'images/nlo/nlo1_1.png', 'width': 35, 'height': 35},
+            {'image': 'images/nlo/nlo1_2.png', 'width': 33, 'height': 35},
+            {'image': 'images/nlo/nlo1_3.png', 'width': 35, 'height': 35},
+            {'image': 'images/nlo/nlo1_4.png', 'width': 35, 'height': 30},
+            {'image': 'images/nlo/nlo1_5.png', 'width': 35, 'height': 30},
 
-
-            # {'image': 'images/astr/col1_1.png', 'width': 35, 'height': 35},
-            # {'image': 'images/astr/col1_2.png', 'width': 35, 'height': 35},
-            # {'image': 'images/astr/col1_3.png', 'width': 35, 'height': 35},
-            # {'image': 'images/astr/col1_4.png', 'width': 35, 'height': 35},
-
-            # {'image': 'images/astr/col2_1.png', 'width': 35, 'height': 30},
-            # {'image': 'images/astr/col2_2.png', 'width': 35, 'height': 35},
-            # {'image': 'images/astr/col2_3.png', 'width': 35, 'height': 35},
-            # {'image': 'images/astr/col2_4.png', 'width': 35, 'height': 35},
-            # {'image': 'images/astr/col2_5.png', 'width': 35, 'height': 35},
-            # {'image': 'images/astr/col2_6.png', 'width': 35, 'height': 35},
-            # {'image': 'images/astr/col2_7.png', 'width': 35, 'height': 35},
-            # {'image': 'images/astr/col2_8.png', 'width': 35, 'height': 30},
-
-
-            {'image': 'images/astr/col3_1.png', 'width': 35, 'height': 35},
-            {'image': 'images/astr/col3_2.png', 'width': 30, 'height': 30},
-            {'image': 'images/astr/col3_3.png', 'width': 30, 'height': 30},
-            {'image': 'images/astr/col3_4.png', 'width': 35, 'height': 35},
-            {'image': 'images/astr/col3_5.png', 'width': 30, 'height': 30},
-            {'image': 'images/astr/col3_6.png', 'width': 30, 'height': 30},
-            {'image': 'images/astr/col3_7.png', 'width': 30, 'height': 30},
-            {'image': 'images/astr/col3_8.png', 'width': 30, 'height': 30},
-
-            {'image': 'images/astr/col4_1.png', 'width': 35, 'height': 35},
-            {'image': 'images/astr/col4_2.png', 'width': 30, 'height': 30},
-            {'image': 'images/astr/col4_3.png', 'width': 30, 'height': 30},
-            {'image': 'images/astr/col4_4.png', 'width': 35, 'height': 35},
-
-            {'image': 'images/level1/as1.png', 'width': 35, 'height': 35},
-            {'image': 'images/level1/as2.png', 'width': 35, 'height': 35},
-            {'image': 'images/level1/as3.png', 'width': 35, 'height': 35},
-            {'image': 'images/level1/as4.png', 'width': 35, 'height': 30},
-            {'image': 'images/level1/as5.png', 'width': 35, 'height': 35},
-            {'image': 'images/level1/as6.png', 'width': 35, 'height': 35},
-            {'image': 'images/level1/as7.png', 'width': 35, 'height': 35}
-
-
+            {'image': 'images/nlo/nlo2_1.png', 'width': 35, 'height': 30},
+            {'image': 'images/nlo/nlo2_2.png', 'width': 37, 'height': 33},
+            {'image': 'images/nlo/nlo2_3.png', 'width': 37, 'height': 33},
+            {'image': 'images/nlo/nlo2_4.png', 'width': 37, 'height': 33},
         ],
         # 'final_pool': [f'images/planet_explore{i}.gif' for i in range(1, 21)]  # 20 уникальных финальных спрайтов
         'finals': {
