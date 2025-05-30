@@ -8,7 +8,7 @@ def get_image_size(image_path):
     return image.get_width(), image.get_height()
 
 
-def parse_astr_collections(base_path='images/astr'):
+def parse_collections(base_path=None):
     # Группируем изображения по префиксу (например, col5_1.png, col5_2.png -> коллекция col5)
     collections = {}
     for img in os.listdir(base_path):
@@ -28,30 +28,6 @@ def parse_robots_collections(base_path='images/robots'):
     return [
         [os.path.join(base_path, img) for img in os.listdir(base_path) if img.endswith('.png')]
     ]
-
-
-def parse_alians_collections(base_path='images/alians'):
-    # Аналогично astr, группируем по префиксу
-    collections = {}
-    for img in os.listdir(base_path):
-        if img.endswith('.png'):
-            prefix = img.split('_')[0]
-            if prefix not in collections:
-                collections[prefix] = []
-            collections[prefix].append(os.path.join(base_path, img))
-    return list(collections.values())
-
-
-def parse_nlo_collections(base_path='images/nlo'):
-    # Аналогично astr, группируем по префиксу
-    collections = {}
-    for img in os.listdir(base_path):
-        if img.endswith('.png'):
-            prefix = img.split('_')[0]
-            if prefix not in collections:
-                collections[prefix] = []
-            collections[prefix].append(os.path.join(base_path, img))
-    return list(collections.values())
 
 # def parse_planets(base_path='images/planets'):
 #     planets = [os.path.join(base_path, img) for img in os.listdir(base_path) if img.endswith('.gif')]
@@ -104,19 +80,18 @@ astr_size_mapping = {
 
 }
 
-astr_collections = parse_astr_collections()
+astr_collections = parse_collections('images/astr')
 robots_collections = parse_robots_collections()
-alians_collections = parse_alians_collections()
-nlo_collections = parse_nlo_collections()
+alians_collections = parse_collections('images/alians')
+nlo_collections = parse_collections('images/nlo')
 planets = parse_planets()
 
 SPRITE_SETS = {
     'EASY': create_sprite_config(
-        collections=nlo_collections,
+        collections=robots_collections,
         player_image='images/sheep3.png',
         player_size=(40, 35),
-        final='images/2537512610.gif',
-        size_mapping=astr_size_mapping
+        final='images/2537512610.gif'
     ),
     'MEDIUM': create_sprite_config(
         collections=robots_collections,

@@ -12,7 +12,8 @@ from game_sprites import Wall, GameSprite
 from enemy_manager import EnemyManager
 # from grafics_classes import Backgrounds, Starfield_white, Starfield_palette
 from grafics import *
-from sprite_config import SPRITE_SETS, astr_collections, robots_collections, alians_collections, nlo_collections
+from sprite_config import SPRITE_SETS, astr_collections, robots_collections, alians_collections, nlo_collections, \
+    planets
 from states.config_state import used_explore_finals
 from test_gradient_for_labirints import Fon2_2
 
@@ -216,23 +217,26 @@ class Level:
             'HARD': 10, 'EXPLORE': 15
         }[self.difficulty]
 
-
-
-        # Выбор финального спрайта
         if self.difficulty == 'EXPLORE':
-            final_image = self.select_explore_final()  # Returns a string (path)
+            final_image = self.select_explore_final()
+            if final_image:
+                final_data = final_image
+                final_image = final_data['image']
+                width = 50
+                height = 50
+            else:
+                final_image = 'images/planets/23.gif'  # Запасной вариант
+                width = 50
+                height = 50
         else:
             final_config = self.sprite_set['final']
             if isinstance(final_config, dict):
                 final_image = final_config['image']
-                width = final_config.get('width', 50)  # Default size if not specified
+                width = final_config.get('width', 50)
                 height = final_config.get('height', 50)
             else:
                 final_image = final_config
-                width = 50
-                height = 50
 
-        # Проверка формата файла
         if final_image.endswith('.gif'):
             if self.difficulty == 'EXPLORE':
                 self.final = FinalGifSprite(end_pos[0], end_pos[1], final_image, scale=0.15, rotation_speed=1)
@@ -244,13 +248,16 @@ class Level:
         self.all_sprites.add(self.walls, self.player, self.final)
 
     def select_explore_final(self):
-        available_finals = [path for key, path in self.sprite_set['finals'].items() if path not in used_explore_finals]
-        if not available_finals:  # Если все использованы, сбрасываем
-            used_explore_finals.clear()
-            available_finals = list(self.sprite_set['finals'].values())
-        selected_final = random.choice(available_finals)
-        used_explore_finals.add(selected_final)
-        return selected_final
+        available_planets = [
+            planet for planet in planets.values()
+            if not planet['discovered'] and planet['image'] not in used_explore_finals
+        ]
+        if not available_planets:
+            return None
+        selected_planet = random.choice(available_planets)
+        used_explore_finals.add(selected_planet['image'])
+
+        return selected_planet
 
     def get_background(self):
         if self.difficulty == 'EASY':
