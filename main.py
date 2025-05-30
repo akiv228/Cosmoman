@@ -29,6 +29,7 @@ class Game:
         self.sound_enabled = True  # Добавляем флаг состояния звука
         self.sound_notification = SoundNotification(self)
 
+
     def toggle_sound(self):
         self.sound_enabled = not self.sound_enabled
         if self.sound_enabled:

@@ -37,7 +37,7 @@ class Level:
             f"Не удалось сгенерировать размер за {max_attempts} попыток. Используется размер по умолчанию {default_size}")
         return default_size
 
-    def __init__(self, difficulty, debug_mode=False, load_from_file=False, filename="maze_data.pkl"):
+    def __init__(self, difficulty, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
         self.difficulty = difficulty
         self.sprite_set = SPRITE_SETS[difficulty]
         self.debug_mode = debug_mode
@@ -78,6 +78,8 @@ class Level:
 
         self.grid = (gw, gh)
         self.path = []
+        self.grid_width = self.maze_info['grid_width']
+        self.grid_height = self.maze_info['grid_height']
 
         # Загрузка спрайтов из конфигурации
         start_pos, final_pos, self.path = path_utils.calculate_positions(self.maze_info, self.grid, self.debug_mode)

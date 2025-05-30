@@ -37,21 +37,39 @@ class EnemyManager:
         if not self.level.path or len(self.level.path) < 4:
             return
 
+        # cfg = {
+        #     'EASY': {'count': 8, 'speed': 1},
+        #     'MEDIUM': {'count': 8, 'speed': 2},
+        #     'HARD': {'count': 10, 'speed': 2},
+        #     'EXPLORE': {'count': 15, 'speed': 2}
+        # }[self.level.difficulty]
+
         cfg = {
-            'EASY': {'count': 8, 'speed': 1},
-            'MEDIUM': {'count': 8, 'speed': 2},
-            'HARD': {'count': 10, 'speed': 2},
-            'EXPLORE': {'count': 15, 'speed': 2}
+            'EASY': {'count_factor': 0.05, 'speed': 1},  # 154 * 0.05 = 7.7 → 8
+            'MEDIUM': {'count_factor': 0.04, 'speed': 2},  # 192 * 0.04 = 7.7 → 8
+            'HARD': {'count_factor': 0.07, 'speed': 2},  # 216 * 0.05 = 10.8 → 11
+            'EXPLORE': {'count_factor': 0.05, 'speed': 2}  # 300 * 0.05 = 15
         }[self.level.difficulty]
+
+        cell_count = self.level.grid_width * self.level.grid_height
+        enemy_count = round(cell_count * cfg['count_factor'])
 
         segments = path_utils.split_path_into_segments(self.level.path)
         valid_segments = [
             seg for seg in segments
             if len(seg) >= 2 and not self.is_near_start_end(seg)
         ]
-        enemy_spacing = self.level.maze_info['cell_size'] * 2
+        # enemy_spacing = self.level.maze_info['cell_size'] * 2
+
+        enemy_spacing = self.level.maze_info['cell_size'] * {
+            'EASY': 1.5,
+            'MEDIUM': 2,
+            'HARD': 2.0,
+            'EXPLORE': 2.0
+        }[self.level.difficulty]
+
         used_segments = []
-        for _ in range(cfg['count']):
+        for _ in range(11):
             if not valid_segments: break
             available_segments = self.filter(
                 valid_segments, used_segments, enemy_spacing
