@@ -3,13 +3,17 @@ import random
 from game_sprites import Enemy
 import path_utils
 from sprite_config import SPRITE_SETS
+import logging
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logger = logging.getLogger('EnemyManager')
 
 
 class EnemyManager:
     def __init__(self, level):
         self.level = level
         self.enemies = pg.sprite.Group()
-
         self.enemy_configs = SPRITE_SETS[level.difficulty]['enemies']
 
     def filter(self, segments, used_segments, min_distance):
@@ -35,54 +39,95 @@ class EnemyManager:
 
     def spawn_enemies(self):
         if not self.level.path or len(self.level.path) < 4:
+            logger.warning("Path too short for enemies")
             return
 
-        # cfg = {
-        #     'EASY': {'count': 8, 'speed': 1},
-        #     'MEDIUM': {'count': 8, 'speed': 2},
-        #     'HARD': {'count': 10, 'speed': 2},
-        #     'EXPLORE': {'count': 15, 'speed': 2}
-        # }[self.level.difficulty]
-
+        # Конфигурация в зависимости от сложности
         cfg = {
-            'EASY': {'count_factor': 0.05, 'speed': 1},  # 154 * 0.05 = 7.7 → 8
-            'MEDIUM': {'count_factor': 0.04, 'speed': 2},  # 192 * 0.04 = 7.7 → 8
-            'HARD': {'count_factor': 0.07, 'speed': 2},  # 216 * 0.05 = 10.8 → 11
-            'EXPLORE': {'count_factor': 0.05, 'speed': 2}  # 300 * 0.05 = 15
+            'EASY': {'count_factor': 0.05, 'speed': 1},
+            'MEDIUM': {'count_factor': 0.04, 'speed': 2},
+            'HARD': {'count_factor': 0.07, 'speed': 2},
+            'EXPLORE': {'count_factor': 0.05, 'speed': 2}
         }[self.level.difficulty]
 
-        cell_count = self.level.grid_width * self.level.grid_height
-        enemy_count = round(cell_count * cfg['count_factor'])
-
-        segments = path_utils.split_path_into_segments(self.level.path)
-        valid_segments = [
-            seg for seg in segments
-            if len(seg) >= 2 and not self.is_near_start_end(seg)
-        ]
-        # enemy_spacing = self.level.maze_info['cell_size'] * 2
-
+        # Расстояние между врагами
         enemy_spacing = self.level.maze_info['cell_size'] * {
-            'EASY': 1.5,
+            'EASY': 1.8,
             'MEDIUM': 2,
             'HARD': 2.0,
             'EXPLORE': 2.0
         }[self.level.difficulty]
 
+        # Расчет количества врагов
+        cell_count = self.level.grid_width * self.level.grid_height
+        planned_enemy_count = round(cell_count * cfg['count_factor'])
+        logger.info(f"Planned enemies: {planned_enemy_count} (based on {cell_count} cells)")
+
+        # Разделение пути на сегменты
+        segments = path_utils.split_path_into_segments(self.level.path)
+        logger.info(f"Total segments: {len(segments)}")
+
+        # Фильтрация сегментов
+        valid_segments = [
+            seg for seg in segments
+            if len(seg) >= 2 and not self.is_near_start_end(seg)
+        ]
+        logger.info(f"Valid segments (length>=2, not near start/end): {len(valid_segments)}")
+
         used_segments = []
-        for _ in range(11):
-            if not valid_segments: break
-            available_segments = self.filter(
-                valid_segments, used_segments, enemy_spacing
-            )
-            if not available_segments: break
+        created_enemies = 0
+        failed_placement = 0
+
+        # Попытки размещения врагов
+        for _ in range(planned_enemy_count):
+            if not valid_segments:
+                logger.warning("No valid segments left")
+                break
+
+            # Фильтрация доступных сегментов
+            available_segments = self.filter(valid_segments, used_segments, enemy_spacing)
+            if not available_segments:
+                logger.warning("No available segments after filtering")
+                break
+
+            # Выбор наиболее удаленного сегмента
             segment = self.choose_distant_segment(available_segments, enemy_spacing)
-            if not segment: continue
+            if not segment:
+                logger.debug("No distant segment found")
+                failed_placement += 1
+                continue
+
+            # Создание врага
             enemy = self.create_enemy_for_segment(segment, cfg['speed'])
-            if enemy and not self.check_enemy_collisions(enemy, enemy_spacing):
-                self.level.all_sprites.add(enemy)
-                self.enemies.add(enemy)
-                used_segments.append(segment)
-                valid_segments.remove(segment)
+            if not enemy:
+                logger.error("Failed to create enemy")
+                continue
+
+            # Проверка коллизий
+            if self.check_enemy_collisions(enemy, enemy_spacing):
+                logger.debug("Enemy collision detected")
+                failed_placement += 1
+                continue
+
+            # Успешное размещение
+            self.level.all_sprites.add(enemy)
+            self.enemies.add(enemy)
+            used_segments.append(segment)
+            valid_segments.remove(segment)
+            created_enemies += 1
+
+        # Логирование результатов
+        logger.info(f"Created enemies: {created_enemies}/{planned_enemy_count}")
+        if created_enemies < planned_enemy_count:
+            reason = "Reasons: "
+            if created_enemies + failed_placement < planned_enemy_count:
+                reason += "Not enough valid segments, "
+            if failed_placement > 0:
+                reason += f"{failed_placement} failed placements (collisions/distance), "
+            reason += f"Valid segments left: {len(valid_segments)}"
+            logger.warning(reason)
+
+    # Остальные методы без изменений (is_near_start_end, create_enemy_for_segment, и т.д.)
 
     def is_near_start_end(self, segment):
         start_node = segment[0]
@@ -145,13 +190,17 @@ class EnemyManager:
         return False
 
     def choose_distant_segment(self, segments, min_distance):
+        if not segments:
+            return None
+
         if not self.enemies:
             return random.choice(segments)
 
         best_segment = None
         best_score = -1
 
-        for _ in range(3):
+        # Проверяем до 10 сегментов (вместо фиксированных 3)
+        for _ in range(min(10, len(segments))):
             segment = random.choice(segments)
             center = self.segment_center(segment)
             min_dist = float('inf')
@@ -162,11 +211,15 @@ class EnemyManager:
                 dist = dx * dx + dy * dy
                 min_dist = min(min_dist, dist)
 
+            # Возвращаем сегмент сразу если он идеально подходит
+            if min_dist > (min_distance ** 2 * 1.5):
+                return segment
+
             if min_dist > best_score:
                 best_score = min_dist
                 best_segment = segment
 
-        return best_segment if best_score > (min_distance ** 2) else None
+        return best_segment
 
     def segment_center(self, segment):
         first = segment[0]

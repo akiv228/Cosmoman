@@ -146,7 +146,7 @@ def get_wall_weight(wall_type, difficulty):
     weights = {
         'EASY': {'v': (1, 10), 'h': (1, 10)},
         'MEDIUM': {'v': (5, 20), 'h': (5, 20)},  # Более высокие веса
-        'HARD': {'v': (10, 50), 'h': (10, 50)},  # Максимальные веса
+        'HARD': {'v': (1, 5), 'h': (1, 5)},  # Максимальные веса
         'EXPLORE': {'v': (1, 100), 'h': (1, 100)} # Полный рандом
     }
     min_w, max_w = weights[difficulty][wall_type]
