@@ -178,26 +178,26 @@ SPRITE_SETS = {
         ],
         # 'final_pool': [f'images/planet_explore{i}.gif' for i in range(1, 21)]  # 20 уникальных финальных спрайтов
         'finals': {
-                    # 1: 'images/planets/1.gif',
-                    # 2: 'images/planets/2.gif',
-                    # 3: 'images/planets/3.gif',
-                    # 4: 'images/planets/4.gif',
-                    # 5: 'images/planets/5.gif',
-                    # 6: 'images/planets/6.gif',
-                #     7: 'images/planets/7.gif',
-                #     8: 'images/planets/8.gif',
-                #     9: 'images/planets/9.gif',
-                #     10: 'images/planets/10.gif',
-                #  11: 'images/planets/11.gif',
-                #      12: 'images/planets/12.gif',
-                #      13: 'images/planets/13.gif',
-                 14: 'images/planets/14.gif'
-                    # 15: 'images/planets/15.gif',
-                    # 16: 'images/planets/16.gif'.
-                    # 17: 'images/planets/17.gif',
-                    # 18: 'images/planets/18.gif',
-                    # 19: 'images/planets/19.gif',
-                    # 20: 'images/planets/20.gif'
+                    1: 'images/planets/1.gif',
+                    2: 'images/planets/2.gif',
+                    3: 'images/planets/3.gif',
+                    4: 'images/planets/4.gif',
+                    5: 'images/planets/5.gif',
+                    6: 'images/planets/6.gif',
+                    7: 'images/planets/7.gif',
+                    8: 'images/planets/8.gif',
+                    9: 'images/planets/9.gif',
+                    10: 'images/planets/10.gif',
+                    11: 'images/planets/11.gif',
+                    12: 'images/planets/12.gif',
+                    13: 'images/planets/13.gif',
+                    14: 'images/planets/14.gif',
+                    15: 'images/planets/15.gif',
+                    16: 'images/planets/16.gif',
+                    17: 'images/planets/17.gif',
+                    18: 'images/planets/18.gif',
+                    19: 'images/planets/19.gif',
+                    20: 'images/planets/20.gif'
                  }
     }
 }

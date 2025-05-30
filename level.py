@@ -54,7 +54,8 @@ class Level:
             # 'HARD': (19, 15),
             'HARD': (18, 12),
             # 'EXPLORE': (random.randint(18, 22), random.randint(13, 17))
-            'EXPLORE': Level.get_explore_size(min_cell_size=35)
+            # 'EXPLORE': Level.get_explore_size(min_cell_size=35)
+            'EXPLORE': Level.get_explore_size2()
         }
         # Ширина: 22 Высота: 15
         # Ширина: 20 Высота: 13
@@ -89,14 +90,15 @@ class Level:
         self.enemy_manager = EnemyManager(self)
         self.enemy_manager.spawn_enemies()
 
-    # def get_explore_size(self):
-    #     while True:
-    #         width = random.randint(16, 20)
-    #         height = random.randint(12, 16)
-    #
-    #         # Проверяем пропорции (ширина должна быть заметно больше высоты)
-    #         if width / height >= 1.25:  # Соотношение не менее 5:4
-    #             return width, height
+    @staticmethod
+    def get_explore_size2():
+        while True:
+            width = random.randint(16, 21)
+            height = random.randint(12, 16)
+
+            # Проверяем пропорции (ширина должна быть заметно больше высоты)
+            if width / height >= 1.25:  # Соотношение не менее 5:4
+                return width, height
 
     def init_fog_of_war(self):
         """Инициализирует систему тумана войны с облаками"""

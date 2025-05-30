@@ -56,4 +56,4 @@ class LevelSelectState(State):
         self.neon_text.draw(window)
         for button in self.buttons:
             button.draw(window)
-        # self.button_back.reset(window)
+        self.button_back.reset(window)
