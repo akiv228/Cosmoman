@@ -12,7 +12,7 @@ from game_sprites import Wall, GameSprite
 from enemy_manager import EnemyManager
 # from grafics_classes import Backgrounds, Starfield_white, Starfield_palette
 from grafics import *
-from sprite_config import SPRITE_SETS
+from sprite_config import SPRITE_SETS, astr_collections, robots_collections, alians_collections, nlo_collections
 from states.config_state import used_explore_finals
 from test_gradient_for_labirints import Fon2_2
 
@@ -52,6 +52,7 @@ class Level:
             'EXPLORE': Level.get_explore_size2()
             # 'EXPLORE': (22, 13)
         }
+
         """
         21, 14
         20, 14
@@ -71,6 +72,35 @@ class Level:
         22, 13
         19, 12
         """
+        if difficulty == 'EASY':
+            selected_collection = random.choice(astr_collections)
+            self.sprite_set['enemies'] = [
+                {'image': img, 'width': self.sprite_set['enemies'][0]['width'],
+                 'height': self.sprite_set['enemies'][0]['height']}
+                for img in selected_collection
+            ]
+        elif difficulty == 'MEDIUM':
+            selected_collection = random.choice(robots_collections)
+            self.sprite_set['enemies'] = [
+                {'image': img, 'width': self.sprite_set['enemies'][0]['width'],
+                 'height': self.sprite_set['enemies'][0]['height']}
+                for img in selected_collection
+            ]
+        elif difficulty == 'HARD':
+            selected_collection = random.choice(alians_collections)
+            self.sprite_set['enemies'] = [
+                {'image': img, 'width': self.sprite_set['enemies'][0]['width'],
+                 'height': self.sprite_set['enemies'][0]['height']}
+                for img in selected_collection
+            ]
+        elif difficulty == 'EXPLORE':
+            all_collections = astr_collections + nlo_collections
+            selected_collection = random.choice(all_collections)
+            self.sprite_set['enemies'] = [
+                {'image': img, 'width': self.sprite_set['enemies'][0]['width'],
+                 'height': self.sprite_set['enemies'][0]['height']}
+                for img in selected_collection
+            ]
         explore_size = self.grid_sizes['EXPLORE']
         print("Ширина:", explore_size[0], "Высота:", explore_size[1])
 

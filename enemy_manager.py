@@ -48,14 +48,24 @@ class EnemyManager:
             logger.warning("Path too short for enemies")
             return
 
-        # Конфигурация в зависимости от сложности
         cfg = {
-            'EASY': {'count_factor': 0.05},
-            'MEDIUM': {'count_factor': 0.04},
-            'HARD': {'count_factor': 0.07},
-            'EXPLORE': {'count_factor': 0.05}
+            'EASY': {
+                'count_factor': 0.05,
+                'off_bfs_factor': 0.7  # 70% от основного количества для врагов вне BFS
+            },
+            'MEDIUM': {
+                'count_factor': 0.04,
+                'off_bfs_factor': 0.8  # 80% от основного количества для врагов вне BFS
+            },
+            'HARD': {
+                'count_factor': 0.07,
+                'off_bfs_factor': 0.9  # 90% от основного количества для врагов вне BFS
+            },
+            'EXPLORE': {
+                'count_factor': 0.05,
+                'off_bfs_factor': 0.7  # 70% от основного количества для врагов вне BFS
+            }
         }[self.level.difficulty]
-
         # Расстояние между врагами
         enemy_spacing = self.level.maze_info['cell_size'] * {
             'EASY': 2,
@@ -67,7 +77,7 @@ class EnemyManager:
         # Расчет количества врагов
         cell_count = self.level.grid_width * self.level.grid_height
         planned_bfs_enemies = round(cell_count * cfg['count_factor'])
-        planned_off_bfs_enemies = round(cell_count * cfg['count_factor'] * 0.7)  # Half the BFS count for off-BFS
+        planned_off_bfs_enemies = round(cell_count * cfg['count_factor'] * cfg['off_bfs_factor'])
 
         # Find all segments in the maze
         all_segments = path_utils.find_all_segments(self.level.maze_info)
