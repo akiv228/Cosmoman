@@ -52,7 +52,25 @@ class Level:
             'EXPLORE': Level.get_explore_size2()
             # 'EXPLORE': (22, 13)
         }
-        # (18, 11) (15, 14) (22, 13) (19, 14), (19, 12)
+        """
+        21, 14
+        20, 14
+        16, 13
+        21, 14
+        17, 12
+        19, 15
+        18, 11
+        18, 12
+        17, 14
+        18, 12
+        18, 14
+        19, 13
+        21, 15
+        19, 14
+        15, 14
+        22, 13
+        19, 12
+        """
         explore_size = self.grid_sizes['EXPLORE']
         print("Ширина:", explore_size[0], "Высота:", explore_size[1])
 
@@ -85,39 +103,27 @@ class Level:
         self.enemy_manager = EnemyManager(self)
         self.enemy_manager.spawn_enemies()
 
-    """
-    21, 14
-    20, 14
-    16, 13
-    21, 14
-    17, 12
-    19, 15
-    18, 12
-    17, 14
-    18, 12
-    18, 14
-    """
-    # @staticmethod
-    # def get_explore_size2():
-    #     while True:
-    #         width = random.randint(16, 21)
-    #         height = random.randint(12, 16)
-    #
-    #         # Проверяем пропорции (ширина должна быть заметно больше высоты)
-    #         if width / height >= 1.2:  # Соотношение не менее 5:4
-    #             return width, height
-
     @staticmethod
-    def get_explore_size2(min_cell_size=40, screen_width=1100, screen_height=800, max_attempts=10):
-        for _ in range(max_attempts):
-            width = random.randint(16, 19)
-            height = random.randint(12, 16)
-            cell_size_x = screen_width / width
-            cell_size_y = screen_height / height
-            print(f"Реальный размер клетки: {cell_size_x}x{cell_size_y}")
-            if cell_size_x >= min_cell_size and cell_size_y >= min_cell_size:
-                return width, height
-        return 21, 14
+    def get_explore_size2(min_cell_size=50, screen_width=1100, screen_height=800):
+        base_width = random.randint(17, 19)
+        base_height = random.randint(12, 14)
+
+        width = base_width + random.randint(-1, 2)
+        height = base_height + random.randint(-1, 1)
+
+        ratio = width / height
+        if ratio < 1.2:
+            width = int(height * 1.3)
+        elif ratio > 1.5:
+            height = int(width / 1.4)
+
+        cell_w = screen_width / width
+        cell_h = screen_height / height
+        if cell_w < min_cell_size or cell_h < min_cell_size:
+            return 18, 14
+
+        return width, height
+
 
     def init_fog_of_war(self):
         """Инициализирует систему тумана войны с облаками"""
