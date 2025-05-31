@@ -23,34 +23,11 @@ class Level:
         self.grid_sizes = {
             'EASY': (14, 11),
             'MEDIUM': (16, 12),
-            # 'MEDIUM': (24, 18),
-            # 'HARD': (24, 15),
-            # 'HARD': (19, 15),
             'HARD': (18, 12),
             # 'EXPLORE': Level.get_explore_size(min_cell_size=35)
             'EXPLORE': Level.get_explore_size2()
-            # 'EXPLORE': (22, 13)
         }
 
-        """
-        21, 14
-        20, 14
-        16, 13
-        21, 14
-        17, 12
-        19, 15
-        18, 11
-        18, 12
-        17, 14
-        18, 12
-        18, 14
-        19, 13
-        21, 15
-        19, 14
-        15, 14
-        22, 13
-        19, 12
-        """
         explore_size = self.grid_sizes['EXPLORE']
         print("Ширина:", explore_size[0], "Высота:", explore_size[1])
 
@@ -77,7 +54,7 @@ class Level:
         self.init_sprites(start_pos, final_pos)
 
         # Инициализация системы "тумана войны"
-        # self.init_fog_of_war()
+        self.init_fog_of_war()
         
         self.background = self.get_background()
         self.enemy_manager = EnemyManager(self)
@@ -109,7 +86,7 @@ class Level:
         """Инициализирует систему тумана войны с облаками"""
         # Загружаем изображение облака
         try:
-            self.cloud_image = pg.image.load('images/cloud.png').convert_alpha()
+            self.cloud_image = pg.image.load('images/smoke.png').convert_alpha()
             self.cloud_image = pg.transform.scale(self.cloud_image, 
                                             (self.maze_info['cell_size'], self.maze_info['cell_size']))
         except:
@@ -127,7 +104,7 @@ class Level:
                 
                 # Создаем спрайт облака с правильными параметрами
                 cloud = GameSprite(
-                    player_image='images/cloud.png',
+                    player_image='images/smoke.png',
                     player_x=x,
                     player_y=y,
                     size_x=self.maze_info['cell_size'],
@@ -217,7 +194,7 @@ class Level:
         self.enemy_manager.enemies.update()
         # self.final.update(delta_time)
         self.all_sprites.update()
-        # self.update_fog_of_war()  # Обновляем видимость облаков
+        self.update_fog_of_war()  # Обновляем видимость облаков
 
         pg.sprite.groupcollide(self.player.bullets, self.walls, True, False)
         pg.sprite.groupcollide(self.player.bullets, self.enemy_manager.enemies, True, True)
@@ -240,14 +217,10 @@ class Level:
 
     def render(self, window):
         if self.difficulty == 'EASY':
-            # self.background.reset(window)
             self.background.update(window)
         elif self.difficulty in ('MEDIUM'):
-            # self.background.update(window)
-            # window.fill((0, 0, 0))
             self.background.render(window)
         elif self.difficulty in ('HARD'):
-            # self.background.update(window)
             # window.fill((0, 0, 0))
             self.background.reset(window)
         elif self.difficulty in ('EXPLORE'):
@@ -260,10 +233,10 @@ class Level:
         self.all_sprites.draw(window)
         self.player.bullets.draw(window)
         
-        # # Рисуем только видимые облака
-        # for cloud in self.cloud_group:
-        #     if hasattr(cloud, 'visible') and cloud.visible:
-        #         window.blit(cloud.image, cloud.rect)
+        # Рисуем только видимые облака
+        for cloud in self.cloud_group:
+            if hasattr(cloud, 'visible') and cloud.visible:
+                window.blit(cloud.image, cloud.rect)
 
     def draw_debug_path(self, surface):
         if not self.debug_mode:
