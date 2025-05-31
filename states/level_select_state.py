@@ -1,6 +1,6 @@
 import pygame as pg
 from .game_state import State
-from grafics_classes_stash import Menu
+from grafics.grafics_elements import ImageButton
 from .config_state import LevelSelectState as cfg
 from grafics.elements_for_menu_select_login import Star, NeonText, Button
 
@@ -17,7 +17,7 @@ class LevelSelectState(State):
         for i, button in enumerate(self.buttons):
             # button.set_active(i <= self.game.completed_difficulties)
             button.set_active(i >= 0)
-        self.button_back = Menu(*cfg.back)
+        self.button_back = ImageButton(*cfg.back)
         self.music = cfg.music
 
     def handle_events(self, events):
@@ -30,7 +30,7 @@ class LevelSelectState(State):
                     if button.rect.collidepoint(e.pos) and button.active:
                         difficulty_map = {"LEVEL1": "EASY", "LEVEL2": "MEDIUM", "LEVEL3": "HARD", "EXPLORE UNIVERSITY": "EXPLORE"}
                         from .play_state import PlayState
-                        from test_intro import IntroState
+                        from states.intro_state import IntroState
                         self.game.set_state(
                             IntroState(self.game, lambda g, text=button.text: PlayState(g, difficulty_map[text])))
                         # difficulty = difficulty_map[button.text]
@@ -56,4 +56,4 @@ class LevelSelectState(State):
         self.neon_text.draw(window)
         for button in self.buttons:
             button.draw(window)
-        self.button_back.reset(window)
+        self.button_back.draw(window)

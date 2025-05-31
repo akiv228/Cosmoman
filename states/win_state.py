@@ -2,7 +2,7 @@ import pygame as pg
 
 from planet_screen import PlanetSystem
 from states.game_state import State
-from grafics_classes_stash import Backgrounds, Menu, Label
+from grafics.grafics_elements import  Menu
 from grafics.elements_for_menu_select_login import NeonText, Button, Star
 from .config_state import WinState as cfg
 from config import win_width as W, win_height as H
@@ -11,7 +11,7 @@ from config import win_width as W, win_height as H
 class WinState(State):
     def __init__(self, game):
         super().__init__(game)
-        self.background = Backgrounds(*cfg.bg)
+        # self.background = Backgrounds(*cfg.bg)
         # self.text_back = Label(*cfg.back_label)
         # self.text_back.set_text(*cfg.per_init_back_label)
         self.neon_text = NeonText(cfg.title)

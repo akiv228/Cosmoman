@@ -4,11 +4,10 @@ import pygame as pg
 from pygame import display, time, event
 from config import win_width, win_height, txt_caption, FPS
 from grafics.elements_for_menu_select_login import SoundNotification
+from states.intro_state import IntroState
 from states.menu_state import MenuState
 from states.login_state import LoginState
 from game_music import mixer
-from test_intro import *
-
 
 
 

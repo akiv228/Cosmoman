@@ -5,17 +5,6 @@ import pygame as pg
 
 used_explore_finals = set()
 
-# class Instance:
-#     def __init__(self, src, *args):
-#         self.__src = src
-#         if (len(args) != 4): raise AttributeError('Надо передать 4 параметра: x, y, width, height')
-#         for arg in args:
-#             if type(arg) not in (int, float): raise TypeError
-#         self.__args = (src,) + tuple(map(int, args))
-#
-#     def __iter__(self):
-#         return iter(self.__args)
-
 class Instance:
     def __init__(self, src, *args):
         self.src = src  # Делаем атрибут публичным
@@ -23,7 +12,7 @@ class Instance:
             raise AttributeError('Надо передать 4 параметра: x, y, width, height')
         self.x, self.y, self.width, self.height = map(int, args)
 
-    # Добавляем возможность обращения по индексу
+    #  возможность обращения по индексу
     def __getitem__(self, index):
         if index == 0:
             return self.src
@@ -37,7 +26,7 @@ class Instance:
             return self.height
         raise IndexError("Instance index out of range")
 
-    # Для удобства можно добавить итерацию
+
     def __iter__(self):
         return iter((self.src, self.x, self.y, self.width, self.height))
 
@@ -72,14 +61,14 @@ class Text:
 if __name__ != '__config__':
 
     class MenuState:
-        bg = Instance('images\\m_start_back2.jpg', W + 20, H + 20, -10, 0)
-        start = Instance('images\\start.png', 550, 370, 130, 130)
-        cross = Img('images/red_cross.png')
-        manual = Instance('images\\instruction.png', 380, 395, 110, 110)
-        sound = Instance('images\\sound.png', 185, 365, 170, 170)
+        # bg = Instance('images\\m_start_back2.jpg', W + 20, H + 20, -10, 0)
+        # start = Instance('images\\start.png', 550, 370, 130, 130)
+        # cross = Img('images/red_cross.png')
+        # manual = Instance('images\\instruction.png', 380, 395, 110, 110)
+        # sound = Instance('images\\sound.png', 185, 365, 170, 170)
+        # greetings = Text(txt_welcome, 62, WHITE)
         label = [140, 0, 680, 40, BLACK_BLUE]
         music = Sound('sound\\menu.mp3')
-        greetings = Text(txt_welcome, 62, WHITE)
         stars = {
             'count': 100,
             'min_speed': 0.5,
@@ -112,17 +101,16 @@ if __name__ != '__config__':
 
 
     class LevelSelectState:
-        bg = Instance('images\\select.jpg', W + 20, H + 20, -10, 0)
-        btn = [
-            Instance('images\\select1.png', 170, 120, 190, 100),
-            Instance('images\\select2.png', 170, 250, 190, 100),
-            Instance('images\\select3.png', 170, 375, 190, 100),
-        ]
-        explore = Instance('images\\explore.png', 400, 375, 190, 100)
-        # back = Instance('images\\menu.png', 70, 420, 100, 100)
+        # bg = Instance('images\\select.jpg', W + 20, H + 20, -10, 0)
+        # btn = [
+        #     Instance('images\\select1.png', 170, 120, 190, 100),
+        #     Instance('images\\select2.png', 170, 250, 190, 100),
+        #     Instance('images\\select3.png', 170, 375, 190, 100),
+        # ]
+        # explore = Instance('images\\explore.png', 400, 375, 190, 100)
+        # pre_init_back_label = (140, 0, 680, 40, GREY_BLUE)
+        # back_label = Text(txt_select, 62, WHITE)
         back = Instance('images\\back3.png', 140, 100, 100, 70)
-        pre_init_back_label = (140, 0, 680, 40, GREY_BLUE)
-        back_label = Text(txt_select, 62, WHITE)
         music = Sound('sound\\menu.mp3')
         stars = {
             'count': 100,
@@ -159,25 +147,22 @@ if __name__ != '__config__':
         # Накладка (overlay)
         overlay_color = (0, 0, 0, 200)  # Черный с прозрачностью 50%
 
-        # Окно паузы
         pause_window_size = (650, 350)
         pause_window_color = (50, 50, 50, 200)
 
-        # Свойства кнопок
         buttons = [
             {'image': 'images\\home.png', 'action': 'home', 'size': (80, 85)},
             {'image': 'images\\info.png', 'action': 'info', 'size': (60, 85)},
-            {'image': 'images\\pause_play.png', 'action': 'unpause', 'size': (80, 85)},
+            {'image': 'images\\pause_play.png', 'action': 'unpause', 'size': (75, 82)},
         ]
-        button_spacing = 80  # Горизонтальный отступ между кнопками
+        button_spacing = 80  # горизонтальный отступ
         button_row_gap = 150  # Вертикальный отступ от низа текста до центра ряда кнопок
 
-        # Свойства текста
         pause_text = {
             'text': "PAUSE",
             'font_size': 70,
             'color': (255, 255, 255),
-            'position': {'x': 'center', 'y': 50}  # x: по центру, y: отступ сверху
+            'position': {'x': 'center', 'y': 50}
         }
 
     class PlayState:
@@ -190,8 +175,8 @@ if __name__ != '__config__':
 
 
     class WinState:
-        bg = Instance('images\\win.jpg', W, H, 0, 0)
-        back_label = (230, 5, 200, 50, DARK_BLUE)
+        # bg = Instance('images\\win.jpg', W, H, 0, 0)
+        # back_label = (230, 5, 200, 50, DARK_BLUE)
         # per_init_back_label = (txt_win, 55, WHITE)
         back = Instance('images\\home.png', 150, H - 100, 130, 135)
         restart = Instance('images\\restart (2).png', W - 180, H - 100, 120, 120)
@@ -235,8 +220,8 @@ if __name__ != '__config__':
         # title = (W // 2 - 200, H // 2 - 150, 400, 50, (255, 255, 255))
         username_box = (W // 2 - 150, H // 2 - 50, 300, 40, "User name", (200, 200, 200), (255, 255, 255))
         password_box = (W // 2 - 150, H // 2 + 20, 300, 40, "Password", (200, 200, 200), (255, 255, 255))
-        login_btn = ("images/log_in.png", W // 2 - 120, H // 2 + 120, 140, 50)
-        register_btn = ("images/sign_in.png", W // 2 + 120, H // 2 + 120, 140, 50)
+        login_btn = ("images/log_in.png", W // 2 - 250, H // 2 + 100, 140, 50)
+        register_btn = ("images/sign_in.png", W // 2 + 100, H // 2 + 100, 140, 50)
         message = (W // 2 - 150, H // 2 + 180, 300, 30, (255, 0, 0))
         # label = ("Космическое Приключение", 36, (255, 255, 255))
         msg = ("", 24, (255, 0, 0))
@@ -264,12 +249,12 @@ if __name__ != '__config__':
             'alpha': (20, 40),
             'rotation_base': (0.5, 1.0),
         }
-        default_duration = 1
+        default_duration = 0.8
 
 
     class SoundIcons:
-        on = Instance('images/sound_on.png', 0, 0, 80, 80)  # Иконка включенного звука
-        off = Instance('images/sound_off.png', 0, 0, 80, 80)  # Иконка выключенного звука
+        on = Instance('images/sound_on.png', 0, 0, 80, 80)
+        off = Instance('images/sound_off.png', 0, 0, 80, 80)
         position = (W // 2 - 40, H - 100)  # Позиция по центру внизу
         duration = 1.0  # Длительность анимации в секундах
         fade_in = 0.3  # Время появления

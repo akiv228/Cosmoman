@@ -1,8 +1,6 @@
 import pygame as pg
-
 from grafics.elements_for_menu_select_login import NeonText, Button, Star
 from .game_state import State
-from grafics_classes_stash import Menu
 from .config_state import MenuState as cfg
 from game_music import mixer
 
@@ -13,14 +11,13 @@ class MenuState(State):
         self.stars = [Star(cfg.stars) for _ in range(cfg.stars['count'])]
         self.neon_text = NeonText(cfg.title)
         button_count = len(cfg.buttons['names'])
-        total_height = (button_count * cfg.buttons['height']) + ((button_count - 1) * cfg.buttons['vertical_spacing'])
         start_y = cfg.buttons['top_margin']
         self.buttons = [Button(name, start_y + i * (cfg.buttons['height'] + cfg.buttons['vertical_spacing']), cfg.buttons)
                         for i, name in enumerate(cfg.buttons['names'])]
         # self.button_sound = Menu(*cfg.sound)
-        self.cross_image = cfg.cross.convert_alpha()
-        self.cross_image = pg.transform.scale(self.cross_image, (40, 40))
-        self.cross_rect = self.cross_image.get_rect()
+        # self.cross_image = cfg.cross.convert_alpha()
+        # self.cross_image = pg.transform.scale(self.cross_image, (40, 40))
+        # self.cross_rect = self.cross_image.get_rect()
         # self.cross_rect.center = (self.button_sound.rect.right - 80, self.button_sound.rect.centery)
         # self.check_sound = 0
         self.music = cfg.music

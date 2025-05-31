@@ -2,7 +2,7 @@ import pygame as pg
 
 from planet_screen import PlanetSystem
 from states.game_state import State
-from grafics_classes_stash import Backgrounds, Menu, Label
+from grafics.grafics_elements import  Menu
 from grafics.elements_for_menu_select_login import NeonText, Button, Star
 from .config_state import LoseState as cfg
 from config import win_width as W, win_height as H

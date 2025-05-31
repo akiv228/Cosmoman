@@ -1,6 +1,6 @@
 import pygame as pg
 from states.game_state import State
-from grafics_classes_stash import Backgrounds, Menu
+from grafics.grafics_elements import  Menu
 from .config_state import PauseState as cfg
 from config import win_width as W, win_height as H
 
@@ -9,16 +9,14 @@ class PauseState(State):
         super().__init__(game)
         self.previous_state = previous_state
 
-        # Создаем накладку
         self.overlay = pg.Surface((W, H), pg.SRCALPHA)
         self.overlay.fill(cfg.overlay_color)
 
-        # Создаем окно паузы
         self.pause_window = pg.Surface(cfg.pause_window_size, pg.SRCALPHA)
         self.pause_window.fill(cfg.pause_window_color)
         self.window_rect = self.pause_window.get_rect(center=(W // 2, H // 2))
 
-        # Создаем текст "PAUSE"
+
         self.font = pg.font.Font(None, cfg.pause_text['font_size'])
         self.pause_text_surface = self.font.render(cfg.pause_text['text'], True, cfg.pause_text['color'])
         text_rect = self.pause_text_surface.get_rect()
@@ -29,14 +27,14 @@ class PauseState(State):
         text_rect.y = self.window_rect.top + cfg.pause_text['position']['y']
         self.pause_text_rect = text_rect
 
-        # Вычисляем центральную Y-координату ряда кнопок (ниже текста)
+
         button_row_center_y = self.pause_text_rect.bottom + cfg.button_row_gap
 
-        # Вычисляем общую ширину кнопок с учетом отступов
+
         total_width = sum(button['size'][0] for button in cfg.buttons) + cfg.button_spacing * (len(cfg.buttons) - 1)
         start_x = self.window_rect.left + (self.window_rect.width - total_width) // 2 + 20
 
-        # Создаем кнопки с индивидуальными размерами
+
         self.buttons = []
         current_x = start_x
         for button_cfg in cfg.buttons:

@@ -5,7 +5,7 @@ from states.game_state import State
 from states.pause_state import PauseState
 from .config_state import PlayState as cfg, used_explore_finals
 from level import Level
-from grafics_classes_stash import Label
+from grafics.grafics_elements import  Label
 # from game_music import win as win_sound, lose as lose_sound
 
 class PlayState(State):

@@ -6,6 +6,7 @@ from grafics.maze_fons import Starfield_white, Starfield_palette
 import createwalls
 import path_utils
 import upload_maze
+from motherboards import MotherboardBackground
 from planet import FinalGifSprite
 from player import Player
 from game_sprites import Wall, GameSprite
@@ -15,8 +16,6 @@ from grafics import *
 from sprite_config import SPRITE_SETS, astr_collections, robots_collections, alians_collections, nlo_collections, \
     planets
 from states.config_state import used_explore_finals
-from test_gradient_for_labirints import Fon2_2
-
 class Level:
     def __init__(self, difficulty, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
         self.difficulty = difficulty
@@ -53,39 +52,6 @@ class Level:
         22, 13
         19, 12
         """
-        if difficulty == 'EASY':
-            selected_collection = random.choice(nlo_collections)
-            self.sprite_set['enemies'] = [
-                {'image': img, 'width': self.sprite_set['enemies'][0]['width'],
-                 'height': self.sprite_set['enemies'][0]['height']}
-                for img in selected_collection
-            ]
-        elif difficulty == 'MEDIUM':
-            selected_collection = random.choice(robots_collections)
-            self.sprite_set['enemies'] = [
-                {'image': img, 'width': self.sprite_set['enemies'][0]['width'],
-                 'height': self.sprite_set['enemies'][0]['height']}
-                for img in selected_collection
-            ]
-        elif difficulty == 'HARD':
-            selected_collection = random.choice(alians_collections)
-            self.sprite_set['enemies'] = [
-                {'image': img, 'width': self.sprite_set['enemies'][0]['width'],
-                 'height': self.sprite_set['enemies'][0]['height']}
-                for img in selected_collection
-            ]
-        elif difficulty == 'EXPLORE':
-            all_collections = astr_collections + nlo_collections
-            selected_collection = random.choice(all_collections)
-            self.sprite_set['enemies'] = [
-                {'image': img, 'width': self.sprite_set['enemies'][0]['width'],
-                 'height': self.sprite_set['enemies'][0]['height']}
-                # for img in selected_collection
-                for img in random.choice([
-                    [img for collection in astr_collections for img in collection],
-                    [img for collection in nlo_collections for img in collection]
-                ])
-            ]
         explore_size = self.grid_sizes['EXPLORE']
         print("Ширина:", explore_size[0], "Высота:", explore_size[1])
 
@@ -243,25 +209,6 @@ class Level:
 
         return selected_planet
 
-    def get_background(self):
-        if self.difficulty == 'EASY':
-            return Starfield_white(w=5000, h=900, stars_count=2000)
-            # return Backgrounds('images/back.jpg', WIDTH, HEIGHT, 0, 0)
-        elif self.difficulty in ('MEDIUM', 'HARD', 'EXPLORE'):
-            return Starfield_palette(w=5000, h=900, stars_count=2000)
-
-    def draw_debug_path(self, surface):
-        if not self.debug_mode:
-            return
-
-        path_pixels = []
-        for (row, col) in self.path:
-            x = self.maze_info['maze_x'] + col * self.maze_info['cell_size'] + self.maze_info['cell_size']//2
-            y = self.maze_info['maze_y'] + row * self.maze_info['cell_size'] + self.maze_info['cell_size']//2
-            path_pixels.append((x, y))
-
-        if len(path_pixels) >= 2:
-            pg.draw.lines(surface, (255,0,0), False, path_pixels, 3)
 
     def update(self):
         # self.clock = time.Clock()
@@ -279,13 +226,25 @@ class Level:
         if pg.sprite.spritecollideany(self.player, self.enemy_manager.enemies):
             self.player.lives -= 1
 
+
+    def get_background(self):
+        if self.difficulty == 'EASY':
+            return Starfield_white(w=5000, h=900, stars_count=2000)
+            # return Backgrounds('images/back.jpg', WIDTH, HEIGHT, 0, 0)
+        if self.difficulty == 'MEDIUM':
+            return MotherboardBackground(w=5000, h=900)
+        elif self.difficulty in ('HARD', 'EXPLORE'):
+            return Starfield_palette(w=5000, h=900, stars_count=2000)
+
+
     def render(self, window):
         if self.difficulty == 'EASY':
             # self.background.reset(window)
             self.background.update(window)
         elif self.difficulty in ('MEDIUM'):
             # self.background.update(window)
-            window.fill((0, 0, 0))
+            # window.fill((0, 0, 0))
+            self.background.render(window)
         elif self.difficulty in ('HARD'):
             # self.background.update(window)
             window.fill((0, 0, 0))
@@ -303,3 +262,16 @@ class Level:
         # for cloud in self.cloud_group:
         #     if hasattr(cloud, 'visible') and cloud.visible:
         #         window.blit(cloud.image, cloud.rect)
+
+    def draw_debug_path(self, surface):
+        if not self.debug_mode:
+            return
+
+        path_pixels = []
+        for (row, col) in self.path:
+            x = self.maze_info['maze_x'] + col * self.maze_info['cell_size'] + self.maze_info['cell_size']//2
+            y = self.maze_info['maze_y'] + row * self.maze_info['cell_size'] + self.maze_info['cell_size']//2
+            path_pixels.append((x, y))
+
+        if len(path_pixels) >= 2:
+            pg.draw.lines(surface, (255,0,0), False, path_pixels, 3)

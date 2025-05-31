@@ -2,7 +2,7 @@ import pygame as pg
 import time
 
 from .game_state import State
-from grafics_classes_stash import Menu, Label, InputBox
+from grafics.grafics_elements import  ImageButton, Label, InputBox
 from .config_state import LoginState as cfg, WinState
 import asyncio
 from grafics.elements_for_menu_select_login import Star, NeonText
@@ -21,8 +21,8 @@ class LoginState(State):
         self.password_box = InputBox(*cfg.password_box[:4], *cfg.password_box[4:])
         self.input_boxes.add(self.username_box, self.password_box)
         self.ui_elements.add(self.username_box, self.password_box)
-        self.login_btn = Menu(*cfg.login_btn)
-        self.register_btn = Menu(*cfg.register_btn)
+        self.login_btn = ImageButton(*cfg.login_btn)
+        self.register_btn = ImageButton(*cfg.register_btn)
         self.ui_elements.add(self.login_btn, self.register_btn)
         self.message = Label(*cfg.message)
         self.message.set_text(*cfg.msg)
