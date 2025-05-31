@@ -1,77 +1,174 @@
-import pygame
+import pygame as pg
 import random
 
-# Initialize Pygame
-pygame.init()
+class SmokeParticle:
+    """
+    Обычная частица дыма: рождается в рамках ячейки, поднимается, растёт,
+    теряет прозрачность и умирает.
+    """
+    def __init__(self, x, y, base_image, cell_size):
+        """
+        x, y — центр спавна (обычно центр клетки);
+        base_image — Surface с изображением облака;
+        cell_size — размер клетки (ширина/высота) для начального масштаба.
+        """
+        self.x = x
+        self.y = y
+        self.base_image = base_image
 
-# Set up the display
-WIDTH = 800
-HEIGHT = 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Matrix Digital Rain")
+        # начальный масштаб относительно cell_size
+        self.scale_k = 0.4 + 0.2 * random.random()  # от 0.4 до 0.6
+        self.size = int(cell_size * self.scale_k)
+        self.img = pg.transform.scale(self.base_image, (self.size, self.size))
 
-# Colors
-BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
-FADE_ALPHA = 13 # Equivalent to rgba(0, 0, 0, 0.05) with 255 scale (0.05 * 255 ≈ 13)
+        self.alpha = 180 + random.randint(0, 75)   # начальная прозрачность (от 180 до 255)
+        self.alpha_rate = 0.5 + 0.3 * random.random()  # скорость падения alpha
+        self.alive = True
 
-# Font setup
-FONT_SIZE = 13
-font = pygame.font.SysFont("MS Gothic", FONT_SIZE)
+        # движение вверх с небольшой «ветрушкой» вбок
+        self.vx = random.uniform(-0.5, 0.5)
+        self.vy = -(0.3 + random.random() * 0.7)
 
-def random_katakana():
- return chr(0x30A0 + int(random.random() * 96))
+        # небольшая дрожь/расширение горизонтального движения
+        self.k = 0.001 * random.random() * random.choice([-1, 1])
 
-# Calculate columns based on screen width and font size
-COLUMNS = WIDTH // FONT_SIZE
+    def update(self):
+        # Двигаем частицы
+        self.x += self.vx
+        self.vx += self.k  # «дрожание» влево/вправо
+        self.y += self.vy
+        self.vy *= 0.98  # потихоньку замедляется движение вверх
 
-# Adjust font size if it's too big for the screen
-if COLUMNS < 10:
- FONT_SIZE = 12
- drops = [0] * COLUMNS # Starting y-position for each column
+        # Увеличиваем масштаб (частица «расширяется»)
+        self.scale_k += 0.002
+        new_size = int(self.base_image.get_width() * self.scale_k)
+        new_size = max(new_size, 1)
+        self.img = pg.transform.scale(self.base_image, (new_size, new_size))
 
-# Create a surface for fading background
-fade_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-fade_surface.fill((0, 0, 0, FADE_ALPHA))
+        # Меняем прозрачность
+        self.alpha -= self.alpha_rate
+        if self.alpha <= 0:
+            self.alpha = 0
+            self.alive = False
+        else:
+            self.img.set_alpha(int(self.alpha))
 
-# Game loop
-clock = pygame.time.Clock()
-running = True
+    def draw(self, surface):
+        """
+        Рисуем частицу на заданную поверхность (surface).
+        Позиционируем так, чтобы центр частицы совпадал с (self.x, self.y).
+        """
+        rect = self.img.get_rect(center=(self.x, self.y))
+        surface.blit(self.img, rect)
 
-while running:
- # Event handling
- for event in pygame.event.get():
-  if event.type == pygame.QUIT:
-   running = False
 
- # Apply fading background
- screen.blit(fade_surface, (0, 0))
+class FogOfWar:
+ def __init__(self, maze_x, maze_y, grid_width, grid_height, cell_size, base_cloud_image):
+  """
+  maze_x, maze_y — координаты левого верхнего угла лабиринта на экране;
+  grid_width, grid_height — размеры сетки (количество клеток по x и y);
+  cell_size — размер каждой клетки в пикселях;
+  base_cloud_image — Surface с исходным изображением облака (одинаковое для всех частиц).
+  """
+  self.maze_x = maze_x
+  self.maze_y = maze_y
+  self.grid_width = grid_width
+  self.grid_height = grid_height
+  self.cell_size = cell_size
 
- # Draw and update drops
- for i in range(len(drops)):
- # Randomly select a character
-  char = random_katakana()
-  x = i * FONT_SIZE # Calculate x position based on column index
-  y = drops[i] * FONT_SIZE # Calculate y position based on drop position
+  # Общая поверхность, на которой «рисуется весь туман»
+  width_px = grid_width * cell_size
+  height_px = grid_height * cell_size
+  self.surface = pg.Surface((width_px, height_px), flags=pg.SRCALPHA)
+  # Заполняем его полностью «чёрным полупрозрачным» фоном (например, alpha=200)
+  self.surface.fill((0, 0, 0, 200))
 
- # Render character in green with antialiasing
- text = font.render(char, True, GREEN) # Antialiasing enabled
- text_rect = text.get_rect(topleft=(x, y))
- screen.blit(text, text_rect)
+  # Базовое изображение облачка, которое будем масштабировать внутри SmokeParticle
+  self.base_cloud_image = base_cloud_image
 
- # Increment drop position
- drops[i] += 1
+  # Список всех частиц дыма, привязанных к разным клеткам
+  self.particles = []
 
- # Adjust the reset condition to be slightly more frequent
- if y > HEIGHT and random.random() > 0.95:
-  drops[i] = random.randint(-20, 0)
- # Reset drop if it goes off-screen with a small random chance
- if y > HEIGHT and random.random() > 0.975:
-  drops[i] = 0
+  # Сколько кадров между спавном новых частиц в каждой невидимой клетке
+  self.spawn_interval = 60  # раз в 15 кадров
+  self.frame_count = 0
 
- # Update display
- pygame.display.flip()
- clock.tick(20) # 20 FPS (~50ms interval like JS setInterval)
+ def update(self, visibility_grid):
+  """
+  Обновляем все частицы, удаляем «мертвые» и, если пора,
+  спавним новые во всех невидимых клетках.
 
-# Quit Pygame
-pygame.quit()
+  visibility_grid — двумерный список/массив размером [grid_height][grid_width]:
+                    True если клетка **открыта** (игрок её увидел), False если ещё скрыта.
+  """
+  # Во-первых, убираем «мертвые» частицы
+  self.particles = [p for p in self.particles if p.alive]
+
+  # Увеличиваем счётчик кадров
+  self.frame_count += 1
+  if self.frame_count >= self.spawn_interval:
+   self.frame_count = 0
+   # Проходим по всем клеткам; если cell закрыта (visibility_grid[row][col] == False),
+   # то спавним в этой клетке ещё одну частицу (с центром посередине клетки или чуть случайно смещённым).
+   for row in range(self.grid_height):
+    for col in range(self.grid_width):
+     if not visibility_grid[row][col]:
+      # вычисляем центр клетки (row, col)
+      cell_center_x = col * self.cell_size + self.cell_size // 2
+      cell_center_y = row * self.cell_size + self.cell_size // 2
+      # создаём частицу в системе координат «относительно» левого верхнего угла maze (0,0)
+      new_particle = SmokeParticle(
+       x=cell_center_x,
+       y=cell_center_y,
+       base_image=self.base_cloud_image,
+       cell_size=self.cell_size
+      )
+      self.particles.append(new_particle)
+
+  # Обновляем все частицы
+  for p in self.particles:
+   p.update()
+
+
+ def render(self, target_surface, player_pos, reveal_radius):
+     """
+     Рисует слой тумана поверх target_surface.
+     player_pos — (x, y) в глобальных координатах экрана,
+                  reveal_radius — радиус «окошка» вокруг игрока (в пикселях).
+     """
+     # 1) Полностью заливаем fog.surface полупрозрачным чёрным
+     #    (RGBA = (0, 0, 0, 200) — 200 означает «почти непрозрачный» чёрный).
+     self.surface.fill((0, 0, 0, 200))
+
+     # 2) Рисуем все активные облачные частицы (SmokeParticle) на fog.surface
+     for p in self.particles:
+         p.draw(self.surface)
+
+     # 3) «Пропечатываем» прозрачный круг вокруг игрока:
+     #    a) Сначала вычисляем координаты игрока внутри fog.surface:
+     rel_x = player_pos[0] - self.maze_x
+     rel_y = player_pos[1] - self.maze_y
+
+     #    b) Создаём вспомогательную поверхность той же величины, что и fog.surface:
+     hole_surf = pg.Surface(self.surface.get_size(), flags=pg.SRCALPHA)
+     #       — изначально она полностью прозрачная (чтобы вычитать именно область круга).
+     hole_surf.fill((0, 0, 0, 0))
+
+     #    c) Рисуем на hole_surf «круг заливки» чёрным полупрозрачным = (0,0,0,200).
+     #       Внутри круга именно эта «альфа=200» и будет вычитаться из fog.surface.
+     pg.draw.circle(
+         hole_surf,
+         (0, 0, 0, 200),  # цвет: чёрный с alpha=200
+         (int(rel_x), int(rel_y)),  # центр круга в системе fog.surface
+         reveal_radius  # радиус круга
+     )
+
+     #    d) Вычитаем hole_surf из fog.surface: BLEND_RGBA_SUB уменьшает каждый канал,
+     #       поэтому внутри круга alpha мокнутого fog.surface (200) станет (200−200)=0,
+     #       и там появится прозрачная «дырка». Вне круга hole_surf полностью прозрачен,
+     #       так что fog.surface за пределами круга остаётся (0,0,0,200).
+     self.surface.blit(hole_surf, (0, 0), special_flags=pg.BLEND_RGBA_SUB)
+
+     # 4) Наконец, рисуем готовый fog.surface поверх целевой поверхности (лабиринта),
+     #    смещая его по (maze_x, maze_y).
+     target_surface.blit(self.surface, (self.maze_x, self.maze_y))

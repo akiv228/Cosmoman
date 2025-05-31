@@ -1,65 +1,24 @@
 import pygame as pg
 import random
+import noise
+import numpy as np
 
-from grafics.circle_hardbackground import CircleBackground
+from matrix import FogOfWar
 from maze_generation import generate_maze
 from grafics.maze_fons import Starfield_white, Starfield_palette
+from grafics.circle_hardbackground import CircleBackground
+from grafics.motherboards import MotherboardBackground
+from game_sprites import Wall, GameSprite
+from enemy_manager import EnemyManager
+from planet import FinalGifSprite
+from player import Player
+from sprite_config import SPRITE_SETS, planets
+from states.config_state import used_explore_finals
 import createwalls
 import path_utils
 import upload_maze
-from grafics.motherboards import MotherboardBackground
-from planet import FinalGifSprite
-from player import Player
-from game_sprites import Wall, GameSprite
-from enemy_manager import EnemyManager
-# from grafics_classes import Backgrounds, Starfield_white, Starfield_palette
-from sprite_config import SPRITE_SETS, planets
-from states.config_state import used_explore_finals
+
 class Level:
-    def __init__(self, difficulty, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
-        self.difficulty = difficulty
-        self.sprite_set = SPRITE_SETS[difficulty]
-        self.debug_mode = debug_mode
-        self.grid_sizes = {
-            'EASY': (14, 11),
-            'MEDIUM': (16, 12),
-            'HARD': (18, 12),
-            # 'EXPLORE': Level.get_explore_size(min_cell_size=35)
-            'EXPLORE': Level.get_explore_size2()
-        }
-
-        explore_size = self.grid_sizes['EXPLORE']
-        print("Ширина:", explore_size[0], "Высота:", explore_size[1])
-
-        if load_from_file:
-            self.maze_info = upload_maze.load_maze(filename)
-            gw, gh = self.maze_info['grid_width'], self.maze_info['grid_height']
-        else:
-            gw, gh = self.grid_sizes[difficulty]
-            self.maze_info = generate_maze(gw, gh, difficulty)
-            upload_maze.save_maze(filename, self.maze_info)
-
-        self.walls = pg.sprite.Group()
-        wall_rects = createwalls.reconstruct_wall_rects(self.maze_info)
-        for rect in wall_rects:
-            self.walls.add(Wall(rect.x, rect.y, rect.width, rect.height))
-
-        self.grid = (gw, gh)
-        self.path = []
-        self.grid_width = self.maze_info['grid_width']
-        self.grid_height = self.maze_info['grid_height']
-
-        # Загрузка спрайтов из конфигурации
-        start_pos, final_pos, self.path = path_utils.calculate_positions(self.maze_info, self.grid, self.debug_mode)
-        self.init_sprites(start_pos, final_pos)
-
-        # Инициализация системы "тумана войны"
-        self.init_fog_of_war()
-        
-        self.background = self.get_background()
-        self.enemy_manager = EnemyManager(self)
-        self.enemy_manager.spawn_enemies()
-
     @staticmethod
     def get_explore_size2(min_cell_size=50, screen_width=1100, screen_height=800):
         base_width = random.randint(17, 19)
@@ -82,48 +41,74 @@ class Level:
         return width, height
 
 
-    def init_fog_of_war(self):
-        """Инициализирует систему тумана войны с облаками"""
-        # Загружаем изображение облака
-        try:
-            self.cloud_image = pg.image.load('images/smoke.png').convert_alpha()
-            self.cloud_image = pg.transform.scale(self.cloud_image, 
-                                            (self.maze_info['cell_size'], self.maze_info['cell_size']))
-        except:
-            # Создаем временное изображение, если файл не найден
-            self.cloud_image = pg.Surface((self.maze_info['cell_size'], self.maze_info['cell_size']), pg.SRCALPHA)
-            self.cloud_image.fill((100, 100, 100, 200))
-        
-        self.cloud_group = pg.sprite.Group()
-        
-        # Создаем облака для каждой клетки
-        for row in range(self.grid[1]):
-            for col in range(self.grid[0]):
-                x = self.maze_info['maze_x'] + col * self.maze_info['cell_size'] + self.maze_info['cell_size']//2
-                y = self.maze_info['maze_y'] + row * self.maze_info['cell_size'] + self.maze_info['cell_size']//2
-                
-                # Создаем спрайт облака с правильными параметрами
-                cloud = GameSprite(
-                    player_image='images/smoke.png',
-                    player_x=x,
-                    player_y=y,
-                    size_x=self.maze_info['cell_size'],
-                    size_y=self.maze_info['cell_size']
-                )
-                # Добавляем свойство видимости
-                cloud.visible = True
-                self.cloud_group.add(cloud)
+    def __init__(self, difficulty, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
+        self.debug_mode = debug_mode
+        self.difficulty = difficulty
+        self.sprite_set = SPRITE_SETS[difficulty]
+        self.grid_sizes = {
+            'EASY': (14, 11),
+            'MEDIUM': (16, 12),
+            'HARD': (18, 12),
+            # 'EXPLORE': Level.get_explore_size(min_cell_size=35)
+            'EXPLORE': Level.get_explore_size2()
+        }
 
-    def update_fog_of_war(self):
-        """Обновляет видимость облаков в зависимости от позиции игрока"""
-        reveal_distance = 150  # Дистанция раскрытия
-        
-        for cloud in self.cloud_group:
-            if hasattr(cloud, 'visible'):
-                # Вычисляем расстояние между центрами
-                distance = ((cloud.rect.centerx - self.player.rect.centerx)**2 + 
-                        (cloud.rect.centery - self.player.rect.centery)**2)**0.5
-                cloud.visible = distance > reveal_distance
+        explore_size = self.grid_sizes['EXPLORE']
+        print("Ширина:", explore_size[0], "Высота:", explore_size[1])
+
+        if load_from_file:
+            self.maze_info = upload_maze.load_maze(filename)
+            gw, gh = self.maze_info['grid_width'], self.maze_info['grid_height']
+        else:
+            gw, gh = self.grid_sizes[difficulty]
+            self.maze_info = generate_maze(gw, gh, difficulty)
+            upload_maze.save_maze(filename, self.maze_info)
+
+
+        self.walls = pg.sprite.Group()
+        wall_rects = createwalls.reconstruct_wall_rects(self.maze_info)
+        for rect in wall_rects:
+            self.walls.add(Wall(rect.x, rect.y, rect.width, rect.height))
+
+        self.grid = (gw, gh)
+        self.path = []
+        self.grid_width = self.maze_info['grid_width']
+        self.grid_height = self.maze_info['grid_height']
+        self.cell_size = self.maze_info['cell_size']
+        self.maze_x = self.maze_info['maze_x']
+        self.maze_y = self.maze_info['maze_y']
+
+        # Загрузка спрайтов из конфигурации
+        start_pos, final_pos, self.path = path_utils.calculate_positions(self.maze_info, self.grid, self.debug_mode)
+        self.init_sprites(start_pos, final_pos)
+        self.background = self.get_background()
+        self.enemy_manager = EnemyManager(self)
+        self.enemy_manager.spawn_enemies()
+
+        # # Инициализация системы "тумана войны"
+        # self.init_fog_of_war()
+
+        self.visibility_grid = [
+            [False for _ in range(self.grid_width)]
+            for _ in range(self.grid_height)
+        ]
+        # Помечаем стартовую клетку как открытую
+        start_cell_row = (start_pos[1] - self.maze_y) // self.cell_size
+        start_cell_col = (start_pos[0] - self.maze_x) // self.cell_size
+        self.visibility_grid[start_cell_row][start_cell_col] = True
+
+        # 6) Загружаем изображение облачка
+        base_cloud_image = pg.image.load('images/smoke.png').convert_alpha()
+
+        # 7) Создаём объект FogOfWar
+        self.fog = FogOfWar(
+            maze_x=self.maze_x,
+            maze_y=self.maze_y,
+            grid_width=self.grid_width,
+            grid_height=self.grid_height,
+            cell_size=self.cell_size,
+            base_cloud_image=base_cloud_image
+        )
 
     def init_sprites(self, start_pos, end_pos):
         self.all_sprites = pg.sprite.Group()
@@ -173,6 +158,7 @@ class Level:
             self.final = GameSprite(final_image, end_pos[0], end_pos[1], width, height)
         self.all_sprites.add(self.walls, self.player, self.final)
 
+
     def select_explore_final(self):
         available_planets = [
             planet for planet in planets.values()
@@ -187,20 +173,34 @@ class Level:
 
 
     def update(self):
-        # self.clock = time.Clock()
-        # delta_time = self.clock.tick(60) / 1000.0
         self.player.update()
         self.player.bullets.update()
         self.enemy_manager.enemies.update()
-        # self.final.update(delta_time)
         self.all_sprites.update()
-        self.update_fog_of_war()  # Обновляем видимость облаков
+        # self.update_fog_of_war()  # Обновляем видимость облаков
 
         pg.sprite.groupcollide(self.player.bullets, self.walls, True, False)
         pg.sprite.groupcollide(self.player.bullets, self.enemy_manager.enemies, True, True)
 
         if pg.sprite.spritecollideany(self.player, self.enemy_manager.enemies):
             self.player.lives -= 1
+
+        player_cx = self.player.rect.centerx
+        player_cy = self.player.rect.centery
+        player_cell_col = (player_cx - self.maze_x) // self.cell_size
+        player_cell_row = (player_cy - self.maze_y) // self.cell_size
+
+        # Раскрываем соседние клетки (±1 по рядам/столбцам)
+        for dr in (-1, 0, 1):
+            for dc in (-1, 0, 1):
+                rr = player_cell_row + dr
+                cc = player_cell_col + dc
+                if 0 <= rr < self.grid_height and 0 <= cc < self.grid_width:
+                    self.visibility_grid[rr][cc] = True
+
+        # Обновляем туман
+        self.fog.update(self.visibility_grid)
+
 
 
     def get_background(self):
@@ -232,11 +232,11 @@ class Level:
         self.enemy_manager.enemies.draw(window)
         self.all_sprites.draw(window)
         self.player.bullets.draw(window)
-        
-        # Рисуем только видимые облака
-        for cloud in self.cloud_group:
-            if hasattr(cloud, 'visible') and cloud.visible:
-                window.blit(cloud.image, cloud.rect)
+
+        player_center = (self.player.rect.centerx, self.player.rect.centery)
+        reveal_radius = self.cell_size * 2   # здесь вы можете настроить любой радиус (в клетках * cell_size)
+        self.fog.render(window, player_center, reveal_radius)
+
 
     def draw_debug_path(self, surface):
         if not self.debug_mode:
