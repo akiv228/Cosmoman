@@ -17,30 +17,39 @@ class SmokeParticle:
         self.base_image = base_image
 
         # начальный масштаб относительно cell_size
-        self.scale_k = 0.4 + 0.2 * random.random()  # от 0.4 до 0.6
+        # self.scale_k = 0.4 + 0.2 * random.random()  # от 0.4 до 0.6
+        # Начальный масштаб (меньше, чем раньше, чтобы быстрее пропадал)
+        self.scale_k = 0.6 + 0.4 * random.random()  # 0.2—0.3
         self.size = int(cell_size * self.scale_k)
         self.img = pg.transform.scale(self.base_image, (self.size, self.size))
 
-        self.alpha = 180 + random.randint(0, 75)   # начальная прозрачность (от 180 до 255)
-        self.alpha_rate = 0.5 + 0.3 * random.random()  # скорость падения alpha
+        self.alpha = 240 + random.randint(0, 75)   # начальная прозрачность (от 180 до 255)
+        # self.alpha_rate = 0.5 + 0.3 * random.random()  # скорость падения alpha
+        self.alpha_rate = 1.5 + 0.3 * random.random()
+     #Уменьшить «время жизни» частицы (alpha_rate или скорость убывания прозрачности)
         self.alive = True
 
-        # движение вверх с небольшой «ветрушкой» вбок
-        self.vx = random.uniform(-0.5, 0.5)
-        self.vy = -(0.3 + random.random() * 0.7)
-
-        # небольшая дрожь/расширение горизонтального движения
-        self.k = 0.001 * random.random() * random.choice([-1, 1])
+        # # движение вверх с небольшой «ветрушкой» вбок
+        # self.vx = random.uniform(-0.5, 0.5)
+        # self.vy = -(0.3 + random.random() * 0.7)
+        #
+        # # небольшая дрожь/расширение горизонтального движения
+        # self.k = 0.001 * random.random() * random.choice([-1, 1])
+        self.vx = random.uniform(-0.3, 0.3)
+        self.vy = -(0.3 + random.random() * 0.4)        # чуть помедленнее
+        self.k = 0.0005 * random.random() * random.choice([-1, 1])
 
     def update(self):
         # Двигаем частицы
         self.x += self.vx
         self.vx += self.k  # «дрожание» влево/вправо
         self.y += self.vy
-        self.vy *= 0.98  # потихоньку замедляется движение вверх
+        self.vy *= 0.97 # потихоньку замедляется движение вверх
 
         # Увеличиваем масштаб (частица «расширяется»)
-        self.scale_k += 0.002
+        # self.scale_k += 0.002
+        # Меньший шаг роста
+        self.scale_k += 0.001
         new_size = int(self.base_image.get_width() * self.scale_k)
         new_size = max(new_size, 1)
         self.img = pg.transform.scale(self.base_image, (new_size, new_size))

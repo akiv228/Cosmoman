@@ -185,23 +185,36 @@ class Level:
         if pg.sprite.spritecollideany(self.player, self.enemy_manager.enemies):
             self.player.lives -= 1
 
-        player_cx = self.player.rect.centerx
-        player_cy = self.player.rect.centery
-        player_cell_col = (player_cx - self.maze_x) // self.cell_size
-        player_cell_row = (player_cy - self.maze_y) // self.cell_size
 
-        # Раскрываем соседние клетки (±1 по рядам/столбцам)
-        for dr in (-1, 0, 1):
-            for dc in (-1, 0, 1):
+        # 1) Сначала вычисляем, какие клетки находятся в зоне видимости:
+        #    (игрок находится в центре некоторого круга радиусом reveal_radius_cells * cell_size)
+        player_x, player_y = self.player.rect.center
+        player_cell_col = (player_x - self.maze_x) // self.cell_size
+        player_cell_row = (player_y - self.maze_y) // self.cell_size
+
+        # Задаём радиус видимости в клетках (например, 2 клетки вокруг игрока):
+        r_cells = 2
+        # Создаём локальный массив для обновлённого состояния (каждый кадр новый):
+        new_visibility = [
+            [False for _ in range(self.grid_width)]
+            for _ in range(self.grid_height)
+        ]
+
+        # Помечаем все клетки, которые лежат в радиусе r_cells
+        for dr in range(-r_cells, r_cells + 1):
+            for dc in range(-r_cells, r_cells + 1):
                 rr = player_cell_row + dr
                 cc = player_cell_col + dc
                 if 0 <= rr < self.grid_height and 0 <= cc < self.grid_width:
-                    self.visibility_grid[rr][cc] = True
+                    # проверим, находится ли клетка именно в круге (по центрам)
+                    cell_center_x = self.maze_x + cc * self.cell_size + self.cell_size // 2
+                    cell_center_y = self.maze_y + rr * self.cell_size + self.cell_size // 2
+                    dist = ((cell_center_x - player_x) ** 2 + (cell_center_y - player_y) ** 2) ** 0.5
+                    if dist <= r_cells * self.cell_size:
+                        new_visibility[rr][cc] = True
 
-        # Обновляем туман
-        self.fog.update(self.visibility_grid)
-
-
+        # 2) Обновляем FogOfWar именно этим новым состоянием:
+        self.fog.update(new_visibility)
 
     def get_background(self):
         if self.difficulty == 'EASY':
