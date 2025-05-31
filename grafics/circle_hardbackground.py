@@ -66,20 +66,20 @@ class CircleBackground:
 
 
 
-    def color(self, distance, x, y):
-        # Разделяем экран на 4 квадранта с разными цветовыми схемами
-        center_x, center_y = self.width // 2, self.height // 2
-
-        if x < center_x and y < center_y:  # Левый верхний
-            return (int(255 * (1 - distance / self.max_distance)), 100, 100)
-        elif x >= center_x and y < center_y:  # Правый верхний
-            return (100, int(255 * (1 - distance / self.max_distance)), 100)
-        elif x < center_x and y >= center_y:  # Левый нижний
-            return (100, 100, int(255 * (1 - distance / self.max_distance)))
-        else:  # Правый нижний
-            return (int(255 * (distance / self.max_distance)),
-                    int(255 * (1 - distance / self.max_distance)),
-                    int(255 * (distance / self.max_distance)))
+    # def color(self, distance, x, y):
+    #     # Разделяем экран на 4 квадранта с разными цветовыми схемами
+    #     center_x, center_y = self.width // 2, self.height // 2
+    #
+    #     if x < center_x and y < center_y:  # Левый верхний
+    #         return (int(255 * (1 - distance / self.max_distance)), 100, 100)
+    #     elif x >= center_x and y < center_y:  # Правый верхний
+    #         return (100, int(255 * (1 - distance / self.max_distance)), 100)
+    #     elif x < center_x and y >= center_y:  # Левый нижний
+    #         return (100, 100, int(255 * (1 - distance / self.max_distance)))
+    #     else:  # Правый нижний
+    #         return (int(255 * (distance / self.max_distance)),
+    #                 int(255 * (1 - distance / self.max_distance)),
+    #                 int(255 * (distance / self.max_distance)))
 
     def reset(self, window):
         """Отрисовка фона на поверхности window"""
