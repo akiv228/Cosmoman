@@ -34,6 +34,7 @@ class ImageButton(pg.sprite.Sprite):
     def draw(self, window):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
+
 class Label:
     def __init__(self, x, y, width, height, color):
         self.rect = pg.Rect(x, y, width, height)

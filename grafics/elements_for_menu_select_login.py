@@ -74,6 +74,7 @@ class NeonText:
             reflection.blit(gradient, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
             surface.blit(reflection, (x_pos, 50 + text_surf.get_height() - 30))
 
+
 class Button:
     def __init__(self, text, y_pos, config):
         self.config = config

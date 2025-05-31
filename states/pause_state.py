@@ -1,6 +1,6 @@
 import pygame as pg
 from states.game_state import State
-from grafics.grafics_elements import  Menu
+from grafics.grafics_elements import  ImageButton
 from .config_state import PauseState as cfg
 from config import win_width as W, win_height as H
 
@@ -32,7 +32,7 @@ class PauseState(State):
 
 
         total_width = sum(button['size'][0] for button in cfg.buttons) + cfg.button_spacing * (len(cfg.buttons) - 1)
-        start_x = self.window_rect.left + (self.window_rect.width - total_width) // 2 + 20
+        start_x = self.window_rect.left + (self.window_rect.width - total_width) // 2
 
 
         self.buttons = []
@@ -41,7 +41,7 @@ class PauseState(State):
             width, height = button_cfg['size']
             x = current_x
             y = button_row_center_y - height // 2  # Центрируем каждую кнопку по вертикали
-            button = Menu(button_cfg['image'], x, y, width, height)
+            button = ImageButton(button_cfg['image'], x, y, width, height)
             self.buttons.append(button)
             current_x += width + cfg.button_spacing
 
@@ -71,4 +71,4 @@ class PauseState(State):
         window.blit(self.pause_window, self.window_rect)
         window.blit(self.pause_text_surface, self.pause_text_rect)
         for button in self.buttons:
-            button.reset(window)
+            button.draw(window)

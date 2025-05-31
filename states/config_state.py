@@ -1,5 +1,4 @@
-from config import win_width as W, win_height as H, txt_welcome, txt_select, txt_win, BLACK_BLUE, WHITE, GREY_BLUE, \
-    DARK_BLUE
+from config import win_width as W, win_height as H, BLACK_BLUE, WHITE
 from game_music import mixer
 import pygame as pg
 
@@ -67,7 +66,7 @@ if __name__ != '__config__':
         # manual = Instance('images\\instruction.png', 380, 395, 110, 110)
         # sound = Instance('images\\sound.png', 185, 365, 170, 170)
         # greetings = Text(txt_welcome, 62, WHITE)
-        label = [140, 0, 680, 40, BLACK_BLUE]
+        # label = [140, 0, 680, 40, BLACK_BLUE]
         music = Sound('sound\\menu.mp3')
         stars = {
             'count': 100,
@@ -110,7 +109,7 @@ if __name__ != '__config__':
         # explore = Instance('images\\explore.png', 400, 375, 190, 100)
         # pre_init_back_label = (140, 0, 680, 40, GREY_BLUE)
         # back_label = Text(txt_select, 62, WHITE)
-        back = Instance('images\\back3.png', 140, 100, 100, 70)
+        back = Instance('images\\back3.png', 130, 55, 100, 70)
         music = Sound('sound\\menu.mp3')
         stars = {
             'count': 100,
@@ -155,7 +154,7 @@ if __name__ != '__config__':
             {'image': 'images\\info.png', 'action': 'info', 'size': (60, 85)},
             {'image': 'images\\pause_play.png', 'action': 'unpause', 'size': (75, 82)},
         ]
-        button_spacing = 80  # горизонтальный отступ
+        button_spacing = 60  # горизонтальный отступ
         button_row_gap = 150  # Вертикальный отступ от низа текста до центра ряда кнопок
 
         pause_text = {
@@ -178,8 +177,8 @@ if __name__ != '__config__':
         # bg = Instance('images\\win.jpg', W, H, 0, 0)
         # back_label = (230, 5, 200, 50, DARK_BLUE)
         # per_init_back_label = (txt_win, 55, WHITE)
-        back = Instance('images\\home.png', 150, H - 100, 130, 135)
-        restart = Instance('images\\restart (2).png', W - 180, H - 100, 120, 120)
+        back = Instance('images\\home.png', 130, H - 130, 127, 130)
+        restart = Instance('images\\restart (2).png', W - 230, H - 130, 120, 120)
         title = {
             'text': 'You win',
             'font_size': 100,
@@ -190,8 +189,8 @@ if __name__ != '__config__':
         }
 
     class LoseState:
-        back = Instance('images\\home.png', 150, H - 100, 130, 135)
-        restart = Instance('images\\restart (2).png', W - 180, H - 100, 120, 120)
+        back = Instance('images\\home.png', 130, H - 130, 127, 130)
+        restart = Instance('images\\restart (2).png', W - 230, H - 130, 120, 120)
         title = {
             'text': 'You lose',
             'font_size': 100,

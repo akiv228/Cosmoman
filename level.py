@@ -1,20 +1,17 @@
 import pygame as pg
-from pygame import time
 import random
 from maze_generation import generate_maze
 from grafics.maze_fons import Starfield_white, Starfield_palette
 import createwalls
 import path_utils
 import upload_maze
-from motherboards import MotherboardBackground
+from grafics.motherboards import MotherboardBackground
 from planet import FinalGifSprite
 from player import Player
 from game_sprites import Wall, GameSprite
 from enemy_manager import EnemyManager
 # from grafics_classes import Backgrounds, Starfield_white, Starfield_palette
-from grafics import *
-from sprite_config import SPRITE_SETS, astr_collections, robots_collections, alians_collections, nlo_collections, \
-    planets
+from sprite_config import SPRITE_SETS, planets
 from states.config_state import used_explore_finals
 class Level:
     def __init__(self, difficulty, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):

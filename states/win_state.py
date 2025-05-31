@@ -1,9 +1,9 @@
 import pygame as pg
 
-from planet_screen import PlanetSystem
+from grafics.planetfons_lose_win import PlanetSystem
 from states.game_state import State
-from grafics.grafics_elements import  Menu
-from grafics.elements_for_menu_select_login import NeonText, Button, Star
+from grafics.grafics_elements import  ImageButton
+from grafics.elements_for_menu_select_login import NeonText
 from .config_state import WinState as cfg
 from config import win_width as W, win_height as H
 
@@ -15,8 +15,8 @@ class WinState(State):
         # self.text_back = Label(*cfg.back_label)
         # self.text_back.set_text(*cfg.per_init_back_label)
         self.neon_text = NeonText(cfg.title)
-        self.button_back = Menu(*cfg.back)
-        self.button_restart = Menu(*cfg.restart)
+        self.button_back = ImageButton(*cfg.back)
+        self.button_restart = ImageButton(*cfg.restart)
 
         # Создаем систему планет для фона
         self.planet_system = PlanetSystem((W, H))
@@ -37,12 +37,10 @@ class WinState(State):
                     self.game.set_state(LevelSelectState(self.game))
 
     def update(self):
-        # Обновляем систему планет
         self.planet_system.update()
         self.neon_text.update()
 
     def render(self, window):
-        # Рисуем фон с планетами
         self.planet_system.draw(window)
 
         # Затемняем фон для интерфейса
@@ -50,7 +48,7 @@ class WinState(State):
 
         # Рисуем интерфейс поверх
         # self.text_back.draw(window, 0, 0)
-        self.button_back.reset(window)
-        self.button_restart.reset(window)
+        self.button_back.draw(window)
+        self.button_restart.draw(window)
 
         self.neon_text.draw(window)
