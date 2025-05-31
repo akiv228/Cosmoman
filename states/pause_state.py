@@ -1,4 +1,6 @@
 import pygame as pg
+
+from game_music import mixer
 from states.game_state import State
 from grafics.grafics_elements import  ImageButton
 from .config_state import PauseState as cfg
@@ -54,11 +56,11 @@ class PauseState(State):
                         action = button_cfg['action']
                         if action == 'unpause':
                             self.game.set_state(self.previous_state)
-                            self.game.toggle_sound()
+                            # self.game.toggle_sound()
                         elif action == 'home':
                             from states.menu_state import MenuState
                             self.game.set_state(MenuState(self.game))
-                            self.game.toggle_sound()
+                            # self.game.toggle_sound()
                         elif action == 'info':
                             pass  # Действие для кнопки info, если нужно
 
@@ -72,3 +74,6 @@ class PauseState(State):
         window.blit(self.pause_text_surface, self.pause_text_rect)
         for button in self.buttons:
             button.draw(window)
+
+    def enter(self):
+        mixer.music.pause()

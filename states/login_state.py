@@ -75,3 +75,6 @@ class LoginState(State):
         self.neon_text.draw(window)
         # self.title.draw(window, 0, -200)
         self.message.draw(window, 0, 150)
+
+    def enter(self):
+        pass

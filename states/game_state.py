@@ -19,3 +19,6 @@ class State(ABC):
         """Отрисовывает элементы состояния."""
         pass
 
+    @abstractmethod
+    def enter(self):
+        pass

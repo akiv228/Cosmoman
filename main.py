@@ -11,6 +11,8 @@ from game_music import mixer
 
 
 
+
+
 class Game:
     def __init__(self):
         pg.init()
@@ -39,14 +41,16 @@ class Game:
 
     def set_state(self, state):
         self.current_state = state
-        if hasattr(state, 'music') and state.music != self.current_music:
-            mixer.music.load(state.music)
-            mixer.music.set_volume(0.8)
-            mixer.music.play(-1)
-            self.current_music = state.music
-            # Применяем текущее состояние звука при смене состояния
-            if not self.sound_enabled:
-                mixer.music.pause()
+        state.enter()
+        # self.current_state = state
+        # if hasattr(state, 'music') and state.music != self.current_music:
+        #     mixer.music.load(state.music)
+        #     mixer.music.set_volume(0.8)
+        #     mixer.music.play(-1)
+        #     self.current_music = state.music
+        #     # Применяем текущее состояние звука при смене состояния
+        #     if not self.sound_enabled:
+        #         mixer.music.pause()
 
     async def run(self):
         while self.running:

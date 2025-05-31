@@ -38,7 +38,7 @@ class MenuState(State):
 
             if e.type == pg.KEYDOWN:
                 if e.key == pg.K_m:
-                    self.game.toggle_sound()  #
+                    self.game.toggle_sound()
 
     def update(self):
         for star in self.stars:
@@ -59,3 +59,14 @@ class MenuState(State):
 
         # if not self.game.sound_enabled:
         #     window.blit(self.cross_image, self.cross_rect)
+
+    def enter(self):
+        if self.music != self.game.current_music:
+            mixer.music.load(self.music)
+            mixer.music.set_volume(0.5)
+            mixer.music.play(-1)
+            self.game.current_music = self.music
+        if self.game.sound_enabled:
+            mixer.music.unpause()
+        else:
+            mixer.music.pause()

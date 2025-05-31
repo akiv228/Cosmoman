@@ -50,3 +50,6 @@ class IntroState(State):
 
     def render(self, window):
         self.starfield.draw(self.alpha)
+
+    def enter(self):
+        pass

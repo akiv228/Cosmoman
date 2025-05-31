@@ -52,3 +52,6 @@ class WinState(State):
         self.button_restart.draw(window)
 
         self.neon_text.draw(window)
+
+    def enter(self):
+        pass

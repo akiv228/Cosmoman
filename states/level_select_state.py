@@ -1,4 +1,6 @@
 import pygame as pg
+
+from game_music import mixer
 from .game_state import State
 from grafics.grafics_elements import ImageButton
 from .config_state import LevelSelectState as cfg
@@ -41,6 +43,7 @@ class LevelSelectState(State):
                 if e.key == pg.K_m:
                     self.game.toggle_sound()
 
+
     def update(self):
         for star in self.stars:
             star.update()
@@ -57,3 +60,14 @@ class LevelSelectState(State):
         for button in self.buttons:
             button.draw(window)
         self.button_back.draw(window)
+
+    def enter(self):
+        if self.music != self.game.current_music:
+            mixer.music.load(self.music)
+            mixer.music.set_volume(0.6)
+            mixer.music.play(-1)
+            self.game.current_music = self.music
+        if self.game.sound_enabled:
+            mixer.music.unpause()
+        else:
+            mixer.music.pause()

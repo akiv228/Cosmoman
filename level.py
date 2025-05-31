@@ -1,5 +1,7 @@
 import pygame as pg
 import random
+
+from grafics.circle_hardbackground import CircleBackground
 from maze_generation import generate_maze
 from grafics.maze_fons import Starfield_white, Starfield_palette
 import createwalls
@@ -230,7 +232,9 @@ class Level:
             # return Backgrounds('images/back.jpg', WIDTH, HEIGHT, 0, 0)
         if self.difficulty == 'MEDIUM':
             return MotherboardBackground(w=5000, h=900)
-        elif self.difficulty in ('HARD', 'EXPLORE'):
+        if self.difficulty == 'HARD':
+            return CircleBackground(w=1100, h=800, circles_count=200)
+        elif self.difficulty in ('EXPLORE'):
             return Starfield_palette(w=5000, h=900, stars_count=2000)
 
 
@@ -244,7 +248,8 @@ class Level:
             self.background.render(window)
         elif self.difficulty in ('HARD'):
             # self.background.update(window)
-            window.fill((0, 0, 0))
+            # window.fill((0, 0, 0))
+            self.background.reset(window)
         elif self.difficulty in ('EXPLORE'):
             self.background.update(window)
         else:

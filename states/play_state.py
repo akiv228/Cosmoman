@@ -27,7 +27,7 @@ class PlayState(State):
                 elif e.key == pg.K_SPACE: player.fire(None)
                 elif e.key == pg.K_ESCAPE:
                     self.game.set_state(PauseState(self.game, self))
-                    self.game.toggle_sound()
+                    # self.game.toggle_sound()
             elif e.type == pg.KEYUP:
                 if e.key in (pg.K_LEFT, pg.K_RIGHT): player.x_speed = 0
                 elif e.key in (pg.K_UP, pg.K_DOWN): player.y_speed = 0
@@ -76,3 +76,14 @@ class PlayState(State):
                 used_explore_finals.add(
                     self.level.final.image_path)  # Предполагается, что у FinalGifSprite есть image_path
             self.game.set_state(WinState(self.game))
+
+    def enter(self):
+        if self.music != self.game.current_music:
+            mixer.music.load(self.music)
+            mixer.music.set_volume(0.7)
+            mixer.music.play(-1)
+            self.game.current_music = self.music
+        if self.game.sound_enabled:
+            mixer.music.unpause()
+        else:
+            mixer.music.pause()

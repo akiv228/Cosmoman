@@ -1,6 +1,6 @@
 import config
 from .game_state import State
-from grafics.grafics_elements import  Menu
+from grafics.grafics_elements import  ImageButton
 from config import W, H, WHITE
 from .config_state import PopupState as cfg
 import pygame as pg
@@ -11,7 +11,7 @@ class PopupState(State):
         super().__init__(game)
         self.parent_state = parent_state
         self.background = pg.transform.scale(cfg.instruction.convert(), (W, H))
-        self.close_btn = Menu(*cfg.cross)
+        self.close_btn = ImageButton(*cfg.cross)
         try:
             font_path = os.path.join("fonts", "standout.ttf")
             self.font = pg.font.Font(font_path, 22)
@@ -62,3 +62,6 @@ class PopupState(State):
                 if (padding > 0): padding = 0
             y_offset += 40 if line else 20
         self.close_btn.reset(window)
+
+    def enter(self):
+        pass
