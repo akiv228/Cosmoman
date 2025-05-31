@@ -119,6 +119,12 @@ SPRITE_SETS = {
         'finals': planets
     }
 }
+all_smoke_images = {
+    'EASY': ['images/smoke/smoke2.png'],
+    'MEDIUM': ['images/smoke/smoke4.png'],
+    'HARD': [f'images/smoke/smoke{i}.png' for i in [2, 5, 10]],
+    'EXPLORE': [f'images/smoke/smoke{i}.png' for i in [3, 7, 8, 6, 9]]
+}
 
 # Задаем индивидуальные размеры для определенных изображений
 astr_size_mapping = {

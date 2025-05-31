@@ -11,7 +11,7 @@ from grafics.grafics_elements import  Label
 class PlayState(State):
     def __init__(self, game, difficulty):
         super().__init__(game)
-        self.level = Level(difficulty)
+        self.level = Level(difficulty,  game.clock)
         self.finish = False
         self.txt_lives = Label(*cfg.hp)
         self.music = cfg.music

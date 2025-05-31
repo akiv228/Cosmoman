@@ -3,7 +3,7 @@ import random
 import noise
 import numpy as np
 
-from matrix import FogOfWar
+from fogofwar import FogOfWar
 from maze_generation import generate_maze
 from grafics.maze_fons import Starfield_white, Starfield_palette
 from grafics.circle_hardbackground import CircleBackground
@@ -12,7 +12,7 @@ from game_sprites import Wall, GameSprite
 from enemy_manager import EnemyManager
 from planet import FinalGifSprite
 from player import Player
-from sprite_config import SPRITE_SETS, planets
+from sprite_config import SPRITE_SETS, planets, all_smoke_images
 from states.config_state import used_explore_finals
 import createwalls
 import path_utils
@@ -41,8 +41,10 @@ class Level:
         return width, height
 
 
-    def __init__(self, difficulty, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
+    def __init__(self, difficulty, clock=None, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
         self.debug_mode = debug_mode
+        self.clock = clock
+        self.current_alpha = 255
         self.difficulty = difficulty
         self.sprite_set = SPRITE_SETS[difficulty]
         self.grid_sizes = {
@@ -97,8 +99,10 @@ class Level:
         start_cell_col = (start_pos[0] - self.maze_x) // self.cell_size
         self.visibility_grid[start_cell_row][start_cell_col] = True
 
-        # 6) Загружаем изображение облачка
-        base_cloud_image = pg.image.load('images/smoke.png').convert_alpha()
+        # base_cloud_image = pg.image.load('images/smoke4.png').convert_alpha()
+        # base_cloud_image = pg.image.load(fog_images[difficulty]).convert_alpha()
+        base_cloud_image_path = random.choice(all_smoke_images[difficulty])
+        base_cloud_image = pg.image.load(base_cloud_image_path).convert_alpha()
 
         # 7) Создаём объект FogOfWar
         self.fog = FogOfWar(
@@ -109,6 +113,11 @@ class Level:
             cell_size=self.cell_size,
             base_cloud_image=base_cloud_image
         )
+
+        self.fog_delay = 0.2  # 1.5 секунды задержки
+        self.fog_delay_timer = 0.0
+        self.fog_ready = False  # Флаг готовности тумана
+        self.fog_delay_font = pg.font.SysFont('Arial', 30)  # Шрифт для сообщения
 
     def init_sprites(self, start_pos, end_pos):
         self.all_sprites = pg.sprite.Group()
@@ -173,6 +182,18 @@ class Level:
 
 
     def update(self):
+        if not self.fog_ready:
+            self.fog_delay_timer += self.clock.get_time() / 1000.0
+
+            # Плавное уменьшение прозрачности
+            progress = min(1.0, self.fog_delay_timer / self.fog_delay)
+            self.current_alpha = int(255 * (1 - progress))  # От 255 до 0
+
+            if self.fog_delay_timer >= self.fog_delay:
+                self.fog_ready = True
+                self.current_alpha = 0  # Полностью прозрачный
+
+
         self.player.update()
         self.player.bullets.update()
         self.enemy_manager.enemies.update()
@@ -249,6 +270,11 @@ class Level:
         player_center = (self.player.rect.centerx, self.player.rect.centery)
         reveal_radius = self.cell_size * 2   # здесь вы можете настроить любой радиус (в клетках * cell_size)
         self.fog.render(window, player_center, reveal_radius)
+        if not self.fog_ready:
+            # Создаем поверхность для затемнения
+            overlay = pg.Surface(window.get_size(), pg.SRCALPHA)
+            overlay.fill((0, 0, 0, self.current_alpha))
+            window.blit(overlay, (0, 0))
 
 
     def draw_debug_path(self, surface):
