@@ -102,55 +102,48 @@ class FogOfWar:
         self.spawn_interval = 60  # раз в 15 кадров
         self.frame_count = 0
 
-        # Частота появления новых частиц (раз в N кадров)
-        self.spawn_interval = 40
-
         # Лимит на общее число активных частиц
         self.max_particles = 300
 
-        # Максимум новых частиц за один «цикловый» spawn
-        self.max_new_particles_per_spawn = 100
+        # Список всех частиц дыма, привязанных к разным клеткам
 
+
+
+def update(self, visibility_grid):
+    """
+    Обновляем все частицы, удаляем «мертвые» и, если пора,
+    спавним новые во всех невидимых клетках.
+
+    visibility_grid — двумерный список/массив размером [grid_height][grid_width]:
+                      True если клетка **открыта** (игрок её увидел), False если ещё скрыта.
+    """
+    # Во-первых, убираем «мертвые» частицы
+    self.particles = [p for p in self.particles if p.alive]
+
+    # Увеличиваем счётчик кадров
+    self.frame_count += 1
+    if self.frame_count >= self.spawn_interval:
         self.frame_count = 0
+        # Проходим по всем клеткам; если cell закрыта (visibility_grid[row][col] == False),
+        # то спавним в этой клетке ещё одну частицу (с центром посередине клетки или чуть случайно смещённым).
+        for row in range(self.grid_height):
+            for col in range(self.grid_width):
+                if not visibility_grid[row][col]:
+                    # вычисляем центр клетки (row, col)
+                    cell_center_x = col * self.cell_size + self.cell_size // 2
+                    cell_center_y = row * self.cell_size + self.cell_size // 2
+                    # создаём частицу в системе координат «относительно» левого верхнего угла maze (0,0)
+                    new_particle = SmokeParticle(
+                        x=cell_center_x,
+                        y=cell_center_y,
+                        base_image=self.base_cloud_image,
+                        cell_size=self.cell_size
+                    )
+                    self.particles.append(new_particle)
 
-
-    def update(self, visibility_grid):
-        # 1) Очищаем «мертвые» частицы
-        self.particles = [p for p in self.particles if p.alive]
-
-        # 2) Спавним новые раз в spawn_interval, но не больше max_new_particles_per_spawn
-        self.frame_count += 1
-        if self.frame_count >= self.spawn_interval:
-            self.frame_count = 0
-
-            # Если уже достигли общего лимита, не создаём новых
-            if len(self.particles) >= self.max_particles:
-                return
-
-            # Собираем список ВСЕХ закрытых клеток
-            closed_cells = [
-                (r, c)
-                for r in range(self.grid_height)
-                for c in range(self.grid_width)
-                if not visibility_grid[r][c]
-            ]
-            if not closed_cells:
-                return
-
-            random.shuffle(closed_cells)
-            num_to_spawn = min(self.max_new_particles_per_spawn,
-                               self.max_particles - len(self.particles))
-
-            for (r, c) in closed_cells[:num_to_spawn]:
-                cx = c * self.cell_size + self.cell_size // 2
-                cy = r * self.cell_size + self.cell_size // 2
-                new_p = SmokeParticle(cx, cy, self.base_cloud_image, self.cell_size)
-                self.particles.append(new_p)
-
-        # 3) Обновляем все живые частицы
-        for p in self.particles:
-            p.update()
-
+    # Обновляем все частицы
+    for p in self.particles:
+        p.update()
 
 
     def render(self, target_surface, player_pos, reveal_radius):
