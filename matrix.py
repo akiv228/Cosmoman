@@ -72,112 +72,126 @@ class SmokeParticle:
 
 
 class FogOfWar:
- def __init__(self, maze_x, maze_y, grid_width, grid_height, cell_size, base_cloud_image):
-  """
-  maze_x, maze_y — координаты левого верхнего угла лабиринта на экране;
-  grid_width, grid_height — размеры сетки (количество клеток по x и y);
-  cell_size — размер каждой клетки в пикселях;
-  base_cloud_image — Surface с исходным изображением облака (одинаковое для всех частиц).
-  """
-  self.maze_x = maze_x
-  self.maze_y = maze_y
-  self.grid_width = grid_width
-  self.grid_height = grid_height
-  self.cell_size = cell_size
+    def __init__(self, maze_x, maze_y, grid_width, grid_height, cell_size, base_cloud_image):
+        """
+        maze_x, maze_y — координаты левого верхнего угла лабиринта на экране;
+        grid_width, grid_height — размеры сетки (количество клеток по x и y);
+        cell_size — размер каждой клетки в пикселях;
+        base_cloud_image — Surface с исходным изображением облака (одинаковое для всех частиц).
+        """
+        self.maze_x = maze_x
+        self.maze_y = maze_y
+        self.grid_width = grid_width
+        self.grid_height = grid_height
+        self.cell_size = cell_size
 
-  # Общая поверхность, на которой «рисуется весь туман»
-  width_px = grid_width * cell_size
-  height_px = grid_height * cell_size
-  self.surface = pg.Surface((width_px, height_px), flags=pg.SRCALPHA)
-  # Заполняем его полностью «чёрным полупрозрачным» фоном (например, alpha=200)
-  self.surface.fill((0, 0, 0, 200))
+        # Общая поверхность, на которой «рисуется весь туман»
+        width_px = grid_width * cell_size
+        height_px = grid_height * cell_size
+        self.surface = pg.Surface((width_px, height_px), flags=pg.SRCALPHA)
+        # Заполняем его полностью «чёрным полупрозрачным» фоном (например, alpha=200)
+        self.surface.fill((0, 0, 0, 200))
 
-  # Базовое изображение облачка, которое будем масштабировать внутри SmokeParticle
-  self.base_cloud_image = base_cloud_image
+        # Базовое изображение облачка, которое будем масштабировать внутри SmokeParticle
+        self.base_cloud_image = base_cloud_image
 
-  # Список всех частиц дыма, привязанных к разным клеткам
-  self.particles = []
+        # Список всех частиц дыма, привязанных к разным клеткам
+        self.particles = []
 
-  # Сколько кадров между спавном новых частиц в каждой невидимой клетке
-  self.spawn_interval = 60  # раз в 15 кадров
-  self.frame_count = 0
+        # Сколько кадров между спавном новых частиц в каждой невидимой клетке
+        self.spawn_interval = 60  # раз в 15 кадров
+        self.frame_count = 0
 
- def update(self, visibility_grid):
-  """
-  Обновляем все частицы, удаляем «мертвые» и, если пора,
-  спавним новые во всех невидимых клетках.
+        # Частота появления новых частиц (раз в N кадров)
+        self.spawn_interval = 40
 
-  visibility_grid — двумерный список/массив размером [grid_height][grid_width]:
-                    True если клетка **открыта** (игрок её увидел), False если ещё скрыта.
-  """
-  # Во-первых, убираем «мертвые» частицы
-  self.particles = [p for p in self.particles if p.alive]
+        # Лимит на общее число активных частиц
+        self.max_particles = 300
 
-  # Увеличиваем счётчик кадров
-  self.frame_count += 1
-  if self.frame_count >= self.spawn_interval:
-   self.frame_count = 0
-   # Проходим по всем клеткам; если cell закрыта (visibility_grid[row][col] == False),
-   # то спавним в этой клетке ещё одну частицу (с центром посередине клетки или чуть случайно смещённым).
-   for row in range(self.grid_height):
-    for col in range(self.grid_width):
-     if not visibility_grid[row][col]:
-      # вычисляем центр клетки (row, col)
-      cell_center_x = col * self.cell_size + self.cell_size // 2
-      cell_center_y = row * self.cell_size + self.cell_size // 2
-      # создаём частицу в системе координат «относительно» левого верхнего угла maze (0,0)
-      new_particle = SmokeParticle(
-       x=cell_center_x,
-       y=cell_center_y,
-       base_image=self.base_cloud_image,
-       cell_size=self.cell_size
-      )
-      self.particles.append(new_particle)
+        # Максимум новых частиц за один «цикловый» spawn
+        self.max_new_particles_per_spawn = 100
 
-  # Обновляем все частицы
-  for p in self.particles:
-   p.update()
+        self.frame_count = 0
 
 
- def render(self, target_surface, player_pos, reveal_radius):
-     """
-     Рисует слой тумана поверх target_surface.
-     player_pos — (x, y) в глобальных координатах экрана,
-                  reveal_radius — радиус «окошка» вокруг игрока (в пикселях).
-     """
-     # 1) Полностью заливаем fog.surface полупрозрачным чёрным
-     #    (RGBA = (0, 0, 0, 200) — 200 означает «почти непрозрачный» чёрный).
-     self.surface.fill((0, 0, 0, 200))
+    def update(self, visibility_grid):
+        # 1) Очищаем «мертвые» частицы
+        self.particles = [p for p in self.particles if p.alive]
 
-     # 2) Рисуем все активные облачные частицы (SmokeParticle) на fog.surface
-     for p in self.particles:
-         p.draw(self.surface)
+        # 2) Спавним новые раз в spawn_interval, но не больше max_new_particles_per_spawn
+        self.frame_count += 1
+        if self.frame_count >= self.spawn_interval:
+            self.frame_count = 0
 
-     # 3) «Пропечатываем» прозрачный круг вокруг игрока:
-     #    a) Сначала вычисляем координаты игрока внутри fog.surface:
-     rel_x = player_pos[0] - self.maze_x
-     rel_y = player_pos[1] - self.maze_y
+            # Если уже достигли общего лимита, не создаём новых
+            if len(self.particles) >= self.max_particles:
+                return
 
-     #    b) Создаём вспомогательную поверхность той же величины, что и fog.surface:
-     hole_surf = pg.Surface(self.surface.get_size(), flags=pg.SRCALPHA)
-     #       — изначально она полностью прозрачная (чтобы вычитать именно область круга).
-     hole_surf.fill((0, 0, 0, 0))
+            # Собираем список ВСЕХ закрытых клеток
+            closed_cells = [
+                (r, c)
+                for r in range(self.grid_height)
+                for c in range(self.grid_width)
+                if not visibility_grid[r][c]
+            ]
+            if not closed_cells:
+                return
 
-     #    c) Рисуем на hole_surf «круг заливки» чёрным полупрозрачным = (0,0,0,200).
-     #       Внутри круга именно эта «альфа=200» и будет вычитаться из fog.surface.
-     pg.draw.circle(
-         hole_surf,
-         (0, 0, 0, 200),  # цвет: чёрный с alpha=200
-         (int(rel_x), int(rel_y)),  # центр круга в системе fog.surface
-         reveal_radius  # радиус круга
-     )
+            random.shuffle(closed_cells)
+            num_to_spawn = min(self.max_new_particles_per_spawn,
+                               self.max_particles - len(self.particles))
 
-     #    d) Вычитаем hole_surf из fog.surface: BLEND_RGBA_SUB уменьшает каждый канал,
-     #       поэтому внутри круга alpha мокнутого fog.surface (200) станет (200−200)=0,
-     #       и там появится прозрачная «дырка». Вне круга hole_surf полностью прозрачен,
-     #       так что fog.surface за пределами круга остаётся (0,0,0,200).
-     self.surface.blit(hole_surf, (0, 0), special_flags=pg.BLEND_RGBA_SUB)
+            for (r, c) in closed_cells[:num_to_spawn]:
+                cx = c * self.cell_size + self.cell_size // 2
+                cy = r * self.cell_size + self.cell_size // 2
+                new_p = SmokeParticle(cx, cy, self.base_cloud_image, self.cell_size)
+                self.particles.append(new_p)
 
-     # 4) Наконец, рисуем готовый fog.surface поверх целевой поверхности (лабиринта),
-     #    смещая его по (maze_x, maze_y).
-     target_surface.blit(self.surface, (self.maze_x, self.maze_y))
+        # 3) Обновляем все живые частицы
+        for p in self.particles:
+            p.update()
+
+
+
+    def render(self, target_surface, player_pos, reveal_radius):
+         """
+         Рисует слой тумана поверх target_surface.
+         player_pos — (x, y) в глобальных координатах экрана,
+                      reveal_radius — радиус «окошка» вокруг игрока (в пикселях).
+         """
+         # 1) Полностью заливаем fog.surface полупрозрачным чёрным
+         #    (RGBA = (0, 0, 0, 200) — 200 означает «почти непрозрачный» чёрный).
+         self.surface.fill((0, 0, 0, 200))
+
+         # 2) Рисуем все активные облачные частицы (SmokeParticle) на fog.surface
+         for p in self.particles:
+             p.draw(self.surface)
+
+         # 3) «Пропечатываем» прозрачный круг вокруг игрока:
+         #    a) Сначала вычисляем координаты игрока внутри fog.surface:
+         rel_x = player_pos[0] - self.maze_x
+         rel_y = player_pos[1] - self.maze_y
+
+         #    b) Создаём вспомогательную поверхность той же величины, что и fog.surface:
+         hole_surf = pg.Surface(self.surface.get_size(), flags=pg.SRCALPHA)
+         #       — изначально она полностью прозрачная (чтобы вычитать именно область круга).
+         hole_surf.fill((0, 0, 0, 0))
+
+         #    c) Рисуем на hole_surf «круг заливки» чёрным полупрозрачным = (0,0,0,200).
+         #       Внутри круга именно эта «альфа=200» и будет вычитаться из fog.surface.
+         pg.draw.circle(
+             hole_surf,
+             (0, 0, 0, 200),  # цвет: чёрный с alpha=200
+             (int(rel_x), int(rel_y)),  # центр круга в системе fog.surface
+             reveal_radius  # радиус круга
+         )
+
+         #    d) Вычитаем hole_surf из fog.surface: BLEND_RGBA_SUB уменьшает каждый канал,
+         #       поэтому внутри круга alpha мокнутого fog.surface (200) станет (200−200)=0,
+         #       и там появится прозрачная «дырка». Вне круга hole_surf полностью прозрачен,
+         #       так что fog.surface за пределами круга остаётся (0,0,0,200).
+         self.surface.blit(hole_surf, (0, 0), special_flags=pg.BLEND_RGBA_SUB)
+
+         # 4) Наконец, рисуем готовый fog.surface поверх целевой поверхности (лабиринта),
+         #    смещая его по (maze_x, maze_y).
+         target_surface.blit(self.surface, (self.maze_x, self.maze_y))
