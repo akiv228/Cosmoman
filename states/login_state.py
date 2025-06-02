@@ -6,13 +6,16 @@ from grafics.grafics_elements import  ImageButton, Label, InputBox
 from .config_state import LoginState as cfg, WinState
 import asyncio
 from grafics.elements_for_menu_select_login import Star, NeonText
+import requests
+import jwt
+from config import W, H, serv
 
 class LoginState(State):
     def __init__(self, game):
         super().__init__(game)
+        self.usr = game.usr
         self.ui_elements = pg.sprite.Group()
         self.input_boxes = pg.sprite.Group()
-
         self.stars = [Star(cfg.stars) for _ in range(cfg.stars['count'])]
         # self.title = Label(*cfg.title)
         # self.title.set_text(*cfg.label)
@@ -31,36 +34,54 @@ class LoginState(State):
         for e in events:
             for box in self.input_boxes: box.handle_event(e)
             if e.type == pg.MOUSEBUTTONDOWN:
-                if self.login_btn.rect.collidepoint(e.pos): self.handle_login(self.username_box.text, self.password_box.text)
-                elif self.register_btn.rect.collidepoint(e.pos): self.handle_register(self.username_box.text, self.password_box.text)
+                if self.login_btn.rect.collidepoint(e.pos):
+                    self.handle_login(self.username_box.text, self.password_box.text)
+                elif self.register_btn.rect.collidepoint(e.pos):
+                    self.handle_register(self.username_box.text, self.password_box.text)
 
     def handle_login(self, username, password):
-        """Заглушка1"""
-        asyncio.sleep(0.5)
-        from .menu_state import MenuState
-        self.game.set_state(MenuState(self.game))
-        # from states.win_state import WinState
-        # self.game.set_state(WinState(self.game))
-        return {
-            "status": "success",
-            "user": {
-                "id": 1,
-                "username": username,
-                "token": "fake_jwt_token_12345"
-            }
-        }
+        res = requests.post(f'http://{serv["host"]}:{serv["port"]}/login', data={'username': username, 'password': password}, headers={'Content-Type': 'application/x-www-form-urlencoded'})
+        res = res.json()
+        try:
+            res['token']
+            self.usr.jwt = res['token']
+            decoded = jwt.decode(res['token'], options={"verify_signature" : False})
+
+            self.usr.username = decoded.get('username')
+            bscore = int(decoded.get('best_score'))
+            self.usr.best_score = "-" if 0 == bscore else str(bscore)
+            print(bscore)
+            from .menu_state import MenuState
+            self.game.set_state(MenuState(self.game))
+        except:
+            self.show_error_message("Incorrect credentials")
+            return -1
 
     def handle_register(self, username, password):
-        """Заглушка2"""
-        # asyncio.sleep(0.5)
-        time.sleep(0.5)
-        from .menu_state import MenuState
-        self.game.set_state(MenuState(self.game))
-        return {
-            "status": "success",
-            "message": f"User {username} registered successfully"
-        }
+        res = requests.post(f'http://{serv["host"]}:{serv["port"]}/register', data={'username': username, 'password': password}, headers={'Content-Type': 'application/x-www-form-urlencoded'})
+        res = res.json()
+        print(res)
+        try:
+            assert res['status'] == 'success'
+            print(username)
+            self.usr.username = username
+            self.usr.best_score = "-"
+            from .menu_state import MenuState
+            self.game.set_state(MenuState(self.game))
+        except:
+            self.show_error_message('Username already exists')
+            return -1
     
+    def show_error_message(self, text):
+        font = pg.font.Font(None, 36)
+        error_text = font.render(text, True, (255, 0, 0))
+        text_rect = error_text.get_rect(
+            centerx=W // 2,
+            bottom=H - 50
+        )
+        self.error_message = (error_text, text_rect)
+        self.error_time = pg.time.get_ticks()
+
     def update(self):
         self.input_boxes.update()
         self.neon_text.update()
@@ -75,6 +96,8 @@ class LoginState(State):
         self.neon_text.draw(window)
         # self.title.draw(window, 0, -200)
         self.message.draw(window, 0, 150)
+        if hasattr(self, 'error_message') and pg.time.get_ticks() - self.error_time < 5000:
+            window.blit(*self.error_message)
 
     def enter(self):
         pass

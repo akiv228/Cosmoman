@@ -113,7 +113,7 @@ class Planet:
                         self.delta += dir_from_obj
 
                     except:
-                        print('In the same spot')
+                        print('In the same spot2')
 
             self.position += self.delta
 

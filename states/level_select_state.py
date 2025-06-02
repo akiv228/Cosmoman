@@ -21,6 +21,7 @@ class LevelSelectState(State):
             button.set_active(i >= 0)
         self.button_back = ImageButton(*cfg.back)
         self.music = cfg.music
+        self.user_font = pg.font.Font(None, 28)
 
     def handle_events(self, events):
         for e in events:
@@ -60,6 +61,17 @@ class LevelSelectState(State):
         for button in self.buttons:
             button.draw(window)
         self.button_back.draw(window)
+
+        if hasattr(self.game, 'usr') and hasattr(self.game.usr, 'username'):
+            user_info = f"{self.game.usr.username} | Best: {self.game.usr.best_score}"
+            user_surface = self.user_font.render(user_info, True, (255, 255, 255))
+            user_rect = user_surface.get_rect(bottomright=(window.get_width() - 20, window.get_height() - 20))
+            
+            bg_rect = user_rect.inflate(20, 10)
+            pg.draw.rect(window, (0, 0, 0, 150), bg_rect, border_radius=5)
+            pg.draw.rect(window, (100, 100, 255), bg_rect, 2, border_radius=5)
+            
+            window.blit(user_surface, user_rect)
 
     def enter(self):
         if self.music != self.game.current_music:

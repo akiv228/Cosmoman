@@ -8,7 +8,7 @@ from states.intro_state import IntroState
 from states.menu_state import MenuState
 from states.login_state import LoginState
 from game_music import mixer
-
+from models import User
 
 
 
@@ -18,8 +18,9 @@ class Game:
         pg.init()
         pg.font.init()
         mixer.init()
-        self.window = display.set_mode((win_width, win_height))
+        self.window = display.set_mode((win_width, win_height), pg.HWSURFACE | pg.DOUBLEBUF)
         display.set_caption(txt_caption)
+        self.usr = User()
         self.clock = time.Clock()
         self.running = True
         self.music_flag = 0  # Можно использовать эту переменную для состояния звука

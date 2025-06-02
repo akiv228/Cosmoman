@@ -29,6 +29,14 @@ text_rules = {
 5: 'Постарайся собрать все бонусы-звёздочки!',
 }
 
+
+scores = {
+    'EASY': 5.0,
+    'MEDIUM': 10.0,
+    'HARD': 15.0,
+    'EXPLORE': 20.0,
+}
+
 BLACK_BLUE = (28,39,71)
 DARK_BLUE = (4, 60, 117)
 WHITE = (255, 255, 255)
@@ -42,6 +50,11 @@ flag = 'menu'
 select = 0
 check_sound = 0
 paused = False
+
+serv = {
+    'host': '127.0.0.1',
+    'port': 8081,
+}
 
 FPS = 60
 
