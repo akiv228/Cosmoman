@@ -2,7 +2,7 @@ import pygame as pg
 from game_music import mixer
 from states.game_state import State
 from states.pause_state import PauseState
-from .config_state import PlayState as cfg, used_explore_finals
+from .config_state import PlayState as cfg
 from level import Level
 from grafics.grafics_elements import Label
 from config import scores, serv, W, H
@@ -12,7 +12,7 @@ import requests
 class PlayState(State):
     def __init__(self, game, difficulty):
         super().__init__(game)
-        self.level = Level(difficulty, game.clock)
+        self.level = Level(difficulty, game, game.clock)
         self.game_link = game
         self.finish = False
         self.txt_lives = Label(*cfg.hp)
@@ -22,7 +22,7 @@ class PlayState(State):
         self.time_limit = 300000
         self.time_left = self.time_limit
         self.txt_timer = Label(*cfg.hp)
-        self.txt_timer.set_text("5:00", 24, (255, 255, 255))
+        self.txt_timer.set_text("5:00", 35, (255, 255, 255))
         self.last_update = 0
 
     def handle_events(self, events):
@@ -57,26 +57,7 @@ class PlayState(State):
             # self.update_timer()
         mixer.music.set_volume(0.2)
 
-    # def update_timer(self):
-    #     current_time = pg.time.get_ticks()
-    #     elapsed = current_time - self.start_time
-    #     self.time_left = max(0, self.time_limit - elapsed)
-    #     seconds = self.time_left // 1000
-    #     minutes = seconds // 60
-    #     seconds = seconds % 60
-    #     time_str = f"{minutes:02d}:{seconds:02d}"
-    #     self.txt_timer.set_text(time_str, 24, (255, 255, 255))
 
-    #     if self.time_left <= 0:
-    #         from states.lose_state import LoseState
-    #         self.finish = True
-    #         self.game.set_state(LoseState(self.game))
-
-    # def render(self, window):
-    #     self.level.render(window)
-    #     self.txt_lives.set_text(*cfg.hp_text(self.level.player))
-    #     self.txt_lives.draw(window, 0, 0)
-    #     self.txt_timer.draw(window, W // 2, 0)
     def update_timer(self):
         current_time = pg.time.get_ticks()
         elapsed = current_time - self.start_time
@@ -85,7 +66,7 @@ class PlayState(State):
         minutes = seconds // 60
         seconds = seconds % 60
         time_str = f"{minutes:02d}:{seconds:02d}"
-        self.txt_timer.set_text(time_str, 24, (255, 255, 255))
+        self.txt_timer.set_text(time_str, 35, (255, 255, 255))
         self.last_update = current_time  # Обновляем время последнего обновления
 
         if self.time_left <= 0:
@@ -94,15 +75,21 @@ class PlayState(State):
             self.game.set_state(LoseState(self.game))
 
     def render(self, window):
-        current_time = pg.time.get_ticks()
-        # Обновляем таймер только если прошло более 500 мс с последнего обновления
-        if current_time - self.last_update > 500:
-            self.update_timer()
+        if self.game.all_planets_discovered():
+            window.fill((0, 0, 0))
+            font = pg.font.SysFont('Arial', 30)
+            text = font.render("Вы исследовали всю нашу галактику, скоро вернемся с приключениями", True, (255, 255, 255))
+            text_rect = text.get_rect(center=(window.get_width() / 2, window.get_height() / 2))
+            window.blit(text, text_rect)
+        else:
+            current_time = pg.time.get_ticks()
+            if current_time - self.last_update > 500:
+                self.update_timer()
 
-        self.level.render(window)
-        self.txt_lives.set_text(*cfg.hp_text(self.level.player))
-        self.txt_lives.draw(window, 5, 5)
-        self.txt_timer.draw(window, W // 2, 0)
+            self.level.render(window)
+            self.txt_lives.set_text(*cfg.hp_text(self.level.player))
+            self.txt_lives.draw(window, 10, 10)
+            self.txt_timer.draw(window, W // 2 - 10, 10)
 
     def check_game_state(self):
         player = self.level.player
@@ -116,18 +103,24 @@ class PlayState(State):
             self.game.completed_difficulties += 1
             if self.level.difficulty == 'EXPLORE':
                 # used_explore_finals.add(self.level.final.image_path)
-                selected_planet = self.level.select_explore_final()
+                selected_planet = self.level.get_selected_planet()
                 if selected_planet:
                     planet_id = selected_planet['id']
                     self.game.complete_level(planet_id)
-                    used_explore_finals.add(selected_planet['image'])
+                    self.game.used_explore_finals.add(selected_planet['image'])
+
+            # bscore = 0.0 if self.game.usr.best_score == "-" else float(self.game.usr.best_score)
+            # self.game.usr.best_score = str(bscore + float(scores[self.level.difficulty]) * self.get_k())
+
+            score_to_add = round(float(scores[self.level.difficulty]) * self.get_k(), 2)
 
             bscore = 0.0 if self.game.usr.best_score == "-" else float(self.game.usr.best_score)
-            self.game.usr.best_score = str(bscore + float(scores[self.level.difficulty]) * self.get_k())
+            self.game.usr.best_score = f"{bscore + score_to_add:.2f}"
+
             requests.post(f'http://{serv["host"]}:{serv["port"]}/update',
                           data={'tkn': self.game.usr.jwt, 'scr': scores[self.level.difficulty] * self.get_k()},
                           headers={'Content-Type': 'application/x-www-form-urlencoded'})
-            self.game.set_state(WinState(self.game))
+            self.game.set_state(WinState(self.game, 'Play'))
 
     def get_k(self) -> float:
         return round(float(self.time_left) / 150000, 2)

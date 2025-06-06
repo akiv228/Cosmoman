@@ -29,7 +29,7 @@ class MenuState(State):
                             self.game.set_state(PopupState(self.game, self))
                         elif button.text == "RATING":
                             from states.win_state import WinState
-                            self.game.set_state(WinState(self.game))
+                            self.game.set_state(WinState(self.game, 'Menu'))
                         elif button.text == "FOUND PLANETS":
                             from states.planet_state import PlanetState
                             self.game.set_state(PlanetState(self.game))

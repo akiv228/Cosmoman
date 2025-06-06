@@ -2,7 +2,7 @@ from config import win_width as W, win_height as H, BLACK_BLUE, WHITE
 from game_music import mixer
 import pygame as pg
 
-used_explore_finals = set()
+# used_explore_finals = set()
 
 class Instance:
     def __init__(self, src, *args):
@@ -93,15 +93,6 @@ if __name__ != '__config__':
 
 
     class LevelSelectState:
-        # bg = Instance('images\\select.jpg', W + 20, H + 20, -10, 0)
-        # btn = [
-        #     Instance('images\\select1.png', 170, 120, 190, 100),
-        #     Instance('images\\select2.png', 170, 250, 190, 100),
-        #     Instance('images\\select3.png', 170, 375, 190, 100),
-        # ]
-        # explore = Instance('images\\explore.png', 400, 375, 190, 100)
-        # pre_init_back_label = (140, 0, 680, 40, GREY_BLUE)
-        # back_label = Text(txt_select, 62, WHITE)
         back = Instance('images\\back3.png', 130, 55, 100, 70)
         music = Sound('sound\\menu.mp3')
         stars = {
@@ -158,22 +149,20 @@ if __name__ != '__config__':
         }
 
     class PlayState:
-        hp = (10, 0, 70, 30, BLACK_BLUE)
+        hp = (15, 0, 100, 40, BLACK_BLUE)
         music = Sound('sound\\fon1.mp3')
-
+        timer = Text("5:00", 35, (255, 255, 255))
         @staticmethod
         def hp_text(player):
             # return Text(f'Жизни: {player.lives} Бонусы: {player.collected_prizes} Пули: {player.limit}', 20, WHITE)
-            return Text(f'Пули: {player.limit}', 25, WHITE)
+            return Text(f'Bullets: {player.limit}', 35, WHITE)
 
 
     class WinState:
-        # bg = Instance('images\\win.jpg', W, H, 0, 0)
-        # back_label = (230, 5, 200, 50, DARK_BLUE)
-        # per_init_back_label = (txt_win, 55, WHITE)
+        back2 = Instance('images\\back3.png', 130, 55, 100, 70)
         back = Instance('images\\home.png', 130, H - 130, 127, 130)
         restart = Instance('images\\restart (2).png', W - 230, H - 130, 120, 120)
-        title = {
+        title1 = {
             'text': 'You win',
             'font_size': 100,
             'pulsation': True,
@@ -181,6 +170,15 @@ if __name__ != '__config__':
             'flash_probability': 0.01,
             'color_change_speed': 0.02
         }
+        title2 = {
+            'text': 'Rating',
+            'font_size': 95,
+            'pulsation': True,
+            'reflection': True,
+            'flash_probability': 0.01,
+            'color_change_speed': 0.02
+        }
+
 
     class LoseState:
         back = Instance('images\\home.png', 130, H - 130, 127, 130)

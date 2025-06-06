@@ -8,9 +8,12 @@ from .config_state import WinState as cfg
 from config import win_width as W, win_height as H, serv
 
 class WinState(State):
-    def __init__(self, game):
+    def __init__(self, game, from_state):
         super().__init__(game)
-        self.neon_text = NeonText(cfg.title)
+        self.from_state = from_state
+        self.neon_text1 = NeonText(cfg.title1)
+        self.neon_text2 = NeonText(cfg.title2)
+        self.button_back2 = ImageButton(*cfg.back2)
         self.button_back = ImageButton(*cfg.back)
         self.button_restart = ImageButton(*cfg.restart)
         self.planet_system = PlanetSystem((W, H))
@@ -75,21 +78,29 @@ class WinState(State):
                 if self.button_back.collidepoint(*e.pos):
                     from states.menu_state import MenuState
                     self.game.set_state(MenuState(self.game))
+                elif self.button_back2.collidepoint(*e.pos):
+                    from states.menu_state import MenuState
+                    self.game.set_state(MenuState(self.game))
                 elif self.button_restart.collidepoint(*e.pos):
                     from states.level_select_state import LevelSelectState
                     self.game.set_state(LevelSelectState(self.game))
 
     def update(self):
         self.planet_system.update()
-        self.neon_text.update()
+        self.neon_text1.update()
+        self.neon_text2.update()
 
     def render(self, window):
         self.planet_system.draw(window)
         window.blit(self.dark_surface, (0, 0))
-        self.button_back.draw(window)
-        self.button_restart.draw(window)
-        self.neon_text.draw(window)
         self.draw_leaderboard(window)
+        if self.from_state == 'Menu':
+            self.neon_text2.draw(window)
+            self.button_back2.draw(window)
+        elif self.from_state == 'Play':
+            self.neon_text1.draw(window)
+            self.button_back.draw(window)
+            self.button_restart.draw(window)
 
     def enter(self):
         self.load_leaderboard()

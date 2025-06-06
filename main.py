@@ -36,9 +36,10 @@ class Game:
                 'id': i,
                 'discovered': False,
                 'image': f'images/planets/{i}.gif',
-                'gif': None,  # Will be initialized in PlanetState
+                'gif': None,
             } for i in range(1, 21)
         ]
+        self.used_explore_finals = set()
 
 
     def toggle_sound(self):
@@ -67,6 +68,8 @@ class Game:
             if planet['id'] == planet_id:
                 planet['discovered'] = True
                 break
+    def all_planets_discovered(self):
+        return all(planet['discovered'] for planet in self.planets)
 
     async def run(self):
         while self.running:

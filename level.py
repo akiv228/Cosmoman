@@ -14,8 +14,8 @@ from game_sprites import Wall, GameSprite
 from enemy_manager import EnemyManager, logger
 from planet import FinalGifSprite
 from player import Player
-from sprite_config import SPRITE_SETS, planets, all_smoke_images
-from states.config_state import used_explore_finals
+from sprite_config import SPRITE_SETS, all_smoke_images
+# from states.config_state import used_explore_finals
 import createwalls
 import path_utils
 
@@ -42,13 +42,15 @@ class Level:
         return width, height
 
 
-    def __init__(self, difficulty, clock=None, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
+    def __init__(self, difficulty, game, clock=None, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
         self.debug_mode = debug_mode
+        self.game = game
         self.clock = clock
         self.current_alpha = 255
         self.difficulty = difficulty
         self.sprite_set = SPRITE_SETS[difficulty]
         self.all_sprites = pg.sprite.Group()
+        self.selected_planet = None
 
         self.grid_sizes = {
             'EASY': (14, 11),
@@ -142,10 +144,9 @@ class Level:
         self.calculate_bullet_limit()
 
         if self.difficulty == 'EXPLORE':
-            final_image = self.select_explore_final()
-            if final_image:
-                final_data = final_image
-                final_image = final_data['image']
+            self.selected_planet = self.select_explore_final()
+            if self.selected_planet:
+                final_image = self.selected_planet['image']
                 width = 50
                 height = 50
             else:
@@ -163,7 +164,7 @@ class Level:
 
         if final_image.endswith('.gif'):
             if self.difficulty == 'EXPLORE':
-                self.final = FinalGifSprite(end_pos[0], end_pos[1], final_image, scale=0.15, rotation_speed=1)
+                self.final = FinalGifSprite(end_pos[0], end_pos[1], final_image, scale=0.13, rotation_speed=1)
             else:
                 self.final = FinalGifSprite(end_pos[0], end_pos[1], final_image, scale=0.17, rotation_speed=1)
 
@@ -173,45 +174,34 @@ class Level:
 
     def select_explore_final(self):
         available_planets = [
-            planet for planet in planets.values()
-            if not planet['discovered'] and planet['image'] not in used_explore_finals
+            planet for planet in self.game.planets
+            if not planet['discovered'] and planet['image'] not in self.game.used_explore_finals
         ]
         if not available_planets:
             return None
         selected_planet = random.choice(available_planets)
-        return selected_planet  # Не добавляем в used_explore_finals здесь
+        return selected_planet
+
+    def get_selected_planet(self):
+        return self.selected_planet
 
     def calculate_bullet_limit(self):
-        """Рассчитывает лимит пуль на основе количества врагов и сложности уровня"""
         enemy_count = len(self.enemy_manager.enemies)
 
-        # Базовый множитель для расчета пуль (1.5 пули на врага)
-        base_multiplier = 1.5
-
-        # Модификаторы сложности
         difficulty_modifiers = {
-            'EASY': 2.0,  # Больше пуль на легких уровнях
+            'EASY': 2.0,
             'MEDIUM': 1.7,
             'HARD': 1.5,
             'EXPLORE': 1.5
         }
 
-
-        # Минимальный и максимальный лимит для страховки
         min_limit = 15
         max_limit = 40
 
-        # Рассчитываем базовый лимит
         base_limit = int(enemy_count  * difficulty_modifiers[self.difficulty])
-
-        # Применяем ограничения
         calculated_limit = max(min_limit, min(base_limit, max_limit))
-
-
-        # Устанавливаем лимит игроку
         self.player.limit = calculated_limit
 
-        # Логируем для отладки
         logger.info(f"Установлен лимит пуль: {calculated_limit} "
                     f"(врагов: {enemy_count}, сложность: {self.difficulty})")
 

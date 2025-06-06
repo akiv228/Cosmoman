@@ -50,6 +50,9 @@ class Label:
         if self.text:
             window.blit(self.text, (self.rect.x + shift_x, self.rect.y + shift_y))
 
+    def Text(self, param, param1, param2):
+        pass
+
 
 class InputBox(pg.sprite.Sprite):
     def __init__(self, x, y, w, h, placeholder='', inactive_color=(200, 200, 200), active_color=(255, 255, 255),
