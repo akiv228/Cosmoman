@@ -113,13 +113,13 @@ class PlayState(State):
             # bscore = 0.0 if self.game.usr.best_score == "-" else float(self.game.usr.best_score)
             # self.game.usr.best_score = str(bscore + float(scores[self.level.difficulty]) * self.get_k())
 
-            score_to_add = round(float(scores[self.level.difficulty]) * self.get_k(), 2)
+            score_to_add = int(int(scores[self.level.difficulty]) * self.get_k())
 
             bscore = 0.0 if self.game.usr.best_score == "-" else float(self.game.usr.best_score)
-            self.game.usr.best_score = f"{bscore + score_to_add:.2f}"
+            self.game.usr.best_score = f"{bscore + score_to_add}"
 
             requests.post(f'http://{serv["host"]}:{serv["port"]}/update',
-                          data={'tkn': str(self.game.usr.jwt), 'scr': str(round(scores[self.level.difficulty] * self.get_k(), 2))},
+                          data={'tkn': str(self.game.usr.jwt), 'scr': str(score_to_add)},
                           headers={'Content-Type': 'application/x-www-form-urlencoded'})
             self.game.set_state(WinState(self.game, 'Play'))
 
