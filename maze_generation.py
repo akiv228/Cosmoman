@@ -92,6 +92,17 @@ def generate_maze(grid_width, grid_height, difficulty):
         'wall_thickness': 3
     }
 
+def get_wall_weight(wall_type, difficulty):
+    """Возвращает вес стены в зависимости от типа и сложности"""
+    weights = {
+        'EASY': {'v': (1, 10), 'h': (1, 10)},
+        'MEDIUM': {'v': (5, 20), 'h': (5, 20)},  # Более высокие веса
+        'HARD': {'v': (5, 30), 'h': (5, 30)},  # Максимальные веса
+        'EXPLORE': {'v': (1, 100), 'h': (1, 100)} # Полный рандом
+    }
+    min_w, max_w = weights[difficulty][wall_type]
+    return random.randint(min_w, max_w)
+
 def get_num_cycles_to_add(difficulty, grid_size):
     return {
         'EASY': 2,
@@ -177,16 +188,6 @@ def generate_all_walls(grid_width, grid_height):
     return walls
 
 
-def get_wall_weight(wall_type, difficulty):
-    """Возвращает вес стены в зависимости от типа и сложности"""
-    weights = {
-        'EASY': {'v': (1, 10), 'h': (1, 10)},
-        'MEDIUM': {'v': (5, 20), 'h': (5, 20)},  # Более высокие веса
-        'HARD': {'v': (5, 30), 'h': (5, 30)},  # Максимальные веса
-        'EXPLORE': {'v': (1, 100), 'h': (1, 100)} # Полный рандом
-    }
-    min_w, max_w = weights[difficulty][wall_type]
-    return random.randint(min_w, max_w)
 
 def build_dsu_from_walls(grid_width, grid_height, walls):
     """Строит DSU на основе набора стен"""

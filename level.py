@@ -1,22 +1,23 @@
 import pygame as pg
 import random
-import noise
-import numpy as np
+import logging
 
-from fogofwar import FogOfWar
+from pygame import display, HWSURFACE, DOUBLEBUF
+
+from config import W, H
+from grafics.fogofwar import FogOfWar
 from maze_generation import generate_maze
 from grafics.maze_fons import Starfield_white, Starfield_palette
 from grafics.circle_hardbackground import CircleBackground
 from grafics.motherboards import MotherboardBackground
 from game_sprites import Wall, GameSprite
-from enemy_manager import EnemyManager
+from enemy_manager import EnemyManager, logger
 from planet import FinalGifSprite
 from player import Player
 from sprite_config import SPRITE_SETS, planets, all_smoke_images
 from states.config_state import used_explore_finals
 import createwalls
 import path_utils
-import upload_maze
 
 class Level:
     @staticmethod
@@ -41,12 +42,14 @@ class Level:
         return width, height
 
 
-    def __init__(self, difficulty, clock=None, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
+    def __init__(self, difficulty, clock=None, debug_mode=False, load_from_file=False, filename="maze_data.pkl"):
         self.debug_mode = debug_mode
         self.clock = clock
         self.current_alpha = 255
         self.difficulty = difficulty
         self.sprite_set = SPRITE_SETS[difficulty]
+        self.all_sprites = pg.sprite.Group()
+
         self.grid_sizes = {
             'EASY': (14, 11),
             'MEDIUM': (16, 12),
@@ -59,12 +62,12 @@ class Level:
         print("Ширина:", explore_size[0], "Высота:", explore_size[1])
 
         if load_from_file:
-            self.maze_info = upload_maze.load_maze(filename)
+            self.maze_info = createwalls.load_maze(filename)
             gw, gh = self.maze_info['grid_width'], self.maze_info['grid_height']
         else:
             gw, gh = self.grid_sizes[difficulty]
             self.maze_info = generate_maze(gw, gh, difficulty)
-            upload_maze.save_maze(filename, self.maze_info)
+            createwalls.save_maze(filename, self.maze_info)
 
 
         self.walls = pg.sprite.Group()
@@ -82,10 +85,11 @@ class Level:
 
         # Загрузка спрайтов из конфигурации
         start_pos, final_pos, self.path = path_utils.calculate_positions(self.maze_info, self.grid, self.debug_mode)
-        self.init_sprites(start_pos, final_pos)
+
         self.background = self.get_background()
         self.enemy_manager = EnemyManager(self)
         self.enemy_manager.spawn_enemies()
+        self.init_sprites(start_pos, final_pos)
 
         # # Инициализация системы "тумана войны"
         # self.init_fog_of_war()
@@ -114,13 +118,12 @@ class Level:
             base_cloud_image=base_cloud_image
         )
 
-        self.fog_delay = 0.2  # 1.5 секунды задержки
+        self.fog_delay = 0.2
         self.fog_delay_timer = 0.0
         self.fog_ready = False  # Флаг готовности тумана
         self.fog_delay_font = pg.font.SysFont('Arial', 30)  # Шрифт для сообщения
 
     def init_sprites(self, start_pos, end_pos):
-        self.all_sprites = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
 
         player_size = self.sprite_set['player_size']
@@ -132,10 +135,11 @@ class Level:
         )
         self.player.walls = self.walls
         self.player.bullets = pg.sprite.Group()
-        self.player.limit = {
-            'EASY': 20, 'MEDIUM': 15,
-            'HARD': 10, 'EXPLORE': 15
-        }[self.difficulty]
+        # self.player.limit = {
+        #     'EASY': 20, 'MEDIUM': 15,
+        #     'HARD': 10, 'EXPLORE': 15
+        # }[self.difficulty]
+        self.calculate_bullet_limit()
 
         if self.difficulty == 'EXPLORE':
             final_image = self.select_explore_final()
@@ -167,6 +171,40 @@ class Level:
             self.final = GameSprite(final_image, end_pos[0], end_pos[1], width, height)
         self.all_sprites.add(self.walls, self.player, self.final)
 
+    def calculate_bullet_limit(self):
+        """Рассчитывает лимит пуль на основе количества врагов и сложности уровня"""
+        enemy_count = len(self.enemy_manager.enemies)
+
+        # Базовый множитель для расчета пуль (1.5 пули на врага)
+        base_multiplier = 1.5
+
+        # Модификаторы сложности
+        difficulty_modifiers = {
+            'EASY': 2.0,  # Больше пуль на легких уровнях
+            'MEDIUM': 1.7,
+            'HARD': 1.5,
+            'EXPLORE': 1.5
+        }
+
+
+        # Минимальный и максимальный лимит для страховки
+        min_limit = 15
+        max_limit = 40
+
+        # Рассчитываем базовый лимит
+        base_limit = int(enemy_count  * difficulty_modifiers[self.difficulty])
+
+        # Применяем ограничения
+        calculated_limit = max(min_limit, min(base_limit, max_limit))
+
+
+        # Устанавливаем лимит игроку
+        self.player.limit = calculated_limit
+
+        # Логируем для отладки
+        logger.info(f"Установлен лимит пуль: {calculated_limit} "
+                    f"(врагов: {enemy_count}, сложность: {self.difficulty})")
+
 
     def select_explore_final(self):
         available_planets = [
@@ -179,6 +217,7 @@ class Level:
         used_explore_finals.add(selected_planet['image'])
 
         return selected_planet
+
 
 
     def update(self):

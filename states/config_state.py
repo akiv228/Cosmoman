@@ -60,13 +60,6 @@ class Text:
 if __name__ != '__config__':
 
     class MenuState:
-        # bg = Instance('images\\m_start_back2.jpg', W + 20, H + 20, -10, 0)
-        # start = Instance('images\\start.png', 550, 370, 130, 130)
-        # cross = Img('images/red_cross.png')
-        # manual = Instance('images\\instruction.png', 380, 395, 110, 110)
-        # sound = Instance('images\\sound.png', 185, 365, 170, 170)
-        # greetings = Text(txt_welcome, 62, WHITE)
-        # label = [140, 0, 680, 40, BLACK_BLUE]
         music = Sound('sound\\menu.mp3')
         stars = {
             'count': 100,
@@ -170,7 +163,8 @@ if __name__ != '__config__':
 
         @staticmethod
         def hp_text(player):
-            return Text(f'Жизни: {player.lives} Бонусы: {player.collected_prizes} Пули: {player.limit}', 20, WHITE)
+            # return Text(f'Жизни: {player.lives} Бонусы: {player.collected_prizes} Пули: {player.limit}', 20, WHITE)
+            return Text(f'Пули: {player.limit}', 25, WHITE)
 
 
     class WinState:

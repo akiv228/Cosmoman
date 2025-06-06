@@ -19,6 +19,7 @@ class Game:
         pg.font.init()
         mixer.init()
         self.window = display.set_mode((win_width, win_height), pg.HWSURFACE | pg.DOUBLEBUF)
+        # self.window = display.set_mode((win_width, win_height))
         display.set_caption(txt_caption)
         self.usr = User()
         self.clock = time.Clock()
