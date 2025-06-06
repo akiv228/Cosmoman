@@ -16,7 +16,6 @@ class WinState(State):
         self.dark_surface = pg.Surface((W, H))
         self.dark_surface.set_alpha(120)
         self.dark_surface.fill((0, 0, 0))
-
         self.init_ui_elements()
 
         self.font_header = pg.font.Font(None, 36)

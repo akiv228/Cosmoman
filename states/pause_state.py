@@ -62,7 +62,9 @@ class PauseState(State):
                             self.game.set_state(MenuState(self.game))
                             # self.game.toggle_sound()
                         elif action == 'info':
-                            pass  # Действие для кнопки info, если нужно
+                            from states.popup_state import PopupState
+                            self.game.set_state((PopupState(self.game, self)))
+                            # pass  # Действие для кнопки info, если нужно
 
     def update(self):
         pass

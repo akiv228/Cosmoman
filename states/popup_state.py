@@ -1,4 +1,5 @@
 import config
+from grafics.planetfons_lose_win import PlanetSystem
 from .game_state import State
 from grafics.grafics_elements import  ImageButton
 from config import W, H, WHITE
@@ -10,7 +11,6 @@ class PopupState(State):
     def __init__(self, game, parent_state):
         super().__init__(game)
         self.parent_state = parent_state
-        self.background = pg.transform.scale(cfg.instruction.convert(), (W, H))
         self.close_btn = ImageButton(*cfg.cross)
         try:
             font_path = os.path.join("fonts", "standout.ttf")
@@ -25,20 +25,30 @@ class PopupState(State):
             self.decor_elements.append(cfg.decoration.convert_alpha())
         except: pass
 
+        self.dark_surface = pg.Surface((W, H))
+        self.dark_surface.set_alpha(120)
+        self.dark_surface.fill((0, 0, 0))
+        self.planet_system = PlanetSystem((W, H))
+
     def handle_events(self, events):
         for e in events:
             if e.type == pg.MOUSEBUTTONDOWN:
                 if self.close_btn.collidepoint(*e.pos):
                     from .menu_state import MenuState
                     self.game.set_state(MenuState(self.game))
-                    
+            if e.type == pg.KEYDOWN:
+                if e.key == pg.K_ESCAPE:
+                    from .menu_state import MenuState
+                    self.game.set_state(MenuState(self.game))
+
     def update(self):
-        pass
+        self.planet_system.update()
         
     def render(self, window):
-        window.blit(self.background, (0, 0))
-        #for decor in self.decor_elements:
-        #    window.blit(decor, (W//2 - decor.get_width()//2, H//2 - 150))
+        self.planet_system.draw(window)
+
+        # Затемняем фон для интерфейса
+        window.blit(self.dark_surface, (0, 0))
         
         title = self.title_font.render("Инструкция к игре", True, WHITE)
         window.blit(title, (W//2 - title.get_width()//2, 30))
@@ -57,7 +67,7 @@ class PopupState(State):
         for line in instruction_lines:
             if line:
                 if (line == instruction_lines[-1]): padding = 160
-                text = self.font.render(line, True, (0, 0, 0))
+                text = self.font.render(line, True, WHITE)
                 window.blit(text, (x_offset + padding, y_offset))
                 if (padding > 0): padding = 0
             y_offset += 40 if line else 20
