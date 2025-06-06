@@ -94,7 +94,7 @@ SPRITE_SETS = {
     'MEDIUM': create_sprite_config(
         collections=robots_collections,
         player_image='images/sprite1_1.png',
-        player_size=(33, 35),
+        player_size=(28, 32),
         final={'image': 'images/heart.png', 'width': 55, 'height': 50},
         collection_name='robots'
     ),

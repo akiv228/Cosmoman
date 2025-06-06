@@ -61,7 +61,7 @@ class PopupState(State):
                 window.blit(text, (x_offset + padding, y_offset))
                 if (padding > 0): padding = 0
             y_offset += 40 if line else 20
-        self.close_btn.reset(window)
+        self.close_btn.draw(window)
 
     def enter(self):
         pass
