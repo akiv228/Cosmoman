@@ -73,7 +73,7 @@ class WinState(State):
 
         for i, row in enumerate(self.leaderboard_data[:10]):
             y = start_y + 40 + i * row_height
-            rank, username, _, score = row
+            rank, username, _, score, pids = row
             rank = i + 1
 
             rank_text = self.font_row.render(str(rank), True, (255, 255, 255))

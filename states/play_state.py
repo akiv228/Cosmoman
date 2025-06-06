@@ -106,6 +106,7 @@ class PlayState(State):
                 selected_planet = self.level.get_selected_planet()
                 if selected_planet:
                     planet_id = selected_planet['id']
+                    res = requests.get(f'http://{serv["host"]}:{serv["port"]}/add?pid={planet_id}&uid={self.game.usr.username}')
                     self.game.complete_level(planet_id)
                     self.game.used_explore_finals.add(selected_planet['image'])
 
@@ -118,7 +119,7 @@ class PlayState(State):
             self.game.usr.best_score = f"{bscore + score_to_add:.2f}"
 
             requests.post(f'http://{serv["host"]}:{serv["port"]}/update',
-                          data={'tkn': self.game.usr.jwt, 'scr': scores[self.level.difficulty] * self.get_k()},
+                          data={'tkn': str(self.game.usr.jwt), 'scr': str(round(scores[self.level.difficulty] * self.get_k(), 2))},
                           headers={'Content-Type': 'application/x-www-form-urlencoded'})
             self.game.set_state(WinState(self.game, 'Play'))
 

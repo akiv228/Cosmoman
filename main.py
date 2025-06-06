@@ -2,6 +2,7 @@ import asyncio
 import platform
 import pygame as pg
 from pygame import display, time, event
+import requests
 from config import win_width, win_height, txt_caption, FPS
 from grafics.elements_for_menu_select_login import SoundNotification
 from states.intro_state import IntroState
@@ -9,6 +10,7 @@ from states.menu_state import MenuState
 from states.login_state import LoginState
 from game_music import mixer
 from models import User
+from config import serv
 
 
 
@@ -68,8 +70,17 @@ class Game:
             if planet['id'] == planet_id:
                 planet['discovered'] = True
                 break
+
     def all_planets_discovered(self):
         return all(planet['discovered'] for planet in self.planets)
+    
+    def upd_discovered(self):
+        disc = requests.get(f'http://{serv["host"]}:{serv["port"]}/get?uid={self.usr.username}')
+        pids = list(map(int, disc.json()['pids'][2:-3].split()))
+        print(pids)
+        for planet in self.planets:
+            planet['discovered'] = bool(planet['id'] in pids)
+
 
     async def run(self):
         while self.running:

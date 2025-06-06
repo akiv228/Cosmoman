@@ -17,6 +17,8 @@ class PlanetState(State):
             'color_change_speed': 0.02
         }
 
+        game.upd_discovered()
+
         self.neon_text = NeonText(title)
         self.planets = self.game.planets
         self.locked_image = pg.image.load('images/locked_planet.png').convert_alpha()

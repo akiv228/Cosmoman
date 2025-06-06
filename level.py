@@ -180,6 +180,7 @@ class Level:
         if not available_planets:
             return None
         selected_planet = random.choice(available_planets)
+        print("***SELECTED*** ", selected_planet)
         return selected_planet
 
     def get_selected_planet(self):
