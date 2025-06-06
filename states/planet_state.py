@@ -1,3 +1,4 @@
+import time
 import pygame as pg
 
 from grafics.elements_for_menu_select_login import NeonText
@@ -37,17 +38,17 @@ class PlanetState(State):
             for j in range(4)
             for i in range(5)
         ]
-
+        
         for i, planet in enumerate(self.planets):
-            if not planet['gif']:
+            planet['position'] = self.planet_positions[i]
+            planet['locked_image'] = self.locked_image
+            if planet.get('discovered', False) and not planet.get('gif'):
                 planet['gif'] = FinalGifSprite(
                     self.planet_positions[i][0] + 50,
                     self.planet_positions[i][1] + 45,
                     planet['image'],
                     scale=0.2, rotation_speed=1
                 )
-            planet['position'] = self.planet_positions[i]
-            planet['locked_image'] = self.locked_image
 
     def handle_events(self, events):
         for e in events:
