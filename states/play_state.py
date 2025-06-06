@@ -115,7 +115,13 @@ class PlayState(State):
             self.finish = True
             self.game.completed_difficulties += 1
             if self.level.difficulty == 'EXPLORE':
-                used_explore_finals.add(self.level.final.image_path)
+                # used_explore_finals.add(self.level.final.image_path)
+                selected_planet = self.level.select_explore_final()
+                if selected_planet:
+                    planet_id = selected_planet['id']
+                    self.game.complete_level(planet_id)
+                    used_explore_finals.add(selected_planet['image'])
+
             bscore = 0.0 if self.game.usr.best_score == "-" else float(self.game.usr.best_score)
             self.game.usr.best_score = str(bscore + float(scores[self.level.difficulty]) * self.get_k())
             requests.post(f'http://{serv["host"]}:{serv["port"]}/update',

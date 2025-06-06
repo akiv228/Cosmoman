@@ -31,8 +31,8 @@ class MenuState(State):
                             from states.win_state import WinState
                             self.game.set_state(WinState(self.game))
                         elif button.text == "FOUND PLANETS":
-                            from states.lose_state import LoseState
-                            self.game.set_state(LoseState(self.game))
+                            from states.planet_state import PlanetState
+                            self.game.set_state(PlanetState(self.game))
                 # if self.button_sound.rect.collidepoint(e.pos):
                 #     self.game.toggle_sound()
 

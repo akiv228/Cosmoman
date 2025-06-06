@@ -62,7 +62,7 @@ class EnemyManager:
                 'off_bfs_factor': 0.9  # 90% от основного количества для врагов вне BFS
             },
             'EXPLORE': {
-                'count_factor': 0.05,
+                'count_factor': 0.0,
                 'off_bfs_factor': 0.7  # 70% от основного количества для врагов вне BFS
             }
         }[self.level.difficulty]

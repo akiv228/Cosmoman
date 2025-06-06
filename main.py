@@ -31,6 +31,14 @@ class Game:
         self.completed_difficulties = 0
         self.sound_enabled = True  # Добавляем флаг состояния звука
         self.sound_notification = SoundNotification(self)
+        self.planets = [
+            {
+                'id': i,
+                'discovered': False,
+                'image': f'images/planets/{i}.gif',
+                'gif': None,  # Will be initialized in PlanetState
+            } for i in range(1, 21)
+        ]
 
 
     def toggle_sound(self):
@@ -53,6 +61,12 @@ class Game:
         #     # Применяем текущее состояние звука при смене состояния
         #     if not self.sound_enabled:
         #         mixer.music.pause()
+
+    def complete_level(self, planet_id):
+        for planet in self.planets:
+            if planet['id'] == planet_id:
+                planet['discovered'] = True
+                break
 
     async def run(self):
         while self.running:

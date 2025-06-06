@@ -42,7 +42,7 @@ class Level:
         return width, height
 
 
-    def __init__(self, difficulty, clock=None, debug_mode=False, load_from_file=False, filename="maze_data.pkl"):
+    def __init__(self, difficulty, clock=None, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
         self.debug_mode = debug_mode
         self.clock = clock
         self.current_alpha = 255
@@ -171,6 +171,16 @@ class Level:
             self.final = GameSprite(final_image, end_pos[0], end_pos[1], width, height)
         self.all_sprites.add(self.walls, self.player, self.final)
 
+    def select_explore_final(self):
+        available_planets = [
+            planet for planet in planets.values()
+            if not planet['discovered'] and planet['image'] not in used_explore_finals
+        ]
+        if not available_planets:
+            return None
+        selected_planet = random.choice(available_planets)
+        return selected_planet  # Не добавляем в used_explore_finals здесь
+
     def calculate_bullet_limit(self):
         """Рассчитывает лимит пуль на основе количества врагов и сложности уровня"""
         enemy_count = len(self.enemy_manager.enemies)
@@ -204,19 +214,6 @@ class Level:
         # Логируем для отладки
         logger.info(f"Установлен лимит пуль: {calculated_limit} "
                     f"(врагов: {enemy_count}, сложность: {self.difficulty})")
-
-
-    def select_explore_final(self):
-        available_planets = [
-            planet for planet in planets.values()
-            if not planet['discovered'] and planet['image'] not in used_explore_finals
-        ]
-        if not available_planets:
-            return None
-        selected_planet = random.choice(available_planets)
-        used_explore_finals.add(selected_planet['image'])
-
-        return selected_planet
 
 
 
@@ -274,7 +271,7 @@ class Level:
                         new_visibility[rr][cc] = True
 
         # 2) Обновляем FogOfWar именно этим новым состоянием:
-        self.fog.update(new_visibility)
+        # self.fog.update(new_visibility)
 
     def get_background(self):
         if self.difficulty == 'EASY':
@@ -308,12 +305,12 @@ class Level:
 
         player_center = (self.player.rect.centerx, self.player.rect.centery)
         reveal_radius = self.cell_size * 2   # здесь вы можете настроить любой радиус (в клетках * cell_size)
-        self.fog.render(window, player_center, reveal_radius)
-        if not self.fog_ready:
-            # Создаем поверхность для затемнения
-            overlay = pg.Surface(window.get_size(), pg.SRCALPHA)
-            overlay.fill((0, 0, 0, self.current_alpha))
-            window.blit(overlay, (0, 0))
+        # self.fog.render(window, player_center, reveal_radius)
+        # if not self.fog_ready:
+        #     # Создаем поверхность для затемнения
+        #     overlay = pg.Surface(window.get_size(), pg.SRCALPHA)
+        #     overlay.fill((0, 0, 0, self.current_alpha))
+        #     window.blit(overlay, (0, 0))
 
 
     def draw_debug_path(self, surface):
