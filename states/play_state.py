@@ -112,6 +112,9 @@ class PlayState(State):
 
             # bscore = 0.0 if self.game.usr.best_score == "-" else float(self.game.usr.best_score)
             # self.game.usr.best_score = str(bscore + float(scores[self.level.difficulty]) * self.get_k())
+            if (self.level.difficulty != 'EXPLORE'):
+                mp = {'EASY': -1, 'MEDIUM': -2, 'HARD': -3}
+                requests.get(f'http://{serv["host"]}:{serv["port"]}/add?pid={mp[self.level.difficulty]}&uid={self.game.usr.username}')
 
             score_to_add = int(int(scores[self.level.difficulty]) * self.get_k())
 

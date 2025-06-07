@@ -87,7 +87,7 @@ SPRITE_SETS = {
     'EASY': create_sprite_config(
         collections=nlo_collections,
         player_image='images/sheep3.png',
-        player_size=(40, 35),
+        player_size=(35, 33),
         final='images/2537512610.gif',
         collection_name='nlo'
     ),

@@ -1,10 +1,13 @@
 import pygame as pg
+import requests  # Добавим для HTTP запросов
 
 from game_music import mixer
 from .game_state import State
 from grafics.grafics_elements import ImageButton
 from .config_state import LevelSelectState as cfg
+from config import serv
 from grafics.elements_for_menu_select_login import Star, NeonText, Button
+
 
 class LevelSelectState(State):
     def __init__(self, game):
@@ -14,22 +17,55 @@ class LevelSelectState(State):
         button_count = len(cfg.buttons['names'])
         total_height = (button_count * cfg.buttons['height']) + ((button_count - 1) * cfg.buttons['vertical_spacing'])
         start_y = cfg.buttons['top_margin']
-        self.buttons = [Button(name, start_y + i * (cfg.buttons['height'] + cfg.buttons['vertical_spacing']), cfg.buttons)
-                        for i, name in enumerate(cfg.buttons['names'])]
-        for i, button in enumerate(self.buttons):
-            button.set_active(i >= 0)
+
+        self.buttons = [
+            Button(name, start_y + i * (cfg.buttons['height'] + cfg.buttons['vertical_spacing']), cfg.buttons)
+            for i, name in enumerate(cfg.buttons['names'])]
+
         self.button_back = ImageButton(*cfg.back)
         self.music = cfg.music
         self.user_font = pg.font.Font(None, 28)
         self.difficulty_map = {"LEVEL1": "EASY", "LEVEL2": "MEDIUM", "LEVEL3": "HARD", "EXPLORE UNIVERSITY": "EXPLORE"}
 
+        self.levels_loaded = False
+        self.completed_levels = []
+
+    def load_completed_levels(self):
+        if not hasattr(self.game, 'usr') or not hasattr(self.game.usr, 'username'): return
+        try:
+            response = requests.get(f"http://{serv['host']}:{serv['port']}/get?uid={self.game.usr.username}")
+            if response.status_code == 200:
+                levels_str = response.text
+                self.completed_levels = [int(num) for num in levels_str.split() if num.lstrip('-').isdigit()]
+                print(f"Completed levels: {self.completed_levels}")
+                for i, button in enumerate(self.buttons):
+                    if i == 0:
+                        button.set_active(True)
+                    elif i == 1 and "-1" in levels_str:
+                        button.set_active(True)
+                    elif i == 2 and "-2" in levels_str:
+                        button.set_active(True)
+                    elif i == 3 and "-3" in levels_str:
+                        button.set_active(True)
+                    else:
+                        button.set_active(False)
+
+                self.levels_loaded = True
+        except requests.RequestException as e:
+            print(f"Error loading completed levels: {e}")
+            for i, button in enumerate(self.buttons):
+                button.set_active(i == 0)
+
     def update(self):
-            for star in self.stars:
-                star.update()
-            self.neon_text.update()
-            mouse_pos = pg.mouse.get_pos()
-            for button in self.buttons:
-                button.update(mouse_pos)
+        if not self.levels_loaded:
+            self.load_completed_levels()
+
+        for star in self.stars:
+            star.update()
+        self.neon_text.update()
+        mouse_pos = pg.mouse.get_pos()
+        for button in self.buttons:
+            button.update(mouse_pos)
 
     def render(self, window):
         window.fill((0, 0, 0))
@@ -44,11 +80,11 @@ class LevelSelectState(State):
             user_info = f"{self.game.usr.username} | Best: {self.game.usr.best_score}"
             user_surface = self.user_font.render(user_info, True, (255, 255, 255))
             user_rect = user_surface.get_rect(bottomright=(window.get_width() - 20, window.get_height() - 20))
-            
+
             bg_rect = user_rect.inflate(20, 10)
             pg.draw.rect(window, (0, 0, 0, 150), bg_rect, border_radius=5)
             pg.draw.rect(window, (100, 100, 255), bg_rect, 2, border_radius=5)
-            
+
             window.blit(user_surface, user_rect)
 
     def enter(self):
@@ -62,6 +98,9 @@ class LevelSelectState(State):
         else:
             mixer.music.pause()
 
+        self.levels_loaded = False
+        self.completed_levels = []
+
     def handle_events(self, events):
         for e in events:
             if e.type == pg.MOUSEBUTTONDOWN:
@@ -74,13 +113,14 @@ class LevelSelectState(State):
                         from states.intro_state import IntroState
                         from .popup_state import PopupState
                         button_text = button.text
+
                         def create_play_state(game):
-                            print('level',button_text)
+                            print('level', button_text)
                             return PlayState(game, self.difficulty_map[button_text])
-                        
+
                         self.game.set_state(
                             PopupState(
-                                self.game, 
-                                self, 
+                                self.game,
+                                self,
                                 lambda g: IntroState(g, create_play_state)
                             ))

@@ -42,7 +42,7 @@ class Level:
         return width, height
 
 
-    def __init__(self, difficulty, game, clock=None, debug_mode=True, load_from_file=False, filename="maze_data.pkl"):
+    def __init__(self, difficulty, game, clock=None, debug_mode=False, load_from_file=False, filename="maze_data.pkl"):
         self.debug_mode = debug_mode
         self.game = game
         self.clock = clock
@@ -225,7 +225,7 @@ class Level:
         self.player.bullets.update()
         self.enemy_manager.enemies.update()
         self.all_sprites.update()
-        # self.update_fog_of_war()  # Обновляем видимость облаков
+
 
         pg.sprite.groupcollide(self.player.bullets, self.walls, True, False)
         pg.sprite.groupcollide(self.player.bullets, self.enemy_manager.enemies, True, True)
@@ -262,7 +262,7 @@ class Level:
                         new_visibility[rr][cc] = True
 
         # 2) Обновляем FogOfWar именно этим новым состоянием:
-        # self.fog.update(new_visibility)
+        self.fog.update(new_visibility)
 
     def get_background(self):
         if self.difficulty == 'EASY':
@@ -296,12 +296,12 @@ class Level:
 
         player_center = (self.player.rect.centerx, self.player.rect.centery)
         reveal_radius = self.cell_size * 2   # здесь вы можете настроить любой радиус (в клетках * cell_size)
-        # self.fog.render(window, player_center, reveal_radius)
-        # if not self.fog_ready:
-        #     # Создаем поверхность для затемнения
-        #     overlay = pg.Surface(window.get_size(), pg.SRCALPHA)
-        #     overlay.fill((0, 0, 0, self.current_alpha))
-        #     window.blit(overlay, (0, 0))
+        self.fog.render(window, player_center, reveal_radius)
+        if not self.fog_ready:
+            # Создаем поверхность для затемнения
+            overlay = pg.Surface(window.get_size(), pg.SRCALPHA)
+            overlay.fill((0, 0, 0, self.current_alpha))
+            window.blit(overlay, (0, 0))
 
 
     def draw_debug_path(self, surface):
