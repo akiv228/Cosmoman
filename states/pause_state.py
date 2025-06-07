@@ -47,6 +47,20 @@ class PauseState(State):
             self.buttons.append(button)
             current_x += width + cfg.button_spacing
 
+    def update(self):
+        pass
+
+    def render(self, window):
+        self.previous_state.render(window)
+        window.blit(self.overlay, (0, 0))
+        window.blit(self.pause_window, self.window_rect)
+        window.blit(self.pause_text_surface, self.pause_text_rect)
+        for button in self.buttons:
+            button.draw(window)
+
+    def enter(self):
+        mixer.music.pause()
+
     def handle_events(self, events):
         for e in events:
             if e.type == pg.MOUSEBUTTONDOWN:
@@ -63,19 +77,8 @@ class PauseState(State):
                             # self.game.toggle_sound()
                         elif action == 'info':
                             from states.popup_state import PopupState
-                            self.game.set_state((PopupState(self.game, self)))
+                            # self.game.set_state((PopupState(self.game, self)))
+                            self.game.set_state(
+                            PopupState(self.game, self, lambda g: PauseState(game=self.game, previous_state=self)))
+
                             # pass  # Действие для кнопки info, если нужно
-
-    def update(self):
-        pass
-
-    def render(self, window):
-        self.previous_state.render(window)
-        window.blit(self.overlay, (0, 0))
-        window.blit(self.pause_window, self.window_rect)
-        window.blit(self.pause_text_surface, self.pause_text_rect)
-        for button in self.buttons:
-            button.draw(window)
-
-    def enter(self):
-        mixer.music.pause()

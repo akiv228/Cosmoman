@@ -17,41 +17,19 @@ class LevelSelectState(State):
         self.buttons = [Button(name, start_y + i * (cfg.buttons['height'] + cfg.buttons['vertical_spacing']), cfg.buttons)
                         for i, name in enumerate(cfg.buttons['names'])]
         for i, button in enumerate(self.buttons):
-            # button.set_active(i <= self.game.completed_difficulties)
             button.set_active(i >= 0)
         self.button_back = ImageButton(*cfg.back)
         self.music = cfg.music
         self.user_font = pg.font.Font(None, 28)
-
-    def handle_events(self, events):
-        for e in events:
-            if e.type == pg.MOUSEBUTTONDOWN:
-                if self.button_back.rect.collidepoint(e.pos):
-                    from .menu_state import MenuState
-                    self.game.set_state(MenuState(self.game))
-                for button in self.buttons:
-                    if button.rect.collidepoint(e.pos) and button.active:
-                        difficulty_map = {"LEVEL1": "EASY", "LEVEL2": "MEDIUM", "LEVEL3": "HARD", "EXPLORE UNIVERSITY": "EXPLORE"}
-                        from .play_state import PlayState
-                        from states.intro_state import IntroState
-                        self.game.set_state(
-                            IntroState(self.game, lambda g, text=button.text: PlayState(g, difficulty_map[text])))
-                        # difficulty = difficulty_map[button.text]
-                        # self.game.set_state(IntroState(self.game, lambda g, diff=difficulty: PlayState(g, diff)))
-                        # self.game.set_state(IntroState(self.game, lambda g: PlayState(g, difficulty_map[button.text])))
-                        # self.game.set_state(PlayState(self.game, difficulty_map[button.text]))
-            if e.type == pg.KEYDOWN:
-                if e.key == pg.K_m:
-                    self.game.toggle_sound()
-
+        self.difficulty_map = {"LEVEL1": "EASY", "LEVEL2": "MEDIUM", "LEVEL3": "HARD", "EXPLORE UNIVERSITY": "EXPLORE"}
 
     def update(self):
-        for star in self.stars:
-            star.update()
-        self.neon_text.update()
-        mouse_pos = pg.mouse.get_pos()
-        for button in self.buttons:
-            button.update(mouse_pos)
+            for star in self.stars:
+                star.update()
+            self.neon_text.update()
+            mouse_pos = pg.mouse.get_pos()
+            for button in self.buttons:
+                button.update(mouse_pos)
 
     def render(self, window):
         window.fill((0, 0, 0))
@@ -83,3 +61,26 @@ class LevelSelectState(State):
             mixer.music.unpause()
         else:
             mixer.music.pause()
+
+    def handle_events(self, events):
+        for e in events:
+            if e.type == pg.MOUSEBUTTONDOWN:
+                if self.button_back.rect.collidepoint(e.pos):
+                    from .menu_state import MenuState
+                    self.game.set_state(MenuState(self.game))
+                for button in self.buttons:
+                    if button.rect.collidepoint(e.pos) and button.active:
+                        from .play_state import PlayState
+                        from states.intro_state import IntroState
+                        from .popup_state import PopupState
+                        button_text = button.text
+                        def create_play_state(game):
+                            print('level',button_text)
+                            return PlayState(game, self.difficulty_map[button_text])
+                        
+                        self.game.set_state(
+                            PopupState(
+                                self.game, 
+                                self, 
+                                lambda g: IntroState(g, create_play_state)
+                            ))

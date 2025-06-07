@@ -91,7 +91,6 @@ if __name__ != '__config__':
             'inactive_bg_color': (0, 0, 30, 50)
         }
 
-
     class LevelSelectState:
         back = Instance('images\\back3.png', 130, 55, 100, 70)
         music = Sound('sound\\menu.mp3')
@@ -222,6 +221,16 @@ if __name__ != '__config__':
         instruction = Img("images\\instr.jpg")
         cross = Instance("images\\cross.png", W - 50, 20, 30, 30)
         decoration = Img("images\\popup_decor.png")
+        title = {
+            'text': 'Instruction',
+            'font_size': 90,
+            'pulsation': True,
+            'reflection': True,
+            'flash_probability': 0.01,
+            'color_change_speed': 0.02
+        }
+        back = Instance('images\\back3.png', 130, 55, 100, 70)
+        back2 = Instance('images\\play.png', W - 230, H - 140, 110, 110)
 
 
     class IntroState:

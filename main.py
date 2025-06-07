@@ -11,7 +11,7 @@ from states.login_state import LoginState
 from game_music import mixer
 from models import User
 from config import serv
-
+import openai
 
 
 

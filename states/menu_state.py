@@ -26,7 +26,7 @@ class MenuState(State):
                             self.game.set_state(LevelSelectState(self.game))
                         elif button.text == "CONTROLS":
                             from .popup_state import PopupState
-                            self.game.set_state(PopupState(self.game, self))
+                            self.game.set_state(PopupState(self.game, self, lambda g: MenuState(game=self.game)))
                         elif button.text == "RATING":
                             from states.win_state import WinState
                             self.game.set_state(WinState(self.game, 'Menu'))
