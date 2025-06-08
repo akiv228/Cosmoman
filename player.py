@@ -3,7 +3,7 @@ from pygame import sprite
 
 from base_sprite import GameSprite
 from bullet import Bullet
-from config import win_width, win_height, WALL_OFFSET
+from config import WALL_OFFSET
 
 
 class Player(GameSprite):
@@ -14,8 +14,8 @@ class Player(GameSprite):
         self.lives = lives
         self.direction = 'right'
         self.bullets = sprite.Group()
-        self.limit = 5  # Will be set in place_objects
-        self.collected_prizes = 0  # Assuming this exists for prize tracking
+        self.limit = 5
+        self.collected_prizes = 0
 
     def fire(self, sound):
         if self.limit > 0:
@@ -128,40 +128,3 @@ class Player(GameSprite):
             prize.kill()
 
 
-
-from base_sprite import GameSprite
-# from bullet import Bullet
-
-# class Player(GameSprite):
-#     def __init__(self, image_path, x, y, width, height, x_speed, y_speed, rotated, is_collide, lives):
-#         super().__init__(image_path, x, y, width, height, rotated)
-#         self.x_speed = x_speed
-#         self.y_speed = y_speed
-#         self.is_collide = is_collide
-#         self.lives = lives
-#         self.walls = None
-#         self.prizes = None
-#         self.bullets = None
-#         self.limit = 0
-#         self.collected_prizes = 0
-#
-#     def update(self):
-#         next_x = self.rect.x + self.x_speed
-#         next_y = self.rect.y + self.y_speed
-#         temp_rect = self.rect.copy()
-#         temp_rect.x = next_x
-#         temp_rect.y = next_y
-#
-#         if self.walls and not pg.sprite.spritecollide(self, self.walls, False):
-#             self.rect.x = next_x
-#             self.rect.y = next_y
-#
-#         collected = pg.sprite.spritecollide(self, self.prizes, True)
-#         if collected:
-#             self.collected_prizes += len(collected)
-#
-#     def fire(self, sound):
-#         if self.bullets and self.limit > 0:
-#             bullet = Bullet(self.rect.centerx, self.rect.top)
-#             self.bullets.add(bullet)
-#             self.limit -= 1

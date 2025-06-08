@@ -62,10 +62,11 @@ class EnemyManager:
                 'off_bfs_factor': 0.9  # 90% от основного количества для врагов вне BFS
             },
             'EXPLORE': {
-                'count_factor': 0.0,
+                'count_factor': 0.07,
                 'off_bfs_factor': 0.7  # 70% от основного количества для врагов вне BFS
             }
         }[self.level.difficulty]
+
         # Расстояние между врагами
         enemy_spacing = self.level.maze_info['cell_size'] * {
             'EASY': 2,
@@ -74,12 +75,10 @@ class EnemyManager:
             'EXPLORE': 2.0
         }[self.level.difficulty]
 
-        # Расчет количества врагов
         cell_count = self.level.grid_width * self.level.grid_height
         planned_bfs_enemies = round(cell_count * cfg['count_factor'])
         planned_off_bfs_enemies = round(cell_count * cfg['count_factor'] * cfg['off_bfs_factor'])
 
-        # Find all segments in the maze
         all_segments = path_utils.find_all_segments(self.level.maze_info)
         bfs_segments = path_utils.split_path_into_segments(self.level.path)
         off_bfs_segments = [seg for seg in all_segments if not any(cell in self.level.path for cell in seg)]
@@ -91,7 +90,7 @@ class EnemyManager:
         created_enemies = 0
         failed_placement = 0
 
-        # Place enemies on BFS segments
+
         valid_bfs_segments = [
             seg for seg in bfs_segments
             if len(seg) >= 2 and not self.is_near_start_end(seg)
@@ -111,7 +110,6 @@ class EnemyManager:
                 failed_placement += 1
                 continue
 
-            # Assign random speed within range
             speed = random.randint(*self.speed_ranges[self.level.difficulty])
             enemy = self.create_enemy_for_segment(segment, speed)
             if not enemy:
@@ -129,7 +127,7 @@ class EnemyManager:
             valid_bfs_segments.remove(segment)
             created_enemies += 1
 
-        # Place enemies on off-BFS segments
+
         valid_off_bfs_segments = [seg for seg in off_bfs_segments if len(seg) >= 2]
         for _ in range(planned_off_bfs_enemies):
             if not valid_off_bfs_segments:
@@ -159,7 +157,7 @@ class EnemyManager:
             valid_off_bfs_segments.remove(segment)
             created_enemies += 1
 
-        # Логирование результатов
+
         total_planned = planned_bfs_enemies + planned_off_bfs_enemies
         logger.info(f"Created enemies: {created_enemies}/{total_planned}")
         if created_enemies < total_planned:

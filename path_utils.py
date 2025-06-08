@@ -1,10 +1,6 @@
 from collections import deque, defaultdict
 
 def build_graph(maze_info):
-    """
-    создает граф соединений лабиринта на основе удаленных стен.
-    алгоритм: проходит по списку удаленных стен, соединяя соседние ячейки двусторонними ребрами.
-    """
     graph = defaultdict(list)
     for wall in maze_info['removed_walls']:
         r, c = wall[1], wall[2]
@@ -16,10 +12,8 @@ def build_graph(maze_info):
         graph[b].append(a)
     return graph
 
+
 def bfs(graph, start):
-    """
-    алгоритм: использует очередь для обхода ячеек по уровням, обновляя расстояния.
-    """
     visited = {start: 0}
     q = deque([start])
     while q:
@@ -30,10 +24,8 @@ def bfs(graph, start):
                 q.append(neighbor)
     return visited
 
+
 def reconstruct_path(graph, start, end):
-    """
-    алгоритм: строит карту родителей через bfs и проходит назад от конца к началу.
-    """
     parent = {start: None}
     q = deque([start])
     while q:
@@ -54,13 +46,6 @@ def reconstruct_path(graph, start, end):
     return path
 
 def calculate_positions(maze_info, grid, debug_mode):
-    """
-    алгоритм:
-    - находит углы лабиринта.
-    - ищет пару углов с максимальным расстоянием через bfs.
-    - при debug_mode строит путь между этими углами.
-    - корректирует позиции для размещения спрайтов.
-    """
     gw, gh = grid
     graph = build_graph(maze_info)
 
@@ -84,9 +69,6 @@ def calculate_positions(maze_info, grid, debug_mode):
     return start_pos, end_pos, path
 
 def adjust_position(maze_info, row, col):
-    """
-    алгоритм: определяет центр ячейки и добавляет смещение с учетом размеров и стен.
-    """
     cs = maze_info['cell_size']
     wall_thickness = maze_info['wall_thickness']
 
@@ -137,13 +119,7 @@ def get_segment_direction(segment):
     return get_direction(segment[0], segment[1])
 
 def find_all_segments(maze_info):
-    """
-    Находит все прямые сегменты в лабиринте на основе удаленных стен.
-    Алгоритм:
-    - Для горизонтальных сегментов: ищет последовательности ячеек в строке, соединенных удаленными вертикальными стенами.
-    - Для вертикальных сегментов: ищет последовательности ячеек в столбце, соединенных удаленными горизонтальными стенами.
-    Возвращает список сегментов, где каждый сегмент - список координат ячеек.
-    """
+
     removed_walls = maze_info['removed_walls']
     gw, gh = maze_info['grid_width'], maze_info['grid_height']
     segments = []

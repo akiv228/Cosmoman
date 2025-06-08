@@ -53,12 +53,12 @@ class PlanetSystem:
         # self.planets.append(Planet(Vector2(400, 600), delta=Vector2(-3, 0), radius=10))
 
 
-        # self.planets.append(Planet(Vector2(800, 400), radius=20, imovable=True))
-        # self.planets.append(Planet(Vector2(280, 400), radius=20, imovable=True))
-        #
-        # self.planets.append(Planet(Vector2(400, 200), delta=Vector2(0, 0), radius=10))
-        # self.planets.append(Planet(Vector2(400, 210), delta=Vector2(1, 2), radius=5))
-        # self.planets.append(Planet(Vector2(200, 200), delta=Vector2(randrange(-3, 3), 2), radius=5))
+        self.planets.append(Planet(Vector2(800, 400), radius=20, imovable=True))
+        self.planets.append(Planet(Vector2(280, 400), radius=20, imovable=True))
+
+        self.planets.append(Planet(Vector2(400, 200), delta=Vector2(0, 0), radius=10))
+        self.planets.append(Planet(Vector2(400, 210), delta=Vector2(1, 2), radius=5))
+        self.planets.append(Planet(Vector2(200, 200), delta=Vector2(randrange(-3, 3), 2), radius=5))
 
         # Создаем сетку статических планет
         grid_dimension = 15

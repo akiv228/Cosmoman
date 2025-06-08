@@ -1,3 +1,5 @@
+import time
+
 import pygame as pg
 import requests
 from grafics.planetfons_lose_win import PlanetSystem
@@ -20,9 +22,10 @@ class WinState(State):
 
         self.font_header = pg.font.Font(None, 36)
         self.font_row = pg.font.Font(None, 28)
-
+        self.last_update_time = 0
         self.leaderboard_data = []
         self.load_leaderboard()
+        self.update_interval = 5000  # 5 секунд в миллисекундах
 
     def init_ui_elements(self):
         self.ui_elements = {
@@ -38,11 +41,17 @@ class WinState(State):
 
     def load_leaderboard(self):
         try:
-            response = requests.get(f'http://{serv["host"]}:{serv["port"]}/scoreboard')
+            response = requests.get(
+                f'http://{serv["host"]}:{serv["port"]}/scoreboard',
+                params={'t': int(time.time())}  # Добавляем timestamp для избежания кэширования
+            )
             if response.status_code == 200:
                 self.leaderboard_data = response.json()
+            else:
+                print(f"Сервер вернул код {response.status_code}")
         except requests.RequestException as e:
             print(f"Ошибка загрузки рейтинга: {e}")
+            # Можно сохранить предыдущие данные или показать сообщение об ошибке
 
     def draw_leaderboard(self, window):
         if not self.leaderboard_data:
@@ -121,12 +130,25 @@ class WinState(State):
               button == self.ui_elements['Play']['buttons'][1]):  # restart
             button_actions['restart']()
 
+    # def update(self):
+    #     self.planet_system.update()
+    #
+    #
+    #     for text in self.ui_elements[self.from_state]['texts']:
+    #         text.update()
+
+
     def update(self):
         self.planet_system.update()
 
+        current_time = pg.time.get_ticks()
+        if current_time - self.last_update_time > self.update_interval:
+            self.load_leaderboard()
+            self.last_update_time = current_time
 
         for text in self.ui_elements[self.from_state]['texts']:
             text.update()
+
 
     def render(self, window):
         self.planet_system.draw(window)

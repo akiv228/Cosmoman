@@ -1,10 +1,5 @@
 import pygame as pg
 import random
-import logging
-
-from pygame import display, HWSURFACE, DOUBLEBUF
-
-from config import W, H
 from grafics.fogofwar import FogOfWar
 from maze_generation import generate_maze
 from grafics.maze_fons import Starfield_white, Starfield_palette
@@ -15,7 +10,6 @@ from enemy_manager import EnemyManager, logger
 from planet import FinalGifSprite
 from player import Player
 from sprite_config import SPRITE_SETS, all_smoke_images
-# from states.config_state import used_explore_finals
 import createwalls
 import path_utils
 
@@ -93,8 +87,6 @@ class Level:
         self.enemy_manager.spawn_enemies()
         self.init_sprites(start_pos, final_pos)
 
-        # # Инициализация системы "тумана войны"
-        # self.init_fog_of_war()
 
         self.visibility_grid = [
             [False for _ in range(self.grid_width)]
@@ -110,7 +102,6 @@ class Level:
         base_cloud_image_path = random.choice(all_smoke_images[difficulty])
         base_cloud_image = pg.image.load(base_cloud_image_path).convert_alpha()
 
-        # 7) Создаём объект FogOfWar
         self.fog = FogOfWar(
             maze_x=self.maze_x,
             maze_y=self.maze_y,
@@ -122,8 +113,9 @@ class Level:
 
         self.fog_delay = 0.2
         self.fog_delay_timer = 0.0
-        self.fog_ready = False  # Флаг готовности тумана
-        self.fog_delay_font = pg.font.SysFont('Arial', 30)  # Шрифт для сообщения
+        self.fog_ready = False
+        self.fog_delay_font = pg.font.SysFont('Arial', 30)
+
 
     def init_sprites(self, start_pos, end_pos):
         self.enemies = pg.sprite.Group()
@@ -137,10 +129,6 @@ class Level:
         )
         self.player.walls = self.walls
         self.player.bullets = pg.sprite.Group()
-        # self.player.limit = {
-        #     'EASY': 20, 'MEDIUM': 15,
-        #     'HARD': 10, 'EXPLORE': 15
-        # }[self.difficulty]
         self.calculate_bullet_limit()
 
         if self.difficulty == 'EXPLORE':
@@ -150,7 +138,7 @@ class Level:
                 width = 50
                 height = 50
             else:
-                final_image = 'images/planets/23.gif'  # Запасной вариант
+                final_image = 'images/planets/23.gif'
                 width = 50
                 height = 50
         else:
@@ -199,7 +187,7 @@ class Level:
         min_limit = 15
         max_limit = 40
 
-        base_limit = int(enemy_count  * difficulty_modifiers[self.difficulty])
+        base_limit = int(enemy_count * difficulty_modifiers[self.difficulty])
         calculated_limit = max(min_limit, min(base_limit, max_limit))
         self.player.limit = calculated_limit
 

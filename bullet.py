@@ -21,15 +21,3 @@ class Bullet(GameSprite):
             self.rect.y += self.speed
             if self.rect.y > win_height: self.kill()
 
-# import pygame as pg
-# from base_sprite import GameSprite
-#
-# class Bullet(GameSprite):
-#     def __init__(self, x, y):
-#         super().__init__('images\\bullet.png', x, y, 5, 10, False)
-#         self.speed = -10
-#
-#     def update(self):
-#         self.rect.y += self.speed
-#         if self.rect.y < 0:
-#             self.kill()

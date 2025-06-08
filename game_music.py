@@ -1,7 +1,10 @@
 # from pygame import *
-# init()
-#
-#
+import pygame as pg
+
+mixer = pg.mixer
+mixer.init()
+
+
 # # создание фоновой музыки
 # melody = 'sound\\fon1.mp3'
 # mixer.music.load(melody)
@@ -14,12 +17,7 @@
 # # звук при сборе бонуса
 # #star_mus = mixer.Sound('sound\\zvezda.mp3')
 # star_mus = mixer.Sound('sound\\star.wav')
-#
 
-import pygame as pg
-
-mixer = pg.mixer
-mixer.init()
 
 # def win():
 #     sound = mixer.Sound('sound\\win.mp3')

@@ -16,16 +16,15 @@ class SmokeParticle:
         self.y = y
         self.base_image = base_image
 
-        # self.scale_k = 0.4 + 0.2 * random.random()  # от 0.4 до 0.6
-        # Начальный масштаб (меньше, чем раньше, чтобы быстрее пропадал)
+
         self.scale_k = 1 + 0.4 * random.random()  # 0.2—0.3
         self.size = int(cell_size * self.scale_k)
         self.img = pg.transform.scale(self.base_image, (self.size, self.size))
 
-        self.alpha = 240 + random.randint(0, 75)   # начальная прозрачность (от 180 до 255)
+        self.alpha = 240 + random.randint(0, 75)
         # self.alpha_rate = 0.5 + 0.3 * random.random()  # скорость падения alpha
         self.alpha_rate = 1.5 + 0.3 * random.random()
-        #Уменьшить «время жизни» частицы (alpha_rate или скорость убывания прозрачности)
+
         self.alive = True
 
         # # движение вверх с небольшой «ветрушкой» вбок
@@ -165,20 +164,13 @@ class FogOfWar:
          #       — изначально она полностью прозрачная (чтобы вычитать именно область круга).
          hole_surf.fill((0, 0, 0, 0))
 
-         #    Рисуем на hole_surf «круг заливки» чёрным полупрозрачным = (0,0,0,200).
-         #    Внутри круга именно эта «альфа=200» и будет вычитаться из fog.surface.
+
          pg.draw.circle(
              hole_surf,
              (0, 0, 0, 200),  # цвет: чёрный с alpha=200
              (int(rel_x), int(rel_y)),  # центр круга в системе fog.surface
              reveal_radius  # радиус круга
          )
-
-         #    Вычитаем hole_surf из fog.surface: BLEND_RGBA_SUB уменьшает каждый канал,
-         #       поэтому внутри круга alpha мокнутого fog.surface (200) станет (200−200)=0,
-         #       и там появится прозрачная «дырка». Вне круга hole_surf полностью прозрачен,
-         #       так что fog.surface за пределами круга остаётся (0,0,0,200).
          self.surface.blit(hole_surf, (0, 0), special_flags=pg.BLEND_RGBA_SUB)
 
-         # рисуем готовый fog.surface поверх целевой поверхности (лабиринта), смещая его по (maze_x, maze_y).
          target_surface.blit(self.surface, (self.maze_x, self.maze_y))

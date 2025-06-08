@@ -1,5 +1,5 @@
 import pygame as pg
-from base_sprite import GameSprite
+
 
 
 class Backgrounds:
@@ -12,13 +12,6 @@ class Backgrounds:
     def reset(self, window):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
-
-# class Menu(GameSprite):
-#     def __init__(self, image_path, x, y, width, height):
-#         super().__init__(image_path, x, y, width, height, False)
-#
-#     def collidepoint(self, x, y):
-#         return self.rect.collidepoint(x, y)
 
 class ImageButton(pg.sprite.Sprite):
     def __init__(self, image_path, x, y, width, height):
